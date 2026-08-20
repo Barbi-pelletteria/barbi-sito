@@ -19,10 +19,9 @@ serve solo farli esistere.
 3. Per il deploy automatico serve un repository Git. Se questo progetto non è già su
    GitHub:
    - crea un repository vuoto su **github.com/new** (es. `barbi-pelletteria-sito`, privato)
-   - nel terminale, dentro questa cartella:
+   - nel terminale, dentro questa cartella (il repository locale esiste già, sul branch `main`):
      ```
      git remote add origin <URL del repository appena creato>
-     git branch -M main
      git push -u origin main
      ```
 4. Su Netlify: **"Add new site" → "Import an existing project"** → collega GitHub →
