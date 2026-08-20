@@ -1,0 +1,110 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Checkout">
+  <section class="sezione contenitore checkout">
+    <h1>Checkout</h1>
+    <p class="segnaposto">Ambiente di test — nessun pagamento reale. Usa la carta Stripe di test 4242 4242 4242 4242, qualunque data futura, qualunque CVC.</p>
+
+    <div id="checkout-vuoto" hidden>
+      <p>Il carrello è vuoto.</p>
+      <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+    </div>
+
+    <div id="checkout-contenuto" hidden>
+      <ul id="riepilogo-righe" class="riepilogo-righe"></ul>
+      <button class="pulsante" id="btn-paga">Procedi al pagamento</button>
+      <p id="errore-checkout" class="errore-checkout" hidden></p>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { getCart } from '../scripts/cart.js';
+  import { getProdottoBySlug, PLACEHOLDER } from '../data/prodotti.js';
+  import { trackEvent } from '../scripts/analytics.js';
+
+  const cart = getCart();
+  const vuoto = document.getElementById('checkout-vuoto');
+  const contenuto = document.getElementById('checkout-contenuto');
+  const lista = document.getElementById('riepilogo-righe');
+  const btnPaga = document.getElementById('btn-paga');
+  const errore = document.getElementById('errore-checkout');
+
+  if (cart.length === 0) {
+    vuoto.hidden = false;
+  } else {
+    contenuto.hidden = false;
+    cart.forEach((riga) => {
+      const prodotto = getProdottoBySlug(riga.slug);
+      if (!prodotto) return;
+      const li = document.createElement('li');
+      li.textContent = `${prodotto.nome} × ${riga.quantita} — ${PLACEHOLDER}`;
+      lista.appendChild(li);
+    });
+
+    // GA4 — begin_checkout: si accende all'apertura della pagina checkout (B4).
+    trackEvent('begin_checkout', {
+      currency: 'EUR',
+      items: cart.map((r) => ({ item_id: r.slug, quantity: r.quantita })),
+    });
+  }
+
+  btnPaga?.addEventListener('click', async () => {
+    btnPaga.disabled = true;
+    btnPaga.textContent = 'Attendere…';
+    errore.hidden = true;
+
+    try {
+      const items = cart
+        .map((r) => {
+          const prodotto = getProdottoBySlug(r.slug);
+          if (!prodotto) return null;
+          return {
+            slug: r.slug,
+            quantita: r.quantita,
+            // Vedi nota in src/data/prodotti.js: valore SOLO di collaudo tecnico.
+            prezzoTestCentesimi: prodotto.prezzoTestCentesimi,
+          };
+        })
+        .filter(Boolean);
+
+      const risposta = await fetch('/.netlify/functions/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, siteUrl: window.location.origin }),
+      });
+
+      let dati = null;
+      const isJson = (risposta.headers.get('content-type') || '').includes('application/json');
+      if (isJson) {
+        dati = await risposta.json();
+      }
+
+      if (!risposta.ok || !dati || !dati.url) {
+        // Risposta non-JSON o senza url: quasi sempre vuol dire che la funzione
+        // Netlify non è ancora raggiungibile in questo ambiente (es. "astro
+        // preview" locale, senza "netlify dev", oppure B1/B2 non ancora collegati).
+        const messaggioServer = dati && dati.error;
+        throw new Error(
+          messaggioServer ||
+            'Impossibile contattare la funzione di pagamento (probabile: il sito non gira ancora su Netlify, o mancano le chiavi Stripe di test).'
+        );
+      }
+
+      window.location.href = dati.url;
+    } catch (err) {
+      errore.textContent = `Errore: ${err.message}. Controlla che le chiavi Stripe di test siano configurate su Netlify (vedi SETUP.md).`;
+      errore.hidden = false;
+      btnPaga.disabled = false;
+      btnPaga.textContent = 'Procedi al pagamento';
+    }
+  });
+</script>
+
+<style>
+  .checkout { max-width: 640px; }
+  .riepilogo-righe { list-style: none; padding: 0; margin: 1.5rem 0; }
+  .riepilogo-righe li { padding: 0.6rem 0; border-bottom: 1px solid var(--bordo); }
+  .errore-checkout { color: #a3342a; margin-top: 1rem; }
+</style>

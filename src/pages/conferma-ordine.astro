@@ -1,0 +1,54 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Ordine confermato">
+  <section class="sezione contenitore conferma">
+    <div id="conferma-ok" hidden>
+      <h1>Grazie, ordine ricevuto.</h1>
+      <p>Questo è un ambiente di test: nessun addebito reale è avvenuto.</p>
+      <p id="riferimento-ordine" class="segnaposto"></p>
+      <a class="pulsante" href="/">Torna alla home</a>
+    </div>
+    <div id="conferma-mancante" hidden>
+      <h1>Nessun ordine da confermare</h1>
+      <p>Questa pagina si apre solo dopo un pagamento completato dal checkout.</p>
+      <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { clearCart } from '../scripts/cart.js';
+  import { trackEvent } from '../scripts/analytics.js';
+
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const value = params.get('value');
+  const currency = params.get('currency') || 'EUR';
+
+  const ok = document.getElementById('conferma-ok');
+  const mancante = document.getElementById('conferma-mancante');
+  const riferimento = document.getElementById('riferimento-ordine');
+
+  if (sessionId) {
+    ok.hidden = false;
+    riferimento.textContent = `Riferimento test: ${sessionId}`;
+
+    // GA4 — purchase, con valore (B4). Valore tecnico di collaudo, vedi
+    // src/data/prodotti.js — non è un prezzo reale comunicato al cliente.
+    trackEvent('purchase', {
+      transaction_id: sessionId,
+      currency,
+      value: value ? parseFloat(value) : undefined,
+    });
+
+    clearCart();
+  } else {
+    mancante.hidden = false;
+  }
+</script>
+
+<style>
+  .conferma { text-align: center; padding-top: 4rem; padding-bottom: 4rem; }
+  .conferma h1 { margin-bottom: 1rem; }
+</style>

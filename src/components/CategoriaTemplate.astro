@@ -1,0 +1,29 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { categorie, getProdottiByCategoria } from '../data/prodotti.js';
+
+const { categoriaSlug } = Astro.props;
+const categoria = categorie.find((c) => c.slug === categoriaSlug);
+const prodottiCategoria = getProdottiByCategoria(categoriaSlug);
+---
+<Layout title={categoria.nome}>
+  <section class="sezione contenitore">
+    <h1>{categoria.nome}</h1>
+    {prodottiCategoria.length === 0 && (
+      <p class="segnaposto">Catalogo di questa categoria da popolare — nessun prodotto ancora caricato.</p>
+    )}
+    <div class="griglia-prodotti">
+      {prodottiCategoria.map((p) => <ProductCard prodotto={p} />)}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .griglia-prodotti {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+</style>

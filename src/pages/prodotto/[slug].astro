@@ -1,0 +1,99 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { prodotti, PLACEHOLDER } from '../../data/prodotti.js';
+
+export function getStaticPaths() {
+  return prodotti.map((p) => ({ params: { slug: p.slug }, props: { prodotto: p } }));
+}
+
+const { prodotto } = Astro.props;
+---
+<Layout title={prodotto.nome === PLACEHOLDER ? 'Prodotto' : prodotto.nome}>
+  <section class="sezione contenitore pagina-prodotto">
+    <div class="pagina-prodotto__immagine">
+      <img src={prodotto.immagine} alt="Immagine prodotto da caricare" />
+    </div>
+    <div class="pagina-prodotto__dettagli">
+      <h1 class="segnaposto">{prodotto.nome}</h1>
+      <p class="pagina-prodotto__prezzo segnaposto">{PLACEHOLDER}</p>
+      <p class="segnaposto">{prodotto.descrizione}</p>
+
+      <div class="pagina-prodotto__azione">
+        <label for="quantita">Quantità</label>
+        <input type="number" id="quantita" name="quantita" value="1" min="1" />
+        <button class="pulsante" id="btn-aggiungi" data-slug={prodotto.slug}>
+          Aggiungi al carrello
+        </button>
+      </div>
+      <p id="conferma-aggiunta" class="conferma-aggiunta" hidden>Aggiunto al carrello.</p>
+    </div>
+  </section>
+</Layout>
+
+<script define:vars={{ slug: prodotto.slug, nome: prodotto.nome }}>
+  // GA4 — view_item: si accende all'apertura della pagina prodotto (B4).
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', 'view_item', {
+      currency: 'EUR',
+      items: [{ item_id: slug, item_name: nome }],
+    });
+  }
+</script>
+
+<script>
+  import { addToCart } from '../../scripts/cart.js';
+  import { trackEvent } from '../../scripts/analytics.js';
+
+  const btn = document.getElementById('btn-aggiungi');
+  const input = document.getElementById('quantita');
+  const conferma = document.getElementById('conferma-aggiunta');
+
+  btn?.addEventListener('click', () => {
+    const slug = btn.getAttribute('data-slug');
+    const quantita = Math.max(1, parseInt(input.value, 10) || 1);
+    addToCart(slug, quantita);
+
+    // GA4 — add_to_cart (B4).
+    trackEvent('add_to_cart', {
+      currency: 'EUR',
+      items: [{ item_id: slug, quantity: quantita }],
+    });
+
+    if (conferma) {
+      conferma.hidden = false;
+      setTimeout(() => { conferma.hidden = true; }, 2500);
+    }
+  });
+</script>
+
+<style>
+  .pagina-prodotto {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  @media (max-width: 720px) {
+    .pagina-prodotto { grid-template-columns: 1fr; }
+  }
+  .pagina-prodotto__immagine img {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--bordo);
+  }
+  .pagina-prodotto__prezzo { font-size: 1.3rem; margin: 0.5rem 0 1rem; }
+  .pagina-prodotto__azione {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .pagina-prodotto__azione input {
+    width: 4.5rem;
+    padding: 0.7rem;
+    border: 1px solid var(--bordo);
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  .conferma-aggiunta { color: var(--cuoio); font-weight: 600; margin-top: 0.75rem; }
+</style>

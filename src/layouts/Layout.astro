@@ -1,0 +1,202 @@
+---
+const { title, description = 'Pelletteria artigianale fatta a mano dal 1992.' } = Astro.props;
+const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+---
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>{title} · Barbi Pelletteria</title>
+  <meta name="description" content={description} />
+  <meta name="robots" content="noindex, nofollow" />
+  <!--
+    robots noindex volutamente attivo: FATTO QUANDO (B3) dice
+    "raggiungibile pubblicamente ma non linkato da nessuna parte,
+    non ancora annunciato". Rimuovere questo meta tag solo quando si
+    decide di far indicizzare il sito davvero (non è un compito di questo pacchetto).
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  {gaId && (
+    <>
+      <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+      <script define:vars={{ gaId }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ window.dataLayer.push(arguments); }
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', gaId);
+      </script>
+    </>
+  )}
+</head>
+<body>
+  <a class="salta-contenuto" href="#contenuto">Vai al contenuto</a>
+  <header class="sito-header">
+    <div class="contenitore sito-header__riga">
+      <a class="logo" href="/">Barbi <span>Pelletteria</span></a>
+      <nav class="nav-principale" aria-label="Categorie">
+        <a href="/portafogli/">Portafogli</a>
+        <a href="/borse/">Borse</a>
+        <a href="/portachiavi/">Portachiavi</a>
+      </nav>
+      <a class="carrello-link" href="/carrello/" aria-label="Vai al carrello">
+        🛍️ <span id="contatore-carrello">0</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="contenuto">
+    <slot />
+  </main>
+
+  <footer class="sito-footer">
+    <div class="contenitore sito-footer__griglia">
+      <div>
+        <p class="sito-footer__marchio">Barbi Pelletteria</p>
+        <p>Laboratorio artigianale dal 1992.</p>
+      </div>
+      <nav aria-label="Informazioni legali">
+        <a href="/privacy/">Privacy</a>
+        <a href="/termini-e-condizioni/">Termini e condizioni</a>
+        <a href="/diritto-di-recesso/">Diritto di recesso</a>
+        <a href="/spedizioni-e-resi/">Spedizioni e resi</a>
+      </nav>
+    </div>
+    <p class="sito-footer__nota">Sito in allestimento — ambiente di test, nessun pagamento reale.</p>
+  </footer>
+
+  <script>
+    import { getCartCount } from '../scripts/cart.js';
+    function aggiornaContatore() {
+      const el = document.getElementById('contatore-carrello');
+      if (el) el.textContent = String(getCartCount());
+    }
+    aggiornaContatore();
+    window.addEventListener('barbi:cart-changed', aggiornaContatore);
+  </script>
+
+  <style is:global>
+    :root {
+      --crema: #faf6ee;
+      --crema-scuro: #e8e0cd;
+      --testo: #2b2318;
+      --testo-tenue: #6b5f4a;
+      --cuoio: #6b4226;
+      --cuoio-scuro: #4a2d18;
+      --bordo: #d9cfb4;
+      --accento: #a8763e;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--crema);
+      color: var(--testo);
+      line-height: 1.55;
+    }
+    h1, h2, h3, .titolo-serif {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 600;
+      line-height: 1.15;
+      margin: 0 0 0.5em;
+    }
+    a { color: inherit; }
+    .contenitore {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    .salta-contenuto {
+      position: absolute;
+      left: -999px;
+      top: 0;
+      background: var(--cuoio);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      z-index: 100;
+    }
+    .salta-contenuto:focus { left: 0.5rem; top: 0.5rem; }
+
+    .sito-header {
+      border-bottom: 1px solid var(--bordo);
+      background: var(--crema);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .sito-header__riga {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.1rem 1.5rem;
+    }
+    .logo {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.3rem;
+      text-decoration: none;
+      font-weight: 600;
+      color: var(--cuoio-scuro);
+    }
+    .logo span { font-weight: 400; color: var(--testo-tenue); }
+    .nav-principale { display: flex; gap: 1.75rem; flex: 1; justify-content: center; }
+    .nav-principale a { text-decoration: none; font-weight: 500; color: var(--testo); }
+    .nav-principale a:hover { color: var(--cuoio); }
+    .carrello-link { text-decoration: none; font-weight: 600; white-space: nowrap; }
+
+    .sito-footer {
+      border-top: 1px solid var(--bordo);
+      margin-top: 4rem;
+      padding: 2.5rem 0 1rem;
+      background: var(--crema-scuro);
+      color: var(--testo-tenue);
+    }
+    .sito-footer__griglia {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .sito-footer__marchio { font-family: 'Fraunces', Georgia, serif; font-size: 1.1rem; color: var(--testo); margin: 0; }
+    .sito-footer nav { display: flex; flex-direction: column; gap: 0.4rem; }
+    .sito-footer nav a { text-decoration: none; font-size: 0.92rem; }
+    .sito-footer nav a:hover { text-decoration: underline; }
+    .sito-footer__nota { text-align: center; font-size: 0.8rem; margin: 2rem 0 0; opacity: 0.8; }
+
+    .pulsante {
+      display: inline-block;
+      background: var(--cuoio);
+      color: #fff;
+      border: none;
+      padding: 0.85rem 1.6rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .pulsante:hover { background: var(--cuoio-scuro); }
+    .pulsante:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pulsante-secondario {
+      background: transparent;
+      color: var(--cuoio);
+      border: 1px solid var(--cuoio);
+    }
+    .pulsante-secondario:hover { background: var(--crema-scuro); }
+
+    .segnaposto {
+      color: var(--testo-tenue);
+      font-style: italic;
+      font-size: 0.92em;
+    }
+
+    .sezione { padding: 3rem 0; }
+  </style>
+</body>
+</html>

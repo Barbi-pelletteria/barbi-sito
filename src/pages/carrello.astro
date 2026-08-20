@@ -1,0 +1,100 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Carrello">
+  <section class="sezione contenitore">
+    <h1>Il tuo carrello</h1>
+
+    <div id="carrello-vuoto" hidden>
+      <p>Il carrello è vuoto.</p>
+      <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+    </div>
+
+    <table id="tabella-carrello" class="tabella-carrello" hidden>
+      <thead>
+        <tr>
+          <th>Prodotto</th>
+          <th>Prezzo</th>
+          <th>Quantità</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="righe-carrello"></tbody>
+    </table>
+
+    <div id="riepilogo-carrello" class="riepilogo-carrello" hidden>
+      <p><strong>Totale:</strong> <span class="segnaposto">[DA COMPLETARE — dati mancanti, vedi blocco 4 DOMANDE_APERTURA.md]</span></p>
+      <a class="pulsante" id="btn-vai-checkout" href="/checkout/">Vai al pagamento</a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { getCart, updateQuantita, removeFromCart } from '../scripts/cart.js';
+  import { getProdottoBySlug, PLACEHOLDER } from '../data/prodotti.js';
+
+  function render() {
+    const cart = getCart();
+    const vuoto = document.getElementById('carrello-vuoto');
+    const tabella = document.getElementById('tabella-carrello');
+    const riepilogo = document.getElementById('riepilogo-carrello');
+    const corpo = document.getElementById('righe-carrello');
+
+    if (cart.length === 0) {
+      vuoto.hidden = false;
+      tabella.hidden = true;
+      riepilogo.hidden = true;
+      return;
+    }
+
+    vuoto.hidden = true;
+    tabella.hidden = false;
+    riepilogo.hidden = false;
+    corpo.innerHTML = '';
+
+    cart.forEach((riga) => {
+      const prodotto = getProdottoBySlug(riga.slug);
+      if (!prodotto) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${prodotto.nome}</td>
+        <td>${PLACEHOLDER}</td>
+        <td>
+          <input type="number" min="1" value="${riga.quantita}" data-slug="${riga.slug}" class="input-quantita" />
+        </td>
+        <td><button class="link-rimuovi" data-slug="${riga.slug}">Rimuovi</button></td>
+      `;
+      corpo.appendChild(tr);
+    });
+
+    corpo.querySelectorAll('.input-quantita').forEach((el) => {
+      el.addEventListener('change', (e) => {
+        const slug = e.target.getAttribute('data-slug');
+        const q = Math.max(1, parseInt(e.target.value, 10) || 1);
+        updateQuantita(slug, q);
+        render();
+      });
+    });
+    corpo.querySelectorAll('.link-rimuovi').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        removeFromCart(e.target.getAttribute('data-slug'));
+        render();
+      });
+    });
+  }
+
+  render();
+  window.addEventListener('barbi:cart-changed', render);
+</script>
+
+<style>
+  .tabella-carrello { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+  .tabella-carrello th, .tabella-carrello td {
+    text-align: left;
+    padding: 0.85rem 0.5rem;
+    border-bottom: 1px solid var(--bordo);
+  }
+  .input-quantita { width: 4rem; padding: 0.4rem; border: 1px solid var(--bordo); border-radius: 4px; }
+  .link-rimuovi { background: none; border: none; color: var(--testo-tenue); text-decoration: underline; cursor: pointer; padding: 0; }
+  .riepilogo-carrello { margin-top: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+</style>
