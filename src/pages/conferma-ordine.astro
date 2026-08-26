@@ -2,19 +2,21 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Ordine confermato">
-  <section class="contenitore pagina-stretta">
-    <div id="conferma-ok" hidden>
-      <h1>Grazie, ordine ricevuto.</h1>
-      <p>Questo è un ambiente di test: nessun addebito reale è avvenuto.</p>
-      <p id="riferimento-ordine" class="riferimento"></p>
-      <p><a class="pulsante" href="/">Torna alla home</a></p>
-    </div>
-    <div id="conferma-mancante" hidden>
-      <h1>Nessun ordine da confermare</h1>
-      <p>Questa pagina si apre solo dopo un pagamento completato dal checkout.</p>
-      <p><a class="pulsante" href="/portafogli/">Vai al catalogo</a></p>
-    </div>
-  </section>
+  <div class="contenitore">
+    <section class="pagina-stretta">
+      <div id="conferma-ok" hidden>
+        <h1>Grazie, ordine ricevuto.</h1>
+        <p>Questo è un ambiente di test: nessun addebito reale è avvenuto.</p>
+        <p id="riferimento-ordine" class="riferimento"></p>
+        <p><a class="pulsante" href="/">Torna alla home</a></p>
+      </div>
+      <div id="conferma-mancante" hidden>
+        <h1>Nessun ordine da confermare</h1>
+        <p>Questa pagina si apre solo dopo un pagamento completato dal checkout.</p>
+        <p><a class="pulsante" href="/portafogli/">Vai al catalogo</a></p>
+      </div>
+    </section>
+  </div>
 </Layout>
 
 <script>
@@ -49,12 +51,12 @@ import Layout from '../layouts/Layout.astro';
 </script>
 
 <style>
-  .pagina-stretta { max-width: 62ch; padding: 80px 0; }
-  .pagina-stretta h1 { font-size: clamp(28px, 4vw, 40px); max-width: none; }
-  .pagina-stretta p { color: var(--ink2); margin: 0 0 22px; }
+  .pagina-stretta { max-width: 660px; margin: 0 auto; padding: 100px 0; text-align: center; }
+  .pagina-stretta h1 { font-size: clamp(30px, 4.4vw, 44px); }
+  .pagina-stretta p { color: var(--ink2); margin: 0 0 28px; }
   .riferimento {
-    font-family: var(--f-d); font-size: 12.5px; color: var(--ink3);
-    background: var(--sunk); border-left: 2px solid var(--line2);
-    padding: 12px 14px; word-break: break-all;
+    font-family: var(--f-label); font-size: 11px; letter-spacing: .06em;
+    color: var(--ink3); background: var(--sunk); border-left: 2px solid var(--line2);
+    padding: 14px 16px; word-break: break-all; text-align: left;
   }
 </style>

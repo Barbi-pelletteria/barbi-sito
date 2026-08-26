@@ -1,0 +1,58 @@
+---
+// Il marchio è un timbro, come quelli che si imprimono sulla pelle: due
+// filetti in ottone che incorniciano il nome, e sotto la dicitura piccola.
+// Non è un logo disegnato: è il nome, incorniciato.
+//
+// Nota sul letter-spacing: la spaziatura aggiunge spazio DOPO l'ultima
+// lettera, quindi il testo risulterebbe spostato a sinistra rispetto ai
+// filetti. Il text-indent dello stesso valore lo rimette in centro.
+const { href = null, size = 'normale' } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+<Tag class:list={['marchio', `marchio--${size}`]} href={href} aria-label="Barbi Pelletteria, dal 1992">
+  <i class="marchio__filetto"></i>
+  <b class="marchio__nome">BARBI</b>
+  <i class="marchio__filetto"></i>
+  <i class="marchio__sub">Pelletteria · dal 1992</i>
+</Tag>
+
+<style>
+  .marchio {
+    display: inline-block;
+    text-align: center;
+    line-height: 1;
+    text-decoration: none;
+    color: inherit;
+  }
+  .marchio__filetto { display: block; height: 1px; background: var(--brass); opacity: .55; }
+  .marchio__nome {
+    display: block;
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: 27px;
+    letter-spacing: .26em;
+    text-indent: .26em;
+    color: var(--brass);
+    padding: 7px 0 6px;
+    white-space: nowrap;
+  }
+  .marchio__sub {
+    display: block;
+    font-family: var(--f-label);
+    font-size: 8.5px;
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: .28em;
+    text-indent: .28em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding-top: 6px;
+    white-space: nowrap;
+  }
+
+  /* In testa il marchio non deve mai andare a capo, nemmeno a 360px. */
+  @media (max-width: 680px) {
+    .marchio--normale .marchio__nome { font-size: 21px; }
+    .marchio--normale .marchio__sub { font-size: 7.5px; letter-spacing: .2em; text-indent: .2em; }
+  }
+</style>

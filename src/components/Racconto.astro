@@ -1,0 +1,129 @@
+---
+// Il racconto lungo del laboratorio. Sta nella home E resta come pagina a sé
+// (/chi-siamo/): per questo è un componente e non testo scritto due volte.
+//
+// Testi verbatim dall'anteprima approvata, con una sola differenza decisa dal
+// QG il 26/08/2026: nel capitolo "2023 · Il proprio nome" il nome del figlio
+// di Stefano è stato tolto (resta "Con il figlio che passa a dare una mano
+// quando serve"), perché sul sito esiste solo Stefano e il suo laboratorio.
+//
+// I due <span class="gap"> in ottone sono PROMEMORIA VISIBILI: segnano i punti
+// dove mancano le parole di Stefano. Vanno tolti solo quando arrivano le sue
+// frasi vere — non riempiti d'invenzione.
+const { titolo = 'h2' } = Astro.props;
+const Titolo = titolo;
+---
+<section class="sec contenitore">
+  <div class="sec-top">
+    <p class="eyebrow">Il laboratorio</p>
+    <Titolo>Stefano</Titolo>
+  </div>
+
+  <div class="narrow story">
+    <h3>1992</h3>
+    <p class="first">Stefano Barbi ha diciassette anni quando comincia a lavorare la pelle. Non è una scelta di carriera. In Campania, allora, la pelletteria è un mestiere che si impara stando accanto a chi lo sa già fare: si guarda, si prova, si sbaglia, si ricomincia. Le prime cose che gli riescono bene sono quelle che nessuno vede — un bordo dritto, una piega che non si apre.</p>
+
+    <span class="gap">Da completare — da chi ha imparato, dove, il primo pezzo che ha fatto tutto da solo</span>
+
+    <h3>Gli anni per gli altri</h3>
+    <p>Per gran parte della sua vita professionale Stefano ha fatto portafogli, borse e cinture che portavano il nome di qualcun altro. Marchi più conosciuti del suo. È il modo in cui funziona davvero la pelletteria italiana: dietro molte etichette famose ci sono laboratori piccoli e mani che nessuno nomina.</p>
+    <p>Sono anche gli anni in cui si impara la parte lunga del mestiere. Quanto tirare un filo. Quando una pelle è pronta e quando no. Perché due pezzi tagliati dallo stesso pellame, a distanza di dieci centimetri, non invecchiano allo stesso modo.</p>
+
+    <h3>2023 · Il proprio nome</h3>
+    <p>Poi Stefano ha deciso di mettere il proprio nome sui pezzi che fa. Ha aperto la sua attività e il suo laboratorio, in Campania, e ha ricominciato da capo: senza un marchio noto alle spalle, senza vetrine, senza catalogo. Con il figlio che passa a dare una mano quando serve.</p>
+
+    <h3>Le fiere</h3>
+    <p>Da allora vende come si vendeva prima che esistessero i negozi: di persona. Quattro fiere al mese, una cinquantina in un anno, in giro per l’Italia. Un banco, i portafogli in fila, e la parte che nessun sito potrà mai sostituire — qualcuno che prende un pezzo in mano, lo apre, lo gira contro la luce, e chiede quanto costa.</p>
+
+    <div class="figures">
+      <div><b>1992</b><span>l’anno in cui ha iniziato</span></div>
+      <div><b>~50</b><span>fiere in un anno</span></div>
+      <div><b>2-3 h</b><span>di lavoro per pezzo</span></div>
+      <div><b>1</b><span>persona in laboratorio</span></div>
+    </div>
+
+    <h3>Oggi</h3>
+    <p>Questo sito è la prima volta che i portafogli di Stefano si possono comprare senza aspettare che la fiera passi dalla vostra città. Quello che trovate qui esce dallo stesso banco di lavoro, dalle stesse mani e dalla stessa pelle: cambia soltanto il modo in cui arriva fino a voi.</p>
+
+    <h3>Dove vogliamo andare</h3>
+    <p>Per ora trovate due modelli e tre colori, ed è esattamente quello che c’è in laboratorio: non abbiamo messo online niente che non possiamo spedirvi oggi. Nei prossimi mesi arriveranno gli altri pezzi che Stefano porta già in fiera — borse, portachiavi, altri portafogli — e i colori che qui ancora non ci sono.</p>
+    <p>Cresceremo alla velocità con cui una persona riesce a produrre, non a quella di un magazzino. È il limite del lavoro fatto così, ed è anche l’unica ragione per cui vale la pena comprarlo.</p>
+
+    <span class="gap">Da completare — una frase di Stefano, sue parole, su cosa vuole che diventi</span>
+  </div>
+</section>
+
+<style>
+  /* Gli occhielli dei capitoli sono etichette in ottone, non titoli Bodoni. */
+  .story h3 {
+    font-family: var(--f-label);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin: 52px 0 14px;
+  }
+  .story h3:first-child { margin-top: 0; }
+  .story p { margin: 0 0 20px; }
+
+  /* Capolettera in Bodoni ottone sul primo paragrafo. */
+  .story p.first::first-letter {
+    float: left;
+    font-family: var(--f-display);
+    font-size: 64px;
+    line-height: .82;
+    padding: 6px 12px 0 0;
+    color: var(--brass);
+  }
+
+  /* Promemoria visibili: qui mancano le parole di Stefano. */
+  .story .gap {
+    display: block;
+    font-family: var(--f-label);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--brass);
+    border-left: 2px solid var(--brass);
+    padding: 8px 0 8px 14px;
+    margin: 0 0 20px;
+    opacity: .85;
+  }
+
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin: 44px 0;
+  }
+  .figures div { padding: 26px 12px; text-align: center; }
+  .figures div + div { border-left: 1px solid var(--line); }
+  .figures b {
+    display: block;
+    font-family: var(--f-display);
+    font-size: 34px;
+    font-weight: 400;
+    color: var(--brass);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .figures span {
+    display: block;
+    margin-top: 10px;
+    font-family: var(--f-label);
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    line-height: 1.5;
+  }
+  /* Su telefono la riga dei numeri diventa 2×2. */
+  @media (max-width: 640px) {
+    .figures { grid-template-columns: 1fr 1fr; }
+    .figures div:nth-child(3) { border-left: 0; }
+    .figures div:nth-child(3), .figures div:nth-child(4) { border-top: 1px solid var(--line); }
+  }
+</style>

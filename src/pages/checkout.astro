@@ -2,22 +2,24 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Checkout">
-  <section class="contenitore pagina-checkout">
-    <h1>Checkout</h1>
-    <p class="nota-test">Ambiente di test — nessun pagamento reale. Usa la carta Stripe di test 4242 4242 4242 4242, qualunque data futura, qualunque CVC.</p>
+  <div class="contenitore">
+    <section class="pagina-checkout">
+      <h1>Checkout</h1>
+      <p class="nota-test">Ambiente di test — nessun pagamento reale. Usa la carta Stripe di test 4242 4242 4242 4242, qualunque data futura, qualunque CVC.</p>
 
-    <div id="checkout-vuoto" hidden>
-      <p class="checkout__vuoto-testo">Il carrello è vuoto.</p>
-      <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
-    </div>
+      <div id="checkout-vuoto" hidden>
+        <p class="checkout__vuoto-testo">Il carrello è vuoto.</p>
+        <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+      </div>
 
-    <div id="checkout-contenuto" hidden>
-      <ul id="riepilogo-righe" class="riepilogo-righe"></ul>
-      <p class="checkout__totale">Totale <span id="checkout-totale"></span></p>
-      <button class="pulsante" id="btn-paga">Procedi al pagamento</button>
-      <p id="errore-checkout" class="errore-checkout" hidden></p>
-    </div>
-  </section>
+      <div id="checkout-contenuto" hidden>
+        <ul id="riepilogo-righe" class="riepilogo-righe"></ul>
+        <p class="checkout__totale">Totale <span id="checkout-totale"></span></p>
+        <button class="pulsante" id="btn-paga">Procedi al pagamento</button>
+        <p id="errore-checkout" class="errore-checkout" hidden></p>
+      </div>
+    </section>
+  </div>
 </Layout>
 
 <script>
@@ -121,34 +123,37 @@ import Layout from '../layouts/Layout.astro';
 
 <!--
   is:global: le voci del riepilogo nascono da createElement nello script qui
-  sopra e gli stili con ambito di Astro non le raggiungono. Selettori sotto
-  classi presenti solo in questa pagina.
+  sopra e gli stili con ambito di Astro non le raggiungono.
 -->
 <style is:global>
-  .pagina-checkout { max-width: 62ch; padding: 44px 0; }
-  .pagina-checkout h1 { font-size: clamp(28px, 4vw, 40px); max-width: none; }
+  .pagina-checkout { max-width: 660px; padding: 64px 0; }
+  .pagina-checkout h1 { font-size: clamp(30px, 4.4vw, 44px); max-width: none; margin: 0 0 26px; }
 
   .nota-test {
-    font-family: var(--f-d); font-size: 13.5px; color: var(--ink3);
-    background: var(--sunk); border-left: 2px solid var(--line2);
-    padding: 12px 14px; margin: 0 0 26px;
+    font-family: var(--f-label); font-size: 12px; line-height: 1.7; letter-spacing: .04em;
+    color: var(--ink3); background: var(--sunk); border-left: 2px solid var(--line2);
+    padding: 14px 16px; margin: 0 0 30px;
   }
-  .checkout__vuoto-testo { color: var(--ink2); margin: 0 0 20px; }
+  .checkout__vuoto-testo { color: var(--ink2); margin: 0 0 26px; }
 
-  .riepilogo-righe { list-style: none; padding: 0; margin: 0 0 26px; }
+  .riepilogo-righe { list-style: none; padding: 0; margin: 0 0 30px; }
   .riepilogo-righe li {
-    padding: 14px 0; border-bottom: 1px solid var(--line);
-    font-size: 15px; color: var(--ink2); font-variant-numeric: tabular-nums;
+    padding: 16px 0; border-bottom: 1px solid var(--line);
+    font-size: 17px; color: var(--ink2); font-variant-numeric: tabular-nums;
   }
 
   .checkout__totale {
-    margin: 0 0 22px; padding-top: 6px;
-    font-family: var(--f-d); font-weight: 700; font-size: 22px;
-    letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+    margin: 0 0 26px; font-family: var(--f-display); font-size: 27px;
+    font-variant-numeric: tabular-nums;
   }
 
+  /*
+    La tavolozza non prevede un rosso e l'ottone è l'unico accento: l'errore
+    si distingue col filetto in ottone e il testo a piena leggibilità, senza
+    inventare un colore che il marchio non ha.
+  */
   .errore-checkout {
-    margin-top: 18px; font-size: 14.5px; color: var(--err);
-    border-left: 2px solid var(--err); padding: 10px 14px; background: var(--sunk);
+    margin-top: 22px; font-size: 16.5px; color: var(--ink);
+    border-left: 2px solid var(--brass); padding: 14px 16px; background: var(--sunk);
   }
 </style>

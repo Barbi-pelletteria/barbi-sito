@@ -1,0 +1,38 @@
+---
+// Citazione a tutta larghezza fra i prodotti e il processo.
+// Testo verbatim dall'anteprima approvata.
+---
+<div class="quote">
+  <blockquote>«Un portafoglio ridimensionato per lo stile di vita odierno.»</blockquote>
+  <cite>Stefano Barbi, sul modello Sottile</cite>
+</div>
+
+<style>
+  .quote {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 66px 22px;
+    text-align: center;
+  }
+  blockquote {
+    margin: 0 auto;
+    max-width: 24ch;
+    font-family: var(--f-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(25px, 4vw, 40px);
+    line-height: 1.25;
+    color: var(--ink);
+  }
+  cite {
+    display: block;
+    margin-top: 26px;
+    font-family: var(--f-label);
+    font-style: normal;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+</style>

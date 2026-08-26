@@ -45,6 +45,8 @@ export const prodotti = [
     categoria: 'portafogli',
     nome: 'Sottile',
     occhiello: 'Portafoglio da 8 carte',
+    // Riga singola mostrata sulla scheda in home (testo verbatim dall'anteprima).
+    sommario: 'Mezzo centimetro di spessore. Sta nella tasca interna di una giacca senza deformarla.',
     prezzoCentesimi: 4900,
     immagine: '/prodotti/placeholder.svg',
     descrizione: [
@@ -73,6 +75,8 @@ export const prodotti = [
     categoria: 'portafogli',
     nome: 'Completo',
     occhiello: 'Portafoglio con portamonete',
+    // Riga singola mostrata sulla scheda in home (testo verbatim dall'anteprima).
+    sommario: 'Il classico di tutti i giorni. Non lascia fuori niente, spiccioli compresi.',
     prezzoCentesimi: 5500,
     immagine: '/prodotti/placeholder.svg',
     descrizione: [

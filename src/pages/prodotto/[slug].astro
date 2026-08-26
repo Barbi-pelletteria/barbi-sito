@@ -38,121 +38,114 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
 )}`;
 ---
 <Layout title={prodotto.nome}>
-  <p class="crumb contenitore"><a href="/portafogli/">Portafogli</a> → {prodotto.nome}</p>
-
-  <section class="contenitore pdp">
-    <div>
-      {fotoAttiva ? (
-        <img src={fotoAttiva} alt={`${prodotto.nome}, ${coloreIniziale.nome.toLowerCase()}`} />
-      ) : (
-        <FotoSegnaposto id="foto-pdp" etichetta={`Foto — ${prodotto.nome}, ${coloreIniziale.nome.toLowerCase()}`} />
-      )}
-    </div>
-
-    <div>
-      <p class="kicker" style="margin-bottom:8px">{prodotto.occhiello}</p>
-      <h1>{prodotto.nome}</h1>
-      <div class="p-price" style="font-size:26px;margin-top:12px">
-        {formatEuro(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em>
-      </div>
-
-      <!--
-        Le pastiglie colore sono fuori dal form di acquisto (che esiste solo
-        quando VENDITA_ATTIVA è vero) così restano visibili — come anteprima
-        di colore e disponibilità — anche quando il pulsante è "Disponibile
-        a breve". Nessun dato di magazzino viene ricalcolato qui: sono gli
-        stessi prodotto.colori già usati sotto.
-      -->
-      <fieldset class="acquisto__colori">
-        <legend class="sr-only">Colore</legend>
-        <div class="swatches" style="margin-top:20px">
-          {prodotto.colori.map((c) => (
-            <label class="sw-wrap">
-              <input
-                type="radio"
-                name="colore"
-                value={c.slug}
-                data-stock={c.stock}
-                disabled={c.stock === 0}
-                checked={c.slug === primoDisponibile}
-              />
-              <span class="sw" data-c={c.slug} title={c.nome}></span>
-            </label>
-          ))}
-          <span class="sw-label" id="stock-label"></span>
-        </div>
-      </fieldset>
-
-      <!--
-        Il riquadro delle iniziali sta fuori dal form, come le pastiglie:
-        spiega cosa si può chiedere (e l'avviso sul reso) anche quando la
-        vendita non è ancora attiva, com'è nell'anteprima. La casella da
-        spuntare compare però solo a vendita attiva: un interruttore che
-        non fa niente sarebbe un comando finto.
-      -->
-      <div class="opt">
-        <label class:list={['opt__label', { 'opt__label--statico': !VENDITA_ATTIVA }]}>
-          {VENDITA_ATTIVA && <input type="checkbox" id="iniziali-checkbox" />}
-          <span>
-            <span class="t">Aggiungi le tue iniziali · +{formatEuro(INIZIALI_CENTESIMI)}</span>
-            <span class="n">{avvisoIniziali}</span>
-          </span>
-        </label>
-        {VENDITA_ATTIVA && (
-          <>
-            <label for="iniziali" class="sr-only">Iniziali</label>
-            <input type="text" id="iniziali" name="iniziali" maxlength="3" autocomplete="off" placeholder="es. G.B." class="opt__iniziali-input" hidden />
-          </>
+  <div class="contenitore">
+    <div class="pdp">
+      <div>
+        {fotoAttiva ? (
+          <img src={fotoAttiva} alt={`${prodotto.nome}, ${coloreIniziale.nome.toLowerCase()}`} />
+        ) : (
+          <FotoSegnaposto id="foto-pdp" etichetta={`Foto — ${prodotto.nome}, ${coloreIniziale.nome.toLowerCase()}`} />
         )}
       </div>
 
-      {VENDITA_ATTIVA ? (
-        <form class="acquisto" id="form-acquisto" onsubmit="return false">
-          <div class="acquisto__riga">
-            <label for="quantita">Quantità</label>
-            <input type="number" id="quantita" name="quantita" value="1" min="1" />
-            <button class="buy" type="button" id="btn-aggiungi">Aggiungi al carrello</button>
+      <div>
+        <p class="p-kick" style="margin-top:0">{prodotto.occhiello}</p>
+        <h1>{prodotto.nome}</h1>
+        <div class="p-price" style="font-size:27px">{formatEuro(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em></div>
+
+        <!--
+          Le pastiglie colore stanno fuori dal form di acquisto (che esiste solo
+          quando VENDITA_ATTIVA è vero) così restano visibili — come anteprima
+          di colore e disponibilità — anche a vendita spenta. Nessun dato di
+          magazzino viene ricalcolato qui.
+        -->
+        <fieldset class="colori">
+          <legend class="sr-only">Colore</legend>
+          <div class="swatches" style="margin-top:26px">
+            {prodotto.colori.map((c) => (
+              <label class="sw-wrap">
+                <input
+                  type="radio"
+                  name="colore"
+                  value={c.slug}
+                  data-stock={c.stock}
+                  disabled={c.stock === 0}
+                  checked={c.slug === primoDisponibile}
+                />
+                <span class="sw" data-c={c.slug} title={c.nome}></span>
+              </label>
+            ))}
+            <span class="sw-label" id="stock-label"></span>
           </div>
+        </fieldset>
 
-          <p id="disponibilita" class="acquisto__disponibilita" hidden></p>
-          <p id="conferma-aggiunta" class="conferma-aggiunta" hidden>Aggiunto al carrello.</p>
-        </form>
-      ) : (
-        <div class="non-in-vendita">
-          <p class="buy soon" aria-disabled="true">Disponibile a breve</p>
-          <p class="non-in-vendita__nota">
-            La vendita online non è ancora attiva. Per informazioni o per prenotare un pezzo,
-            <a href={mailtoDisponibile}>scrivi a {EMAIL_CONTATTO}</a>.
-          </p>
+        <!--
+          Il riquadro delle iniziali resta visibile anche a vendita spenta:
+          spiega cosa si può chiedere e porta l'avviso sul reso. La casella da
+          spuntare invece è legata a VENDITA_ATTIVA — ricompare da sola quando
+          l'interruttore passa a true, senza rimettere mano al codice.
+        -->
+        <div class="opt">
+          <label class:list={['opt__label', { 'opt__label--statico': !VENDITA_ATTIVA }]}>
+            {VENDITA_ATTIVA && <input type="checkbox" id="iniziali-checkbox" />}
+            <span>
+              <span class="t">Le tue iniziali · +{formatEuro(INIZIALI_CENTESIMI)}</span>
+              <span class="n">Impresse sulla pelle prima che il pezzo esca dal laboratorio. {avvisoIniziali}</span>
+            </span>
+          </label>
+          {VENDITA_ATTIVA && (
+            <>
+              <label for="iniziali" class="sr-only">Iniziali</label>
+              <input type="text" id="iniziali" name="iniziali" maxlength="3" autocomplete="off" placeholder="es. G.B." class="opt__input" hidden />
+            </>
+          )}
         </div>
-      )}
 
-      {esauritoTutto && VENDITA_ATTIVA && (
-        <p class="acquisto__disponibilita">Al momento tutti i colori sono esauriti.</p>
-      )}
+        {VENDITA_ATTIVA ? (
+          <form class="acquisto" id="form-acquisto" onsubmit="return false">
+            <div class="acquisto__riga">
+              <label for="quantita">Quantità</label>
+              <input type="number" id="quantita" name="quantita" value="1" min="1" />
+              <button class="buy" type="button" id="btn-aggiungi">Aggiungi al carrello</button>
+            </div>
+            <p id="disponibilita" class="avviso" hidden></p>
+            <p id="conferma-aggiunta" class="avviso avviso--ok" hidden>Aggiunto al carrello.</p>
+          </form>
+        ) : (
+          <div class="non-in-vendita">
+            <p class="buy soon" aria-disabled="true">Disponibile a breve</p>
+            <p class="non-in-vendita__nota">
+              La vendita online non è ancora attiva. Per informazioni o per prenotare un pezzo,
+              <a href={mailtoDisponibile}>scrivi a {EMAIL_CONTATTO}</a>.
+            </p>
+          </div>
+        )}
 
-      <ConfrontoSpessore prodotti={prodotti} class="confronto-pdp" />
+        {esauritoTutto && VENDITA_ATTIVA && (
+          <p class="avviso">Al momento tutti i colori sono esauriti.</p>
+        )}
 
-      <table>
-        {prodotto.specifiche.map(([voce, valore]) => (
-          <tr><th>{voce}</th><td>{valore}</td></tr>
-        ))}
-      </table>
+        <ConfrontoSpessore prodotti={prodotti} class="confronto-pdp" />
+
+        <table>
+          {prodotto.specifiche.map(([voce, valore]) => (
+            <tr><th>{voce}</th><td>{valore}</td></tr>
+          ))}
+        </table>
+
+        <div class="care">
+          <h3>{curaProdotto.titolo}</h3>
+          <p>{curaProdotto.intro}</p>
+          <ul>
+            {curaProdotto.punti.map((p) => <li>{p}</li>)}
+          </ul>
+          <p style="margin-bottom:0">{curaProdotto.chiusura}</p>
+        </div>
+      </div>
     </div>
-  </section>
 
-  <div class="contenitore pdp-extra">
-    <div class="descrizione">
+    <div class="narrow descrizione">
       {prodotto.descrizione.map((par) => <p>{par}</p>)}
-    </div>
-
-    <div class="care">
-      <h3>{curaProdotto.titolo}</h3>
-      <p>{curaProdotto.intro}</p>
-      <ul>
-        {curaProdotto.punti.map((p) => <li>{p}</li>)}
-      </ul>
-      <p style="margin-top:10px;margin-bottom:0">{curaProdotto.chiusura}</p>
     </div>
   </div>
 </Layout>
@@ -182,11 +175,9 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
       const disponibilita = document.getElementById('disponibilita');
       const conferma = document.getElementById('conferma-aggiunta');
 
+      // Le pastiglie stanno fuori dal form, quindi la ricerca è sul documento:
+      // c'è comunque un solo selettore colore per pagina.
       function coloreSelezionato() {
-        // Le pastiglie colore non sono più dentro <form> (vedi markup: stanno
-        // fuori così restano visibili anche a vendita non attiva), quindi la
-        // ricerca è sul documento e non più su "form". Il risultato è
-        // identico: c'è un solo selettore colore per pagina.
         return document.querySelector('input[name="colore"]:checked');
       }
 
@@ -259,9 +250,8 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
         aggiorna();
       });
 
-      // Mostra il campo iniziali solo se la casella è spuntata (solo aspetto:
-      // il valore che finisce nel carrello è comunque quello dell'input,
-      // invariato).
+      // Il campo iniziali compare solo se la casella è spuntata: è solo aspetto,
+      // il valore che finisce nel carrello resta quello dell'input.
       const checkboxIniziali = document.getElementById('iniziali-checkbox');
       checkboxIniziali?.addEventListener('change', () => {
         inputIniziali.hidden = !checkboxIniziali.checked;
@@ -269,11 +259,10 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
       });
     }
 
-    // Sotto qui: solo la vista (etichetta scorta accanto alle pastiglie e
-    // testo del segnaposto foto). Non tocca stock, carrello o VENDITA_ATTIVA:
-    // legge solo i dati già presenti in "prodotto" per mostrarli.
+    // Sotto qui solo la vista: etichetta scorta accanto alle pastiglie e
+    // didascalia del segnaposto foto. Non tocca stock, carrello o VENDITA_ATTIVA.
     const stockLabel = document.getElementById('stock-label');
-    const fotoEtichetta = document.querySelector('#foto-pdp b');
+    const didascalia = document.querySelector('#foto-pdp b');
 
     function aggiornaVista() {
       const scelto = document.querySelector('input[name="colore"]:checked');
@@ -283,8 +272,8 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
       if (stockLabel) {
         stockLabel.textContent = c.stock > 0 ? `${c.nome} · ${c.stock} disponibili` : `${c.nome} · esaurito`;
       }
-      if (fotoEtichetta) {
-        fotoEtichetta.textContent = `Foto — ${prodotto.nome}, ${c.nome.toLowerCase()}`;
+      if (didascalia) {
+        didascalia.textContent = `Foto — ${prodotto.nome}, ${c.nome.toLowerCase()}`;
       }
     }
     document.querySelectorAll('input[name="colore"]').forEach((el) => {
@@ -295,84 +284,82 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
 </script>
 
 <style>
-  .crumb { font-family: var(--f-d); font-size: 12px; color: var(--ink3); letter-spacing: .02em; padding-top: 26px; display: block; }
-  .crumb a { color: var(--ink3); text-decoration: none; }
-  .crumb a:hover { text-decoration: underline; }
+  .pdp { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; padding: 70px 0; align-items: start; }
+  @media (max-width: 800px) { .pdp { grid-template-columns: 1fr; gap: 32px; padding: 44px 0; } }
 
-  .pdp { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; padding: 24px 0 44px; align-items: start; }
-  @media (max-width: 760px) { .pdp { grid-template-columns: 1fr; gap: 26px; padding: 18px 0 30px; } }
+  .pdp h1 {
+    font-size: clamp(30px, 4.4vw, 44px);
+    margin: 8px 0 0;
+    max-width: none;
+    text-align: left;
+  }
 
-  .pdp h1 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -.025em; margin-bottom: 4px; max-width: none; }
-
-  .p-price { font-family: var(--f-d); font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-  .p-price em { font-style: normal; font-size: 12.5px; font-weight: 500; color: var(--ink3); margin-left: 8px; letter-spacing: .02em; }
-
-  .acquisto__colori { border: none; padding: 0; margin: 0; }
+  .colori { border: 0; padding: 0; margin: 0; }
 
   .sw-wrap { position: relative; display: inline-block; line-height: 0; }
   .sw-wrap input {
-    position: absolute; inset: 0; width: 24px; height: 24px; margin: 0;
+    position: absolute; inset: 0; width: 26px; height: 26px; margin: 0;
     opacity: 0; cursor: pointer;
   }
   .sw-wrap input:disabled { cursor: not-allowed; }
   .sw-wrap input:checked + .sw::after {
-    content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 1.5px solid var(--ink);
+    content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--brass);
   }
-  .sw-wrap input:disabled + .sw { opacity: .3; }
-  .sw-wrap input:focus-visible + .sw { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .sw-wrap input:disabled + .sw { opacity: .32; }
+  .sw-wrap input:focus-visible + .sw { outline: 2px solid var(--brass); outline-offset: 4px; }
 
-  .buy {
-    display: block; width: 100%; margin-top: 4px;
-    font-family: var(--f-d); font-size: 15px; font-weight: 600; letter-spacing: .01em;
-    background: var(--ink); color: var(--paper);
-    border: 1px solid var(--ink); padding: 15px; cursor: pointer;
-  }
-  .buy:hover { opacity: .88; }
-  .buy.soon { background: transparent; color: var(--ink); margin-top: 22px; }
-
-  .opt { margin-top: 22px; padding: 14px; border: 1px solid var(--line); background: var(--card); }
-  .opt__label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .opt { margin-top: 22px; padding: 17px; border: 1px solid var(--line); background: var(--raise); }
+  .opt__label { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
   .opt__label--statico { cursor: default; }
-  .opt input[type="checkbox"] { margin: 3px 0 0; width: 17px; height: 17px; accent-color: var(--ink); flex: 0 0 auto; }
-  .opt .t { font-family: var(--f-d); font-size: 14px; font-weight: 600; }
-  .opt .n { display: block; margin-top: 5px; font-size: 14.5px; color: var(--ink2); line-height: 1.45; }
-  .opt__iniziali-input {
-    margin-top: 12px; width: 8rem; padding: 9px 10px; border: 1px solid var(--line);
-    background: var(--paper); color: var(--ink); font-size: 15px; text-transform: uppercase;
+  .opt input[type="checkbox"] { margin: 4px 0 0; width: 17px; height: 17px; accent-color: var(--brass); flex: 0 0 auto; }
+  .opt .t { font-family: var(--f-label); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+  .opt .n { display: block; margin-top: 8px; font-size: 16.5px; color: var(--ink2); line-height: 1.5; }
+  .opt__input {
+    margin-top: 14px; width: 9rem; padding: 11px; border: 1px solid var(--line2);
+    background: var(--sunk); color: var(--ink); font-family: var(--f-label);
+    font-size: 14px; letter-spacing: .1em; text-transform: uppercase;
   }
 
-  .acquisto__riga { display: flex; align-items: center; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
-  .acquisto__riga label { font-family: var(--f-d); font-size: 13px; font-weight: 600; color: var(--ink2); }
+  .buy { margin-top: 26px; width: 100%; }
+
+  .acquisto__riga { display: flex; align-items: center; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
+  .acquisto__riga label {
+    font-family: var(--f-label); font-size: 10.5px; font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--ink3);
+  }
   .acquisto__riga input {
-    width: 4.5rem; padding: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 15px;
+    width: 5rem; padding: 15px 12px; border: 1px solid var(--line2);
+    background: var(--sunk); color: var(--ink); font-size: 16px;
+    font-variant-numeric: tabular-nums;
   }
-  .acquisto__riga .buy { width: auto; flex: 1 1 auto; margin-top: 0; }
+  .acquisto__riga .buy { width: auto; flex: 1 1 12rem; margin-top: 0; }
 
-  .acquisto__disponibilita { margin-top: 12px; font-size: 14.5px; color: var(--ink2); }
-  .conferma-aggiunta { margin-top: 12px; font-size: 14.5px; color: var(--ok); font-weight: 600; }
+  .avviso { margin-top: 14px; font-size: 16.5px; color: var(--ink2); }
+  .avviso--ok { color: var(--brass); }
 
-  .non-in-vendita__nota { margin: 14px 0 0; font-size: 15px; color: var(--ink2); }
+  .non-in-vendita__nota { margin: 16px 0 0; font-size: 16.5px; color: var(--ink2); }
+  .non-in-vendita__nota a { color: var(--brass); }
 
-  .confronto-pdp { margin-top: 30px; }
+  .confronto-pdp { margin-top: 36px; }
 
-  table { width: 100%; border-collapse: collapse; margin-top: 26px; font-size: 15px; }
-  th, td { text-align: left; padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+  th, td { text-align: left; padding: 11px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
   th {
-    font-family: var(--f-d); font-size: 11px; font-weight: 600; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--ink3); width: 11rem; padding-right: 16px;
+    font-family: var(--f-label); font-size: 9.5px; font-weight: 600; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--ink3); width: 11rem; padding-right: 18px;
   }
-  td { font-variant-numeric: tabular-nums; color: var(--ink2); }
+  td { color: var(--ink2); font-size: 17px; font-variant-numeric: tabular-nums; }
   @media (max-width: 520px) {
-    th { width: auto; display: block; border: 0; padding-bottom: 1px; }
+    th { width: auto; display: block; border: 0; padding-bottom: 2px; }
     td { display: block; padding-top: 0; }
   }
 
-  .pdp-extra { max-width: 62ch; padding-bottom: 40px; }
-  .descrizione p { margin: 0 0 1em; }
+  .care { border: 1px solid var(--line); background: var(--raise); padding: 26px; margin-top: 34px; }
+  .care h3 { margin: 0 0 12px; }
+  .care p { margin: 0 0 12px; color: var(--ink2); font-size: 17px; }
+  .care ul { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: 17px; }
+  .care li { margin-bottom: 6px; }
 
-  .care { background: var(--card); border: 1px solid var(--line); padding: 22px; margin-top: 30px; }
-  .care h3 { margin: 0 0 10px; }
-  .care p { margin: 0 0 10px; font-size: 15.5px; color: var(--ink2); line-height: 1.55; }
-  .care ul { margin: 0; padding-left: 19px; font-size: 15.5px; color: var(--ink2); line-height: 1.55; }
-  .care li { margin-bottom: 5px; }
+  .descrizione { padding-bottom: 70px; }
+  .descrizione p { margin: 0 0 20px; }
 </style>

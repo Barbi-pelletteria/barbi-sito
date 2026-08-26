@@ -3,20 +3,22 @@ import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
 <Layout title="Privacy e cookie">
-  <section class="contenitore pagina-testo">
-    <h1>Privacy e cookie</h1>
+  <div class="contenitore">
+    <section class="pagina-testo">
+      <h1>Privacy e cookie</h1>
 
-    <p>Il titolare del trattamento è Barbi Stefano — impresa individuale, Via Nazionale delle Puglie 98, 80026 Casoria (NA). Per qualsiasi richiesta sui tuoi dati puoi scrivere a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>.</p>
+      <p>Il titolare del trattamento è Barbi Stefano — impresa individuale, Via Nazionale delle Puglie 98, 80026 Casoria (NA). Per qualsiasi richiesta sui tuoi dati puoi scrivere a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>.</p>
 
-    <h2>Analytics e cookie</h2>
-    <p>Questo sito usa Google Analytics 4 per contare le visite in forma aggregata e capire quali pagine vengono lette. Analytics installa cookie sul tuo dispositivo.</p>
-    <p>Google Analytics non parte al caricamento della pagina: si attiva solo dopo che hai premuto <strong>Accetta</strong> nel banner dei cookie. Se premi <strong>Rifiuta</strong>, nessun cookie di analisi viene installato e nessun dato viene inviato. La tua scelta viene ricordata per le visite successive.</p>
-    <p>Puoi cambiare idea in qualsiasi momento:</p>
-    <p><button type="button" class="pulsante pulsante-secondario" id="reset-consenso">Rivedi la scelta sui cookie</button></p>
+      <h2>Analytics e cookie</h2>
+      <p>Questo sito usa Google Analytics 4 per contare le visite in forma aggregata e capire quali pagine vengono lette. Analytics installa cookie sul tuo dispositivo.</p>
+      <p>Google Analytics non parte al caricamento della pagina: si attiva solo dopo che hai premuto <strong>Accetta</strong> nel banner dei cookie. Se premi <strong>Rifiuta</strong>, nessun cookie di analisi viene installato e nessun dato viene inviato. La tua scelta viene ricordata per le visite successive.</p>
+      <p>Puoi cambiare idea in qualsiasi momento:</p>
+      <p><button type="button" class="pulsante pulsante-secondario" id="reset-consenso">Rivedi la scelta sui cookie</button></p>
 
-    <h2>Dati di acquisto</h2>
-    <p>I pagamenti sono gestiti da Stripe: i dati della carta vengono trattati direttamente da Stripe e non passano da questo sito. I dati necessari alla spedizione (nome, indirizzo, contatti) sono usati solo per evadere l’ordine.</p>
-  </section>
+      <h2>Dati di acquisto</h2>
+      <p>I pagamenti sono gestiti da Stripe: i dati della carta vengono trattati direttamente da Stripe e non passano da questo sito. I dati necessari alla spedizione (nome, indirizzo, contatti) sono usati solo per evadere l’ordine.</p>
+    </section>
+  </div>
 </Layout>
 
 <script>

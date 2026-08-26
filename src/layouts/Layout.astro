@@ -1,6 +1,7 @@
 ---
 const { title, description = 'Portafogli in pelle conciata al vegetale, fatti a mano.' } = Astro.props;
 const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+import Marchio from '../components/Marchio.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
 <!doctype html>
@@ -20,7 +21,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Archivo:wght@500;600&display=swap" rel="stylesheet" />
 
   <!--
     GA4 NON viene caricato qui: parte solo dopo il consenso esplicito dato
@@ -29,17 +30,16 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
 </head>
 <body>
   <a class="salta-contenuto" href="#contenuto">Vai al contenuto</a>
+
   <header class="nav">
-    <div class="contenitore nav-in">
-      <a class="mark" href="/">Barbi <span>Pelletteria</span></a>
-      <div class="right">
-        <nav class="menu" aria-label="Menu principale">
-          <a href="/portafogli/" class="hideable">Portafogli</a>
-          <a href="/chi-siamo/" class="hideable">Chi siamo</a>
-          <a href="/contatti/" class="hideable">Contatti</a>
-        </nav>
-        <a class="carrello-link" href="/carrello/" aria-label="Vai al carrello">Carrello (<span id="contatore-carrello">0</span>)</a>
-      </div>
+    <div class="nav-in">
+      <Marchio href="/" />
+      <nav class="nav-right" aria-label="Menu principale">
+        <a href="/portafogli/" class="hideable">Portafogli</a>
+        <a href="/chi-siamo/" class="hideable">Il laboratorio</a>
+        <a href="/contatti/" class="hideable">Contatti</a>
+        <a href="/carrello/">Carrello (<span id="contatore-carrello">0</span>)</a>
+      </nav>
     </div>
   </header>
 
@@ -48,20 +48,19 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
   </main>
 
   <footer class="site-footer">
-    <div class="contenitore">
-      <nav class="flinks" aria-label="Informazioni legali">
-        <a href="/termini-e-condizioni/">Informazioni legali</a>
-        <a href="/spedizioni-e-resi/">Spedizioni e consegne</a>
-        <a href="/diritto-di-recesso/">Recesso e resi</a>
-        <a href="/termini-e-condizioni/#garanzia">Garanzia</a>
-        <a href="/termini-e-condizioni/#pagamenti-e-prezzi">Pagamenti e prezzi</a>
-        <a href="/privacy/">Privacy e cookie</a>
-      </nav>
-      <p class="fine">
-        Barbi Stefano — impresa individuale · Via Nazionale delle Puglie 98, 80026 Casoria (NA)<br />
-        Partita IVA 10311791213 · REA NA-1097798 · <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>
-      </p>
-    </div>
+    <Marchio size="piede" />
+    <nav class="flinks" aria-label="Informazioni legali">
+      <a href="/termini-e-condizioni/">Informazioni legali</a>
+      <a href="/spedizioni-e-resi/">Spedizioni</a>
+      <a href="/diritto-di-recesso/">Recesso e resi</a>
+      <a href="/termini-e-condizioni/#garanzia">Garanzia</a>
+      <a href="/termini-e-condizioni/#pagamenti-e-prezzi">Pagamenti</a>
+      <a href="/privacy/">Privacy e cookie</a>
+    </nav>
+    <p class="fine">
+      Barbi Stefano — impresa individuale · Via Nazionale delle Puglie 98, 80026 Casoria (NA)<br />
+      Partita IVA 10311791213 · REA NA-1097798 · <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>
+    </p>
   </footer>
 
   {gaId && (
@@ -116,224 +115,202 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
   </script>
 
   <style is:global>
+    /* ─────────────────────────────────────────────────────────────────
+       Tema unico, scuro e caldo. È la scelta di un marchio, non una
+       preferenza di sistema: niente @media (prefers-color-scheme),
+       niente [data-theme]. Su fondo scuro la pelle risalta.
+
+       L'ottone è il colore dello strumento che imprime le iniziali:
+       per questo è l'unico accento, e va usato con parsimonia.
+       Tutti i colori stanno qui e da nessun'altra parte.
+       ───────────────────────────────────────────────────────────────── */
     :root {
-      --paper: #F6F5F2;
-      --card: #FFFFFF;
-      --sunk: #EEECE7;
-      --ink: #14100F;
-      --ink2: #5F5A56;
-      --ink3: #8E8781;
-      --line: #DFDBD4;
-      --line2: #C6C0B7;
-      --blu: #2B3A55;
-      --bordeaux: #6E2230;
-      --marrone: #7A5230;
-      --ok: #2C5B43;
-      /* --err non è nella tavolozza dell'anteprima: serve perché il messaggio
-         di errore del checkout aveva un rosso scritto dentro il componente,
-         e i colori devono stare tutti qui. Stessa famiglia calda del resto. */
-      --err: #8C2F22;
-      --f-d: "Archivo", system-ui, sans-serif;
-      --f-b: "Newsreader", Georgia, serif;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --paper: #131110;
-        --card: #1B1817;
-        --sunk: #231F1D;
-        --ink: #F1EDE8;
-        --ink2: #B0A8A1;
-        --ink3: #847C75;
-        --line: #302B28;
-        --line2: #463F3A;
-        --blu: #7C93BE;
-        --bordeaux: #C97F8B;
-        --marrone: #C09466;
-        --ok: #7FB79C;
-        --err: #E08C7D;
-      }
-    }
-    :root[data-theme="dark"] {
-      --paper: #131110;
-      --card: #1B1817;
-      --sunk: #231F1D;
-      --ink: #F1EDE8;
-      --ink2: #B0A8A1;
-      --ink3: #847C75;
-      --line: #302B28;
-      --line2: #463F3A;
-      --blu: #7C93BE;
+      --ground: #171310;
+      --raise: #211B17;
+      --sunk: #100D0B;
+      --ink: #F2EAE0;
+      --ink2: #BCADA0;
+      --ink3: #9B8C7E;
+      --line: #312822;
+      --line2: #4A3D34;
+      --brass: #C6A15B;
+      --blu: #7E97C6;
       --bordeaux: #C97F8B;
-      --marrone: #C09466;
-      --ok: #7FB79C;
-      --err: #E08C7D;
+      --marrone: #BE9163;
+
+      /* Gli stessi due colori in componenti separate: servono per gli aloni
+         e i filetti trasparenti (rgba). Stanno qui perché anche una
+         trasparenza è un colore, e i colori non si scrivono nei componenti. */
+      --brass-rgb: 198, 161, 91;
+      --ink-rgb: 242, 234, 224;
+
+      --f-display: "Bodoni Moda", Didot, "Times New Roman", serif;
+      --f-text: "EB Garamond", Garamond, Georgia, serif;
+      --f-label: "Archivo", system-ui, sans-serif;
+
+      color-scheme: dark;
     }
 
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: var(--paper);
+      background: var(--ground);
       color: var(--ink);
-      font-family: var(--f-b);
-      font-size: 17px;
-      line-height: 1.6;
+      font-family: var(--f-text);
+      font-size: 19px;
+      line-height: 1.68;
       -webkit-text-size-adjust: 100%;
     }
     a { color: inherit; }
     img { max-width: 100%; display: block; }
 
-    h1, h2, h3 {
-      font-family: var(--f-d);
-      letter-spacing: -.025em;
-      margin: 0 0 8px;
+    /* ---- impaginazione ---- */
+    .contenitore { max-width: 1120px; margin: 0 auto; padding: 0 22px; }
+    .narrow { max-width: 660px; margin-left: auto; margin-right: auto; }
+    .sec { padding: 78px 0; }
+    .sec-top { text-align: center; margin-bottom: 44px; }
+    .sec-top p { margin: 0 auto; color: var(--ink2); max-width: 50ch; font-size: 18px; }
+
+    /* ---- titoli: Bodoni in peso 400 e grande. La magrezza è il pregio. ---- */
+    h1, h2 {
+      font-family: var(--f-display);
+      font-weight: 400;
+      margin: 0 0 12px;
       text-wrap: balance;
     }
     h1 {
-      font-weight: 800;
-      font-size: clamp(31px, 5.6vw, 58px);
-      line-height: 1.02;
-      letter-spacing: -.035em;
-      margin: 0 0 18px;
-      max-width: 15ch;
+      font-size: clamp(34px, 6.4vw, 68px);
+      line-height: 1.08;
+      letter-spacing: -.005em;
+      margin: 0 auto 22px;
+      max-width: 19ch;
     }
-    h2 {
-      font-weight: 700;
-      font-size: clamp(23px, 3.2vw, 32px);
-    }
-    h3 {
-      font-weight: 600;
-      font-size: 17px;
-      letter-spacing: -.01em;
+    h2 { font-size: clamp(27px, 3.7vw, 42px); line-height: 1.14; }
+    /* Una parola in corsivo e in ottone. Una sola. */
+    h1 em, h2 em { font-style: italic; color: var(--brass); }
+    h3 { font-family: var(--f-display); font-weight: 400; font-size: 23px; margin: 0 0 6px; }
+
+    .lede { font-size: clamp(18px, 2.1vw, 21px); color: var(--ink2); max-width: 52ch; margin: 0 auto; line-height: 1.6; }
+
+    .eyebrow {
+      font-family: var(--f-label); font-size: 10.5px; font-weight: 600;
+      letter-spacing: .24em; text-indent: .24em; text-transform: uppercase;
+      color: var(--brass); margin: 0 0 22px;
     }
 
-    .contenitore { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-    .sezione { padding: 48px 0; }
+    /* ---- testata ---- */
+    .nav { border-bottom: 1px solid var(--line); }
+    .nav-in { max-width: 1120px; margin: 0 auto; padding: 20px 22px; display: flex; align-items: center; gap: 28px; }
+    .nav-right { margin-left: auto; display: flex; gap: 24px; align-items: center; }
+    .nav a {
+      font-family: var(--f-label); font-size: 12.5px; font-weight: 500; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--ink2); text-decoration: none; white-space: nowrap;
+    }
+    .nav a:hover { color: var(--brass); }
+    @media (max-width: 680px) {
+      .nav a.hideable { display: none; }
+      .nav-in { gap: 14px; padding: 16px 22px; }
+    }
 
-    /* ---- pagine di solo testo: legali, chi siamo, contatti ---- */
-    .pagina-testo { max-width: 62ch; padding: 44px 0; }
-    .pagina-testo h1 { font-size: clamp(28px, 4vw, 40px); max-width: none; margin-bottom: 22px; }
-    .pagina-testo h2 { font-size: clamp(19px, 2.4vw, 23px); margin: 36px 0 10px; }
-    .pagina-testo p { margin: 0 0 1em; }
-    .pagina-testo li { margin-bottom: 6px; }
-    .pagina-testo a { color: var(--ink); }
+    /* ---- pastiglie colore (scheda + pagina prodotto) ---- */
+    .swatches { display: flex; gap: 11px; margin-top: 20px; align-items: center; flex-wrap: wrap; }
+    .sw {
+      width: 26px; height: 26px; border-radius: 50%; cursor: pointer; position: relative;
+      border: 1px solid rgba(var(--ink-rgb), .22); padding: 0; appearance: none; -webkit-appearance: none;
+    }
+    .sw[data-c="blu"] { background: var(--blu); }
+    .sw[data-c="bordeaux"] { background: var(--bordeaux); }
+    .sw[data-c="marrone"] { background: var(--marrone); }
+    .sw.on::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--brass); }
+    .sw:disabled { opacity: .32; cursor: not-allowed; }
+    .sw-label {
+      font-family: var(--f-label); font-size: 11px; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--ink3); margin-left: 8px;
+    }
 
-    /* Riquadro in rilievo dentro una pagina di testo (modulo di recesso,
-       nota fiscale): stesso trattamento del riquadro "Come si cura". */
-    .riquadro { background: var(--card); border: 1px solid var(--line); padding: 22px; margin-top: 30px; }
+    /* ---- pulsanti ---- */
+    .buy, .pulsante {
+      display: inline-block;
+      font-family: var(--f-label); font-size: 12.5px; font-weight: 600;
+      letter-spacing: .16em; text-transform: uppercase;
+      background: var(--brass); color: var(--ground);
+      border: 1px solid var(--brass); padding: 17px 26px;
+      text-decoration: none; text-align: center; cursor: pointer;
+    }
+    .buy:hover, .pulsante:hover { filter: brightness(1.08); }
+    .buy:disabled, .pulsante:disabled, .pulsante[aria-disabled="true"] { opacity: .45; cursor: not-allowed; filter: none; }
+    .buy.soon, .pulsante-secondario { background: transparent; color: var(--brass); }
+
+    /* ---- prezzo, ricorre su scheda e pagina prodotto ---- */
+    .p-price { font-family: var(--f-display); font-size: 23px; margin-top: 12px; font-variant-numeric: tabular-nums; }
+    .p-price em { font-style: italic; font-size: 15px; color: var(--ink3); margin-left: 10px; }
+    .p-kick {
+      font-family: var(--f-label); font-size: 10px; font-weight: 600; letter-spacing: .19em;
+      text-transform: uppercase; color: var(--brass); margin: 22px 0 0;
+    }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 46px; }
+    @media (max-width: 740px) { .grid2 { grid-template-columns: 1fr; gap: 56px; } }
+
+    /* ---- pagine di solo testo: legali, contatti ---- */
+    .pagina-testo { max-width: 660px; padding: 64px 0; }
+    .pagina-testo h1 { font-size: clamp(30px, 4.4vw, 44px); max-width: none; margin: 0 0 26px; text-align: left; }
+    .pagina-testo h2 { font-size: clamp(22px, 2.6vw, 27px); margin: 44px 0 12px; }
+    .pagina-testo p { margin: 0 0 20px; }
+    .pagina-testo li { margin-bottom: 8px; }
+    .pagina-testo a { color: var(--brass); }
+
+    .riquadro { border: 1px solid var(--line); background: var(--raise); padding: 26px; margin-top: 34px; }
     .riquadro h2 { margin-top: 0; }
     .riquadro :last-child { margin-bottom: 0; }
+
+    .segnaposto { color: var(--ink3); font-style: italic; font-size: 0.95em; }
 
     .sr-only {
       position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
       overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
     }
 
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
-    @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; gap: 34px; } }
-
-    .kicker {
-      font-family: var(--f-d);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--ink3);
-      margin: 0 0 14px;
-    }
+    hr.div { border: 0; border-top: 1px solid var(--line2); margin: 0; }
 
     .salta-contenuto {
-      position: absolute;
-      left: -999px;
-      top: 0;
-      background: var(--ink);
-      color: var(--paper);
-      padding: 0.75rem 1rem;
-      z-index: 100;
-      font-family: var(--f-d);
-      font-size: 14px;
+      position: absolute; left: -999px; top: 0;
+      background: var(--brass); color: var(--ground);
+      padding: 12px 16px; z-index: 100;
+      font-family: var(--f-label); font-size: 12px; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
     }
-    .salta-contenuto:focus { left: 0.5rem; top: 0.5rem; }
+    .salta-contenuto:focus { left: 12px; top: 12px; }
 
-    /* ---- header ---- */
-    .nav { border-bottom: 1px solid var(--line); background: var(--card); position: sticky; top: 0; z-index: 10; }
-    .nav-in { display: flex; align-items: center; gap: 26px; padding-top: 14px; padding-bottom: 14px; }
-    .mark {
-      font-family: var(--f-d); font-weight: 800; font-size: 19px;
-      letter-spacing: -.03em; text-transform: uppercase;
-      text-decoration: none; color: var(--ink); white-space: nowrap;
+    /* ---- piè di pagina ---- */
+    .site-footer { border-top: 1px solid var(--line2); padding: 52px 22px 70px; text-align: center; margin-top: 20px; }
+    .flinks {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 26px; margin-top: 32px;
+      font-family: var(--f-label); font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
     }
-    .mark span { font-weight: 400; color: var(--ink3); letter-spacing: .02em; }
-    .right { margin-left: auto; display: flex; gap: 20px; align-items: center; }
-    .menu { display: flex; gap: 20px; }
-    .right a, .menu a {
-      font-family: var(--f-d); font-size: 13.5px; font-weight: 500;
-      color: var(--ink2); text-decoration: none; white-space: nowrap;
-    }
-    .right a:hover, .menu a:hover { color: var(--ink); }
-    @media (max-width: 640px) { .menu a.hideable { display: none; } }
-
-    /* ---- pulsanti ---- */
-    .pulsante {
-      display: inline-block;
-      font-family: var(--f-d); font-size: 15px; font-weight: 600; letter-spacing: .01em;
-      background: var(--ink); color: var(--paper);
-      border: 1px solid var(--ink);
-      padding: 14px 24px;
-      text-decoration: none; text-align: center;
-      cursor: pointer;
-    }
-    .pulsante:hover { opacity: .88; }
-    .pulsante:disabled, .pulsante[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
-    .pulsante-secondario { background: transparent; color: var(--ink); }
-    .pulsante-secondario:hover { background: var(--sunk); opacity: 1; }
-
-    .segnaposto {
-      color: var(--ink3);
-      font-style: italic;
-      font-size: 0.95em;
-    }
-
-    /* ---- pastiglie colore (scheda + pagina prodotto) ---- */
-    .swatches { display: flex; gap: 7px; margin-top: 13px; align-items: center; flex-wrap: wrap; }
-    .sw {
-      width: 24px; height: 24px; border-radius: 50%;
-      border: 1px solid rgba(0, 0, 0, .18); cursor: pointer; position: relative;
-      padding: 0; appearance: none; -webkit-appearance: none;
-    }
-    :root:not([data-theme="light"]) .sw { border-color: rgba(255, 255, 255, .16); }
-    .sw[data-c="blu"] { background: var(--blu); }
-    .sw[data-c="bordeaux"] { background: var(--bordeaux); }
-    .sw[data-c="marrone"] { background: var(--marrone); }
-    .sw.on::after {
-      content: ""; position: absolute; inset: -5px; border-radius: 50%;
-      border: 1.5px solid var(--ink);
-    }
-    .sw:disabled { opacity: .3; cursor: not-allowed; }
-    .sw-label { font-family: var(--f-d); font-size: 12px; color: var(--ink3); margin-left: 6px; letter-spacing: .02em; }
-
-    /* ---- footer ---- */
-    .site-footer { border-top: 1px solid var(--line2); margin-top: 20px; padding: 40px 0 60px; }
-    .flinks { display: flex; flex-wrap: wrap; gap: 10px 22px; font-family: var(--f-d); font-size: 13px; }
     .flinks a { color: var(--ink2); text-decoration: none; }
-    .flinks a:hover { color: var(--ink); text-decoration: underline; }
-    .fine { margin-top: 20px; font-family: var(--f-d); font-size: 12px; color: var(--ink3); line-height: 1.6; }
+    .flinks a:hover { color: var(--brass); }
+    .fine {
+      margin: 28px 0 0; font-family: var(--f-label); font-size: 10.5px;
+      letter-spacing: .05em; color: var(--ink3); line-height: 1.9;
+    }
     .fine a { color: var(--ink3); }
 
     /* ---- banner cookie ---- */
     .cookie-banner {
       position: fixed; left: 16px; right: 16px; bottom: 16px;
-      max-width: 640px; margin: 0 auto;
-      background: var(--card); border: 1px solid var(--line2);
-      padding: 18px 20px; z-index: 50;
+      max-width: 660px; margin: 0 auto;
+      background: var(--raise); border: 1px solid var(--line2);
+      padding: 20px 22px; z-index: 50;
       display: flex; flex-wrap: wrap; align-items: center;
-      gap: 12px 20px; justify-content: space-between;
+      gap: 14px 20px; justify-content: space-between;
     }
-    .cookie-banner__testo { margin: 0; font-size: 15px; color: var(--ink2); flex: 1 1 260px; }
-    .cookie-banner__testo a { color: var(--ink); }
+    .cookie-banner__testo { margin: 0; font-size: 16.5px; color: var(--ink2); flex: 1 1 260px; line-height: 1.5; }
+    .cookie-banner__testo a { color: var(--brass); }
     .cookie-banner__azioni { display: flex; gap: 10px; }
-    .cookie-banner__azioni .pulsante { padding: 10px 18px; font-size: 14px; }
+    .cookie-banner__azioni .pulsante { padding: 12px 18px; font-size: 11px; }
 
-    :where(a, button, input):focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    :where(a, button, input, .sw):focus-visible { outline: 2px solid var(--brass); outline-offset: 4px; }
     @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   </style>
 </body>

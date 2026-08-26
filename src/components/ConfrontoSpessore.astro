@@ -1,7 +1,8 @@
 ---
 // Confronto reale dello spessore fra i modelli, in scala esatta fra loro.
 // Il numero viene letto dalla voce "Spessore" già presente in specifiche —
-// non è reinventato qui, solo disegnato.
+// non è reinventato qui, solo disegnato. Nessun confronto con monete,
+// telefoni o carte: non li abbiamo misurati.
 const { prodotti, class: className = '' } = Astro.props;
 
 function spessoreCm(prodotto) {
@@ -17,18 +18,17 @@ const righe = prodotti.map((p) => ({
 }));
 const max = Math.max(...righe.map((r) => r.valore), 0.01);
 
-const LABEL_W = 92;
-const BAR_X = 100;
-const BAR_W = 230;
-const BAR_H = 14;
-const VALUE_X = BAR_X + BAR_W + 14;
-const ROW_H = 34;
-const PAD = 12;
-const W = VALUE_X + 70;
+const BAR_X = 104;
+const BAR_W = 232;
+const BAR_H = 12;
+const VALUE_X = BAR_X + BAR_W + 16;
+const ROW_H = 36;
+const PAD = 10;
+const W = VALUE_X + 74;
 const H = PAD * 2 + ROW_H * righe.length - (ROW_H - BAR_H);
 ---
 <div class:list={['confronto-spessore', className]}>
-  <p class="kicker">Spessore</p>
+  <p class="eyebrow confronto-spessore__titolo">Spessore a confronto</p>
   <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Spessore a confronto: ${righe.map((r) => r.nome + ' ' + r.etichetta).join(', ')}`}>
     {righe.map((r, i) => {
       const y = PAD + i * ROW_H;
@@ -47,16 +47,16 @@ const H = PAD * 2 + ROW_H * righe.length - (ROW_H - BAR_H);
 </div>
 
 <style>
-  .confronto-spessore { max-width: 480px; }
+  .confronto-spessore { max-width: 500px; }
+  .confronto-spessore__titolo { margin-bottom: 16px; }
   svg { width: 100%; height: auto; display: block; overflow: visible; }
   .ce-nome {
-    font-family: var(--f-d); font-size: 13px; font-weight: 600;
-    letter-spacing: -.01em; fill: var(--ink);
+    font-family: var(--f-display); font-size: 17px; fill: var(--ink);
   }
   .ce-pista { fill: var(--sunk); }
-  .ce-barra { fill: var(--ink); }
+  .ce-barra { fill: var(--brass); }
   .ce-valore {
-    font-family: var(--f-d); font-size: 13px; font-weight: 500;
-    fill: var(--ink2); font-variant-numeric: tabular-nums;
+    font-family: var(--f-label); font-size: 11px; letter-spacing: .09em;
+    fill: var(--ink3); font-variant-numeric: tabular-nums;
   }
 </style>

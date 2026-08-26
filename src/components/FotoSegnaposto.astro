@@ -1,29 +1,32 @@
 ---
-// Segnaposto foto "voluto, non rotto": tratteggio diagonale tenue su fondo
-// incassato, con scritta che dice cosa ci andrà. Quando c'è lo scatto vero
+// Segnaposto foto: deve sembrare voluto, non rotto. Fondo incassato, un alone
+// caldo al centro e un tratteggio diagonale appena percettibile, con la
+// scritta che dice cosa ci andrà. Quando arriva lo scatto vero
 // (src/data/immagini.js) il chiamante mostra una <img> al suo posto.
-const { etichetta, ratio = '4 / 5', id } = Astro.props;
+const { etichetta, ratio = '4 / 5', id, class: className = '' } = Astro.props;
 ---
-<div class="foto-segnaposto" style={`aspect-ratio:${ratio}`} id={id}>
+<div class:list={['foto-segnaposto', className]} style={`aspect-ratio:${ratio}`} id={id}>
   <b>{etichetta}</b>
 </div>
 
 <style>
   .foto-segnaposto {
-    background: var(--sunk);
+    background-color: var(--sunk);
     border: 1px solid var(--line);
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: repeating-linear-gradient(45deg, transparent 0 11px, rgba(120, 110, 100, .055) 11px 22px);
-    padding: 14px;
+    padding: 16px;
     text-align: center;
+    background-image:
+      radial-gradient(90% 70% at 50% 45%, rgba(var(--brass-rgb), .075), transparent 65%),
+      repeating-linear-gradient(45deg, transparent 0 12px, rgba(var(--brass-rgb), .035) 12px 24px);
   }
   .foto-segnaposto b {
-    font-family: var(--f-d);
-    font-size: 10.5px;
+    font-family: var(--f-label);
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: .16em;
+    letter-spacing: .2em;
     text-transform: uppercase;
     color: var(--ink3);
   }

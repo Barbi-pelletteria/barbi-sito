@@ -3,24 +3,23 @@ import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
 <Layout title="Contatti">
-  <section class="contenitore pagina-testo">
-    <h1>Contatti</h1>
-    <p>Per informazioni sui portafogli, sugli ordini o sui resi, scrivi a:</p>
-    <p class="contatti__email"><a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a></p>
+  <div class="contenitore">
+    <section class="pagina-testo">
+      <h1>Contatti</h1>
+      <p>Per informazioni sui portafogli, sugli ordini o sui resi, scrivi a:</p>
+      <p class="contatti__email"><a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a></p>
 
-    <h2>Dove</h2>
-    <p>
-      Barbi Stefano — impresa individuale<br />
-      Via Nazionale delle Puglie 98, 80026 Casoria (NA)
-    </p>
-  </section>
+      <h2>Dove</h2>
+      <p>
+        Barbi Stefano — impresa individuale<br />
+        Via Nazionale delle Puglie 98, 80026 Casoria (NA)
+      </p>
+    </section>
+  </div>
 </Layout>
 
 <style>
-  .contatti__email {
-    font-family: var(--f-d);
-    font-size: 19px;
-    font-weight: 600;
-    letter-spacing: -.02em;
-  }
+  .contatti__email { font-family: var(--f-display); font-size: 25px; }
+  .contatti__email a { text-decoration: none; }
+  .contatti__email a:hover { text-decoration: underline; }
 </style>
