@@ -2,11 +2,11 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Carrello">
-  <section class="sezione contenitore">
+  <section class="contenitore pagina-carrello">
     <h1>Il tuo carrello</h1>
 
     <div id="carrello-vuoto" hidden>
-      <p>Il carrello è vuoto.</p>
+      <p class="carrello-vuoto__testo">Il carrello è vuoto.</p>
       <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
     </div>
 
@@ -17,14 +17,14 @@ import Layout from '../layouts/Layout.astro';
           <th>Prezzo</th>
           <th>Quantità</th>
           <th>Subtotale</th>
-          <th></th>
+          <th><span class="sr-only">Azioni</span></th>
         </tr>
       </thead>
       <tbody id="righe-carrello"></tbody>
     </table>
 
     <div id="riepilogo-carrello" class="riepilogo-carrello" hidden>
-      <p><strong>Totale:</strong> <span id="totale-carrello"></span></p>
+      <p class="riepilogo-carrello__totale">Totale <span id="totale-carrello"></span></p>
       <a class="pulsante" id="btn-vai-checkout" href="/checkout/">Vai al pagamento</a>
     </div>
   </section>
@@ -88,12 +88,12 @@ import Layout from '../layouts/Layout.astro';
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <strong>${prodotto.nome}</strong><br>
+          <span class="riga-nome">${prodotto.nome}</span><br>
           <span class="riga-dettaglio">${dettaglio}</span>
         </td>
         <td>${formatEuro(unit)}</td>
         <td>
-          <input type="number" min="1" max="${maxQ}" value="${riga.quantita}" data-key="${key}" class="input-quantita" />
+          <input type="number" min="1" max="${maxQ}" value="${riga.quantita}" data-key="${key}" class="input-quantita" aria-label="Quantità" />
         </td>
         <td>${formatEuro(sub)}</td>
         <td><button class="link-rimuovi" data-key="${key}">Rimuovi</button></td>
@@ -125,17 +125,55 @@ import Layout from '../layouts/Layout.astro';
   window.addEventListener('barbi:cart-changed', render);
 </script>
 
-<style>
-  .tabella-carrello { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
-  .tabella-carrello th, .tabella-carrello td {
-    text-align: left;
-    padding: 0.85rem 0.5rem;
-    border-bottom: 1px solid var(--bordo);
-    vertical-align: top;
+<!--
+  is:global obbligatorio: le righe della tabella nascono da innerHTML nello
+  script qui sopra, e gli stili con ambito di Astro non le raggiungono (non
+  hanno l'attributo di scope). I selettori sono tutti sotto classi che
+  esistono solo in questa pagina, quindi non sporcano il resto del sito.
+-->
+<style is:global>
+  .pagina-carrello { padding: 44px 0; }
+  .pagina-carrello h1 { font-size: clamp(28px, 4vw, 40px); max-width: none; }
+  .carrello-vuoto__testo { color: var(--ink2); margin: 0 0 20px; }
+
+  .tabella-carrello { width: 100%; border-collapse: collapse; margin-top: 26px; font-size: 15px; }
+  .tabella-carrello th {
+    font-family: var(--f-d); font-size: 11px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink3); text-align: left;
+    padding: 0 12px 9px 0; border-bottom: 1px solid var(--line2);
   }
-  .riga-dettaglio { color: var(--testo-tenue); font-size: 0.9rem; }
-  .input-quantita { width: 4rem; padding: 0.4rem; border: 1px solid var(--bordo); border-radius: 4px; }
-  .link-rimuovi { background: none; border: none; color: var(--testo-tenue); text-decoration: underline; cursor: pointer; padding: 0; }
-  .riepilogo-carrello { margin-top: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-  #totale-carrello { font-size: 1.15rem; }
+  .tabella-carrello td {
+    text-align: left; padding: 14px 12px 14px 0; border-bottom: 1px solid var(--line);
+    vertical-align: top; font-variant-numeric: tabular-nums; color: var(--ink2);
+  }
+  .tabella-carrello .riga-nome { font-family: var(--f-d); font-weight: 600; font-size: 15px; color: var(--ink); }
+  .tabella-carrello .riga-dettaglio { font-family: var(--f-d); font-size: 12.5px; color: var(--ink3); }
+
+  .input-quantita {
+    width: 4rem; padding: 8px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink); font-size: 15px;
+    font-variant-numeric: tabular-nums;
+  }
+  .link-rimuovi {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font-family: var(--f-d); font-size: 12.5px; color: var(--ink3); text-decoration: underline;
+  }
+  .link-rimuovi:hover { color: var(--ink); }
+
+  .riepilogo-carrello {
+    margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line2);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .riepilogo-carrello__totale {
+    margin: 0; font-family: var(--f-d); font-weight: 700; font-size: 22px;
+    letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 560px) {
+    .tabella-carrello, .tabella-carrello tbody, .tabella-carrello tr, .tabella-carrello td { display: block; width: 100%; }
+    .tabella-carrello thead { display: none; }
+    .tabella-carrello tr { padding: 16px 0; border-bottom: 1px solid var(--line); }
+    .tabella-carrello td { border: 0; padding: 2px 0; }
+  }
 </style>

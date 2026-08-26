@@ -13,29 +13,17 @@ const corpo = encodeURIComponent(
 const mailtoRecesso = `mailto:${EMAIL_CONTATTO}?subject=${oggetto}&body=${corpo}`;
 ---
 <Layout title="Diritto di recesso e resi">
-  <section class="sezione contenitore pagina-legale">
+  <section class="contenitore pagina-testo">
     <h1>Diritto di recesso e resi</h1>
     <p>Hai 14 giorni dalla consegna per cambiare idea, senza doverne spiegare il motivo. Scrivici a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a> e ti diciamo come procedere.</p>
     <p>Il costo della spedizione di ritorno è a tuo carico.</p>
     <p>Il rimborso arriva entro 14 giorni dal rientro del portafoglio.</p>
     <p>Unica eccezione: i portafogli con le iniziali impresse sono realizzati su tua richiesta e non possono essere restituiti (art. 59, lettera c, del Codice del Consumo).</p>
 
-    <div class="recesso-modulo">
+    <div class="riquadro">
       <h2>Modulo di recesso</h2>
       <p>Puoi comunicare il recesso in un clic: si apre un’email già pronta da completare e inviare.</p>
-      <a class="pulsante" href={mailtoRecesso}>Compila il modulo di recesso</a>
+      <p><a class="pulsante" href={mailtoRecesso}>Compila il modulo di recesso</a></p>
     </div>
   </section>
 </Layout>
-
-<style>
-  .pagina-legale { max-width: 720px; }
-  .recesso-modulo {
-    margin-top: 2rem;
-    padding: 1.25rem 1.5rem;
-    border: 1px solid var(--bordo);
-    border-radius: 8px;
-    background: #fff;
-  }
-  .recesso-modulo h2 { margin-top: 0; }
-</style>

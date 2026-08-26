@@ -83,20 +83,31 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
         </div>
       </fieldset>
 
-      {VENDITA_ATTIVA ? (
-        <form class="acquisto" id="form-acquisto" onsubmit="return false">
-          <div class="opt">
-            <label>
-              <input type="checkbox" id="iniziali-checkbox" />
-              <span>
-                <span class="t">Aggiungi le tue iniziali · +{formatEuro(INIZIALI_CENTESIMI)}</span>
-                <span class="n">{avvisoIniziali}</span>
-              </span>
-            </label>
+      <!--
+        Il riquadro delle iniziali sta fuori dal form, come le pastiglie:
+        spiega cosa si può chiedere (e l'avviso sul reso) anche quando la
+        vendita non è ancora attiva, com'è nell'anteprima. La casella da
+        spuntare compare però solo a vendita attiva: un interruttore che
+        non fa niente sarebbe un comando finto.
+      -->
+      <div class="opt">
+        <label class:list={['opt__label', { 'opt__label--statico': !VENDITA_ATTIVA }]}>
+          {VENDITA_ATTIVA && <input type="checkbox" id="iniziali-checkbox" />}
+          <span>
+            <span class="t">Aggiungi le tue iniziali · +{formatEuro(INIZIALI_CENTESIMI)}</span>
+            <span class="n">{avvisoIniziali}</span>
+          </span>
+        </label>
+        {VENDITA_ATTIVA && (
+          <>
             <label for="iniziali" class="sr-only">Iniziali</label>
             <input type="text" id="iniziali" name="iniziali" maxlength="3" autocomplete="off" placeholder="es. G.B." class="opt__iniziali-input" hidden />
-          </div>
+          </>
+        )}
+      </div>
 
+      {VENDITA_ATTIVA ? (
+        <form class="acquisto" id="form-acquisto" onsubmit="return false">
           <div class="acquisto__riga">
             <label for="quantita">Quantità</label>
             <input type="number" id="quantita" name="quantita" value="1" min="1" />
@@ -320,7 +331,8 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
   .buy.soon { background: transparent; color: var(--ink); margin-top: 22px; }
 
   .opt { margin-top: 22px; padding: 14px; border: 1px solid var(--line); background: var(--card); }
-  .opt label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .opt__label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .opt__label--statico { cursor: default; }
   .opt input[type="checkbox"] { margin: 3px 0 0; width: 17px; height: 17px; accent-color: var(--ink); flex: 0 0 auto; }
   .opt .t { font-family: var(--f-d); font-size: 14px; font-weight: 600; }
   .opt .n { display: block; margin-top: 5px; font-size: 14.5px; color: var(--ink2); line-height: 1.45; }

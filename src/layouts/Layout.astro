@@ -129,6 +129,10 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       --bordeaux: #6E2230;
       --marrone: #7A5230;
       --ok: #2C5B43;
+      /* --err non è nella tavolozza dell'anteprima: serve perché il messaggio
+         di errore del checkout aveva un rosso scritto dentro il componente,
+         e i colori devono stare tutti qui. Stessa famiglia calda del resto. */
+      --err: #8C2F22;
       --f-d: "Archivo", system-ui, sans-serif;
       --f-b: "Newsreader", Georgia, serif;
     }
@@ -146,6 +150,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
         --bordeaux: #C97F8B;
         --marrone: #C09466;
         --ok: #7FB79C;
+        --err: #E08C7D;
       }
     }
     :root[data-theme="dark"] {
@@ -161,6 +166,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       --bordeaux: #C97F8B;
       --marrone: #C09466;
       --ok: #7FB79C;
+      --err: #E08C7D;
     }
 
     * { box-sizing: border-box; }
@@ -202,6 +208,20 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
 
     .contenitore { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
     .sezione { padding: 48px 0; }
+
+    /* ---- pagine di solo testo: legali, chi siamo, contatti ---- */
+    .pagina-testo { max-width: 62ch; padding: 44px 0; }
+    .pagina-testo h1 { font-size: clamp(28px, 4vw, 40px); max-width: none; margin-bottom: 22px; }
+    .pagina-testo h2 { font-size: clamp(19px, 2.4vw, 23px); margin: 36px 0 10px; }
+    .pagina-testo p { margin: 0 0 1em; }
+    .pagina-testo li { margin-bottom: 6px; }
+    .pagina-testo a { color: var(--ink); }
+
+    /* Riquadro in rilievo dentro una pagina di testo (modulo di recesso,
+       nota fiscale): stesso trattamento del riquadro "Come si cura". */
+    .riquadro { background: var(--card); border: 1px solid var(--line); padding: 22px; margin-top: 30px; }
+    .riquadro h2 { margin-top: 0; }
+    .riquadro :last-child { margin-bottom: 0; }
 
     .sr-only {
       position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;

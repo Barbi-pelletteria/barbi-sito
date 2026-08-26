@@ -6,6 +6,15 @@ export const immaginiProdotto = {
   completo: { blu: null, bordeaux: null, marrone: null },
 };
 
+// Colore mostrato per primo su ogni scheda. È una scelta di vetrina, non di
+// magazzino: serve solo perché le due schede affiancate non partano dallo
+// stesso colore (come nell'anteprima approvata). Se il colore indicato è
+// esaurito, il componente ripiega sul primo disponibile.
+export const coloreVetrina = {
+  sottile: 'blu',
+  completo: 'marrone',
+};
+
 export function immagineProdotto(slug, colore) {
   return immaginiProdotto[slug]?.[colore] || null;
 }

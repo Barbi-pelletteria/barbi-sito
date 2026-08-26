@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
 <Layout title="Privacy e cookie">
-  <section class="sezione contenitore pagina-legale">
+  <section class="contenitore pagina-testo">
     <h1>Privacy e cookie</h1>
 
     <p>Il titolare del trattamento è Barbi Stefano — impresa individuale, Via Nazionale delle Puglie 98, 80026 Casoria (NA). Per qualsiasi richiesta sui tuoi dati puoi scrivere a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>.</p>
@@ -30,8 +30,3 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     window.location.reload();
   });
 </script>
-
-<style>
-  .pagina-legale { max-width: 720px; }
-  .pagina-legale h2 { margin-top: 2rem; }
-</style>

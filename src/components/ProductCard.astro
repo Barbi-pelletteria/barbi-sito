@@ -1,6 +1,6 @@
 ---
 import { formatEuro } from '../data/prodotti.js';
-import { immagineProdotto } from '../data/immagini.js';
+import { immagineProdotto, coloreVetrina } from '../data/immagini.js';
 import FotoSegnaposto from './FotoSegnaposto.astro';
 
 const { prodotto } = Astro.props;
@@ -8,7 +8,11 @@ const stockTotale = prodotto.colori.reduce((t, c) => t + c.stock, 0);
 const esaurito = stockTotale === 0;
 const url = `/prodotto/${prodotto.slug}/`;
 
-const coloreAttivo = prodotto.colori.find((c) => c.stock > 0) || prodotto.colori[0];
+// Colore di vetrina se è ancora disponibile, altrimenti il primo che c'è.
+const preferito = prodotto.colori.find(
+  (c) => c.slug === coloreVetrina[prodotto.slug] && c.stock > 0
+);
+const coloreAttivo = preferito || prodotto.colori.find((c) => c.stock > 0) || prodotto.colori[0];
 const fotoAttiva = immagineProdotto(prodotto.slug, coloreAttivo.slug);
 const fotoId = `foto-${prodotto.slug}`;
 

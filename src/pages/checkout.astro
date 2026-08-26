@@ -2,18 +2,18 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Checkout">
-  <section class="sezione contenitore checkout">
+  <section class="contenitore pagina-checkout">
     <h1>Checkout</h1>
-    <p class="segnaposto">Ambiente di test — nessun pagamento reale. Usa la carta Stripe di test 4242 4242 4242 4242, qualunque data futura, qualunque CVC.</p>
+    <p class="nota-test">Ambiente di test — nessun pagamento reale. Usa la carta Stripe di test 4242 4242 4242 4242, qualunque data futura, qualunque CVC.</p>
 
     <div id="checkout-vuoto" hidden>
-      <p>Il carrello è vuoto.</p>
+      <p class="checkout__vuoto-testo">Il carrello è vuoto.</p>
       <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
     </div>
 
     <div id="checkout-contenuto" hidden>
       <ul id="riepilogo-righe" class="riepilogo-righe"></ul>
-      <p class="checkout__totale"><strong>Totale:</strong> <span id="checkout-totale"></span></p>
+      <p class="checkout__totale">Totale <span id="checkout-totale"></span></p>
       <button class="pulsante" id="btn-paga">Procedi al pagamento</button>
       <p id="errore-checkout" class="errore-checkout" hidden></p>
     </div>
@@ -119,10 +119,36 @@ import Layout from '../layouts/Layout.astro';
   });
 </script>
 
-<style>
-  .checkout { max-width: 640px; }
-  .riepilogo-righe { list-style: none; padding: 0; margin: 1.5rem 0; }
-  .riepilogo-righe li { padding: 0.6rem 0; border-bottom: 1px solid var(--bordo); }
-  .checkout__totale { font-size: 1.1rem; margin: 1rem 0 1.5rem; }
-  .errore-checkout { color: #a3342a; margin-top: 1rem; }
+<!--
+  is:global: le voci del riepilogo nascono da createElement nello script qui
+  sopra e gli stili con ambito di Astro non le raggiungono. Selettori sotto
+  classi presenti solo in questa pagina.
+-->
+<style is:global>
+  .pagina-checkout { max-width: 62ch; padding: 44px 0; }
+  .pagina-checkout h1 { font-size: clamp(28px, 4vw, 40px); max-width: none; }
+
+  .nota-test {
+    font-family: var(--f-d); font-size: 13.5px; color: var(--ink3);
+    background: var(--sunk); border-left: 2px solid var(--line2);
+    padding: 12px 14px; margin: 0 0 26px;
+  }
+  .checkout__vuoto-testo { color: var(--ink2); margin: 0 0 20px; }
+
+  .riepilogo-righe { list-style: none; padding: 0; margin: 0 0 26px; }
+  .riepilogo-righe li {
+    padding: 14px 0; border-bottom: 1px solid var(--line);
+    font-size: 15px; color: var(--ink2); font-variant-numeric: tabular-nums;
+  }
+
+  .checkout__totale {
+    margin: 0 0 22px; padding-top: 6px;
+    font-family: var(--f-d); font-weight: 700; font-size: 22px;
+    letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+  }
+
+  .errore-checkout {
+    margin-top: 18px; font-size: 14.5px; color: var(--err);
+    border-left: 2px solid var(--err); padding: 10px 14px; background: var(--sunk);
+  }
 </style>
