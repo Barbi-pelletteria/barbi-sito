@@ -1,0 +1,62 @@
+---
+// Confronto reale dello spessore fra i modelli, in scala esatta fra loro.
+// Il numero viene letto dalla voce "Spessore" già presente in specifiche —
+// non è reinventato qui, solo disegnato.
+const { prodotti, class: className = '' } = Astro.props;
+
+function spessoreCm(prodotto) {
+  const riga = prodotto.specifiche.find(([voce]) => voce === 'Spessore');
+  const match = riga ? riga[1].match(/([\d,]+)/) : null;
+  return match ? parseFloat(match[1].replace(',', '.')) : 0;
+}
+
+const righe = prodotti.map((p) => ({
+  nome: p.nome,
+  valore: spessoreCm(p),
+  etichetta: p.specifiche.find(([voce]) => voce === 'Spessore')?.[1] || '',
+}));
+const max = Math.max(...righe.map((r) => r.valore), 0.01);
+
+const LABEL_W = 92;
+const BAR_X = 100;
+const BAR_W = 230;
+const BAR_H = 14;
+const VALUE_X = BAR_X + BAR_W + 14;
+const ROW_H = 34;
+const PAD = 12;
+const W = VALUE_X + 70;
+const H = PAD * 2 + ROW_H * righe.length - (ROW_H - BAR_H);
+---
+<div class:list={['confronto-spessore', className]}>
+  <p class="kicker">Spessore</p>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Spessore a confronto: ${righe.map((r) => r.nome + ' ' + r.etichetta).join(', ')}`}>
+    {righe.map((r, i) => {
+      const y = PAD + i * ROW_H;
+      const cy = y + BAR_H / 2;
+      const w = (r.valore / max) * BAR_W;
+      return (
+        <g>
+          <text x="0" y={cy} dominant-baseline="middle" class="ce-nome">{r.nome}</text>
+          <rect x={BAR_X} y={y} width={BAR_W} height={BAR_H} class="ce-pista" />
+          <rect x={BAR_X} y={y} width={w} height={BAR_H} class="ce-barra" />
+          <text x={VALUE_X} y={cy} dominant-baseline="middle" class="ce-valore">{r.etichetta}</text>
+        </g>
+      );
+    })}
+  </svg>
+</div>
+
+<style>
+  .confronto-spessore { max-width: 480px; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .ce-nome {
+    font-family: var(--f-d); font-size: 13px; font-weight: 600;
+    letter-spacing: -.01em; fill: var(--ink);
+  }
+  .ce-pista { fill: var(--sunk); }
+  .ce-barra { fill: var(--ink); }
+  .ce-valore {
+    font-family: var(--f-d); font-size: 13px; font-weight: 500;
+    fill: var(--ink2); font-variant-numeric: tabular-nums;
+  }
+</style>

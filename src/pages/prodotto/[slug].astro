@@ -1,99 +1,366 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { prodotti, PLACEHOLDER } from '../../data/prodotti.js';
+import FotoSegnaposto from '../../components/FotoSegnaposto.astro';
+import ConfrontoSpessore from '../../components/ConfrontoSpessore.astro';
+import { immagineProdotto } from '../../data/immagini.js';
+import {
+  prodotti,
+  curaProdotto,
+  avvisoIniziali,
+  formatEuro,
+  VENDITA_ATTIVA,
+  EMAIL_CONTATTO,
+  INIZIALI_CENTESIMI,
+} from '../../data/prodotti.js';
 
 export function getStaticPaths() {
   return prodotti.map((p) => ({ params: { slug: p.slug }, props: { prodotto: p } }));
 }
 
 const { prodotto } = Astro.props;
----
-<Layout title={prodotto.nome === PLACEHOLDER ? 'Prodotto' : prodotto.nome}>
-  <section class="sezione contenitore pagina-prodotto">
-    <div class="pagina-prodotto__immagine">
-      <img src={prodotto.immagine} alt="Immagine prodotto da caricare" />
-    </div>
-    <div class="pagina-prodotto__dettagli">
-      <h1 class="segnaposto">{prodotto.nome}</h1>
-      <p class="pagina-prodotto__prezzo segnaposto">{PLACEHOLDER}</p>
-      <p class="segnaposto">{prodotto.descrizione}</p>
+const stockTotale = prodotto.colori.reduce((t, c) => t + c.stock, 0);
+const esauritoTutto = stockTotale === 0;
+const primoDisponibile = prodotto.colori.find((c) => c.stock > 0)?.slug || '';
+const coloreIniziale = prodotto.colori.find((c) => c.slug === primoDisponibile) || prodotto.colori[0];
+const fotoAttiva = immagineProdotto(prodotto.slug, coloreIniziale.slug);
 
-      <div class="pagina-prodotto__azione">
-        <label for="quantita">Quantità</label>
-        <input type="number" id="quantita" name="quantita" value="1" min="1" />
-        <button class="pulsante" id="btn-aggiungi" data-slug={prodotto.slug}>
-          Aggiungi al carrello
-        </button>
+// Dati minimi che servono allo script lato client (stock per colore, prezzi).
+const datiClient = {
+  slug: prodotto.slug,
+  nome: prodotto.nome,
+  prezzoCentesimi: prodotto.prezzoCentesimi,
+  inizialiCentesimi: INIZIALI_CENTESIMI,
+  colori: prodotto.colori.map((c) => ({ slug: c.slug, nome: c.nome, stock: c.stock })),
+};
+
+const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent(
+  'Disponibilità portafoglio ' + prodotto.nome
+)}`;
+---
+<Layout title={prodotto.nome}>
+  <p class="crumb contenitore"><a href="/portafogli/">Portafogli</a> → {prodotto.nome}</p>
+
+  <section class="contenitore pdp">
+    <div>
+      {fotoAttiva ? (
+        <img src={fotoAttiva} alt={`${prodotto.nome}, ${coloreIniziale.nome.toLowerCase()}`} />
+      ) : (
+        <FotoSegnaposto id="foto-pdp" etichetta={`Foto — ${prodotto.nome}, ${coloreIniziale.nome.toLowerCase()}`} />
+      )}
+    </div>
+
+    <div>
+      <p class="kicker" style="margin-bottom:8px">{prodotto.occhiello}</p>
+      <h1>{prodotto.nome}</h1>
+      <div class="p-price" style="font-size:26px;margin-top:12px">
+        {formatEuro(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em>
       </div>
-      <p id="conferma-aggiunta" class="conferma-aggiunta" hidden>Aggiunto al carrello.</p>
+
+      <!--
+        Le pastiglie colore sono fuori dal form di acquisto (che esiste solo
+        quando VENDITA_ATTIVA è vero) così restano visibili — come anteprima
+        di colore e disponibilità — anche quando il pulsante è "Disponibile
+        a breve". Nessun dato di magazzino viene ricalcolato qui: sono gli
+        stessi prodotto.colori già usati sotto.
+      -->
+      <fieldset class="acquisto__colori">
+        <legend class="sr-only">Colore</legend>
+        <div class="swatches" style="margin-top:20px">
+          {prodotto.colori.map((c) => (
+            <label class="sw-wrap">
+              <input
+                type="radio"
+                name="colore"
+                value={c.slug}
+                data-stock={c.stock}
+                disabled={c.stock === 0}
+                checked={c.slug === primoDisponibile}
+              />
+              <span class="sw" data-c={c.slug} title={c.nome}></span>
+            </label>
+          ))}
+          <span class="sw-label" id="stock-label"></span>
+        </div>
+      </fieldset>
+
+      {VENDITA_ATTIVA ? (
+        <form class="acquisto" id="form-acquisto" onsubmit="return false">
+          <div class="opt">
+            <label>
+              <input type="checkbox" id="iniziali-checkbox" />
+              <span>
+                <span class="t">Aggiungi le tue iniziali · +{formatEuro(INIZIALI_CENTESIMI)}</span>
+                <span class="n">{avvisoIniziali}</span>
+              </span>
+            </label>
+            <label for="iniziali" class="sr-only">Iniziali</label>
+            <input type="text" id="iniziali" name="iniziali" maxlength="3" autocomplete="off" placeholder="es. G.B." class="opt__iniziali-input" hidden />
+          </div>
+
+          <div class="acquisto__riga">
+            <label for="quantita">Quantità</label>
+            <input type="number" id="quantita" name="quantita" value="1" min="1" />
+            <button class="buy" type="button" id="btn-aggiungi">Aggiungi al carrello</button>
+          </div>
+
+          <p id="disponibilita" class="acquisto__disponibilita" hidden></p>
+          <p id="conferma-aggiunta" class="conferma-aggiunta" hidden>Aggiunto al carrello.</p>
+        </form>
+      ) : (
+        <div class="non-in-vendita">
+          <p class="buy soon" aria-disabled="true">Disponibile a breve</p>
+          <p class="non-in-vendita__nota">
+            La vendita online non è ancora attiva. Per informazioni o per prenotare un pezzo,
+            <a href={mailtoDisponibile}>scrivi a {EMAIL_CONTATTO}</a>.
+          </p>
+        </div>
+      )}
+
+      {esauritoTutto && VENDITA_ATTIVA && (
+        <p class="acquisto__disponibilita">Al momento tutti i colori sono esauriti.</p>
+      )}
+
+      <ConfrontoSpessore prodotti={prodotti} class="confronto-pdp" />
+
+      <table>
+        {prodotto.specifiche.map(([voce, valore]) => (
+          <tr><th>{voce}</th><td>{valore}</td></tr>
+        ))}
+      </table>
     </div>
   </section>
+
+  <div class="contenitore pdp-extra">
+    <div class="descrizione">
+      {prodotto.descrizione.map((par) => <p>{par}</p>)}
+    </div>
+
+    <div class="care">
+      <h3>{curaProdotto.titolo}</h3>
+      <p>{curaProdotto.intro}</p>
+      <ul>
+        {curaProdotto.punti.map((p) => <li>{p}</li>)}
+      </ul>
+      <p style="margin-top:10px;margin-bottom:0">{curaProdotto.chiusura}</p>
+    </div>
+  </div>
 </Layout>
 
-<script define:vars={{ slug: prodotto.slug, nome: prodotto.nome }}>
-  // GA4 — view_item: si accende all'apertura della pagina prodotto (B4).
-  if (typeof window.gtag === 'function') {
-    window.gtag('event', 'view_item', {
-      currency: 'EUR',
-      items: [{ item_id: slug, item_name: nome }],
-    });
-  }
-</script>
+<script type="application/json" id="prodotto-dati" is:inline set:html={JSON.stringify(datiClient)}></script>
 
 <script>
-  import { addToCart } from '../../scripts/cart.js';
+  import { addToCart, getQuantitaColore } from '../../scripts/cart.js';
   import { trackEvent } from '../../scripts/analytics.js';
 
-  const btn = document.getElementById('btn-aggiungi');
-  const input = document.getElementById('quantita');
-  const conferma = document.getElementById('conferma-aggiunta');
+  const nodo = document.getElementById('prodotto-dati');
+  const prodotto = nodo ? JSON.parse(nodo.textContent) : null;
 
-  btn?.addEventListener('click', () => {
-    const slug = btn.getAttribute('data-slug');
-    const quantita = Math.max(1, parseInt(input.value, 10) || 1);
-    addToCart(slug, quantita);
-
-    // GA4 — add_to_cart (B4).
-    trackEvent('add_to_cart', {
+  if (prodotto) {
+    // GA4 — view_item (parte solo se il consenso ai cookie è stato dato).
+    trackEvent('view_item', {
       currency: 'EUR',
-      items: [{ item_id: slug, quantity: quantita }],
+      value: prodotto.prezzoCentesimi / 100,
+      items: [{ item_id: prodotto.slug, item_name: prodotto.nome }],
     });
 
-    if (conferma) {
-      conferma.hidden = false;
-      setTimeout(() => { conferma.hidden = true; }, 2500);
+    const form = document.getElementById('form-acquisto');
+    if (form) {
+      const btn = document.getElementById('btn-aggiungi');
+      const inputQ = document.getElementById('quantita');
+      const inputIniziali = document.getElementById('iniziali');
+      const disponibilita = document.getElementById('disponibilita');
+      const conferma = document.getElementById('conferma-aggiunta');
+
+      function coloreSelezionato() {
+        // Le pastiglie colore non sono più dentro <form> (vedi markup: stanno
+        // fuori così restano visibili anche a vendita non attiva), quindi la
+        // ricerca è sul documento e non più su "form". Il risultato è
+        // identico: c'è un solo selettore colore per pagina.
+        return document.querySelector('input[name="colore"]:checked');
+      }
+
+      function stockColore(slug) {
+        const c = prodotto.colori.find((x) => x.slug === slug);
+        return c ? c.stock : 0;
+      }
+
+      // Pezzi ancora aggiungibili per il colore scelto (stock meno quelli già nel carrello).
+      function residuo(slug) {
+        return Math.max(0, stockColore(slug) - getQuantitaColore(prodotto.slug, slug));
+      }
+
+      function aggiorna() {
+        const scelto = coloreSelezionato();
+        if (!scelto) {
+          btn.disabled = true;
+          return;
+        }
+        const rimasti = residuo(scelto.value);
+        inputQ.max = String(Math.max(1, rimasti));
+        if (parseInt(inputQ.value, 10) > rimasti) inputQ.value = String(Math.max(1, rimasti));
+        btn.disabled = rimasti === 0;
+        if (rimasti === 0) {
+          disponibilita.textContent = 'Questo colore è esaurito.';
+          disponibilita.hidden = false;
+        } else if (rimasti <= 3) {
+          disponibilita.textContent = `Disponibili ${rimasti} pezzi in questo colore.`;
+          disponibilita.hidden = false;
+        } else {
+          disponibilita.hidden = true;
+        }
+      }
+
+      document.querySelectorAll('input[name="colore"]').forEach((el) => {
+        el.addEventListener('change', aggiorna);
+      });
+      inputQ.addEventListener('input', aggiorna);
+      aggiorna();
+
+      btn.addEventListener('click', () => {
+        const scelto = coloreSelezionato();
+        if (!scelto) return;
+        const colore = scelto.value;
+        const rimasti = residuo(colore);
+        let quantita = Math.max(1, parseInt(inputQ.value, 10) || 1);
+
+        if (rimasti === 0) {
+          disponibilita.textContent = 'Questo colore è esaurito.';
+          disponibilita.hidden = false;
+          return;
+        }
+        if (quantita > rimasti) {
+          quantita = rimasti;
+          inputQ.value = String(rimasti);
+          disponibilita.textContent = `Puoi aggiungerne al massimo ${rimasti} in questo colore.`;
+          disponibilita.hidden = false;
+        }
+
+        const iniziali = (inputIniziali.value || '').trim().toUpperCase();
+        addToCart({ slug: prodotto.slug, colore, iniziali, quantita });
+
+        trackEvent('add_to_cart', {
+          currency: 'EUR',
+          items: [{ item_id: prodotto.slug, quantity: quantita }],
+        });
+
+        conferma.hidden = false;
+        setTimeout(() => { conferma.hidden = true; }, 2500);
+        aggiorna();
+      });
+
+      // Mostra il campo iniziali solo se la casella è spuntata (solo aspetto:
+      // il valore che finisce nel carrello è comunque quello dell'input,
+      // invariato).
+      const checkboxIniziali = document.getElementById('iniziali-checkbox');
+      checkboxIniziali?.addEventListener('change', () => {
+        inputIniziali.hidden = !checkboxIniziali.checked;
+        if (!checkboxIniziali.checked) inputIniziali.value = '';
+      });
     }
-  });
+
+    // Sotto qui: solo la vista (etichetta scorta accanto alle pastiglie e
+    // testo del segnaposto foto). Non tocca stock, carrello o VENDITA_ATTIVA:
+    // legge solo i dati già presenti in "prodotto" per mostrarli.
+    const stockLabel = document.getElementById('stock-label');
+    const fotoEtichetta = document.querySelector('#foto-pdp b');
+
+    function aggiornaVista() {
+      const scelto = document.querySelector('input[name="colore"]:checked');
+      if (!scelto) return;
+      const c = prodotto.colori.find((x) => x.slug === scelto.value);
+      if (!c) return;
+      if (stockLabel) {
+        stockLabel.textContent = c.stock > 0 ? `${c.nome} · ${c.stock} disponibili` : `${c.nome} · esaurito`;
+      }
+      if (fotoEtichetta) {
+        fotoEtichetta.textContent = `Foto — ${prodotto.nome}, ${c.nome.toLowerCase()}`;
+      }
+    }
+    document.querySelectorAll('input[name="colore"]').forEach((el) => {
+      el.addEventListener('change', aggiornaVista);
+    });
+    aggiornaVista();
+  }
 </script>
 
 <style>
-  .pagina-prodotto {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2.5rem;
-    align-items: start;
+  .crumb { font-family: var(--f-d); font-size: 12px; color: var(--ink3); letter-spacing: .02em; padding-top: 26px; display: block; }
+  .crumb a { color: var(--ink3); text-decoration: none; }
+  .crumb a:hover { text-decoration: underline; }
+
+  .pdp { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; padding: 24px 0 44px; align-items: start; }
+  @media (max-width: 760px) { .pdp { grid-template-columns: 1fr; gap: 26px; padding: 18px 0 30px; } }
+
+  .pdp h1 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -.025em; margin-bottom: 4px; max-width: none; }
+
+  .p-price { font-family: var(--f-d); font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .p-price em { font-style: normal; font-size: 12.5px; font-weight: 500; color: var(--ink3); margin-left: 8px; letter-spacing: .02em; }
+
+  .acquisto__colori { border: none; padding: 0; margin: 0; }
+
+  .sw-wrap { position: relative; display: inline-block; line-height: 0; }
+  .sw-wrap input {
+    position: absolute; inset: 0; width: 24px; height: 24px; margin: 0;
+    opacity: 0; cursor: pointer;
   }
-  @media (max-width: 720px) {
-    .pagina-prodotto { grid-template-columns: 1fr; }
+  .sw-wrap input:disabled { cursor: not-allowed; }
+  .sw-wrap input:checked + .sw::after {
+    content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 1.5px solid var(--ink);
   }
-  .pagina-prodotto__immagine img {
-    width: 100%;
-    border-radius: 6px;
-    border: 1px solid var(--bordo);
+  .sw-wrap input:disabled + .sw { opacity: .3; }
+  .sw-wrap input:focus-visible + .sw { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  .buy {
+    display: block; width: 100%; margin-top: 4px;
+    font-family: var(--f-d); font-size: 15px; font-weight: 600; letter-spacing: .01em;
+    background: var(--ink); color: var(--paper);
+    border: 1px solid var(--ink); padding: 15px; cursor: pointer;
   }
-  .pagina-prodotto__prezzo { font-size: 1.3rem; margin: 0.5rem 0 1rem; }
-  .pagina-prodotto__azione {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+  .buy:hover { opacity: .88; }
+  .buy.soon { background: transparent; color: var(--ink); margin-top: 22px; }
+
+  .opt { margin-top: 22px; padding: 14px; border: 1px solid var(--line); background: var(--card); }
+  .opt label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .opt input[type="checkbox"] { margin: 3px 0 0; width: 17px; height: 17px; accent-color: var(--ink); flex: 0 0 auto; }
+  .opt .t { font-family: var(--f-d); font-size: 14px; font-weight: 600; }
+  .opt .n { display: block; margin-top: 5px; font-size: 14.5px; color: var(--ink2); line-height: 1.45; }
+  .opt__iniziali-input {
+    margin-top: 12px; width: 8rem; padding: 9px 10px; border: 1px solid var(--line);
+    background: var(--paper); color: var(--ink); font-size: 15px; text-transform: uppercase;
   }
-  .pagina-prodotto__azione input {
-    width: 4.5rem;
-    padding: 0.7rem;
-    border: 1px solid var(--bordo);
-    border-radius: 4px;
-    font-size: 1rem;
+
+  .acquisto__riga { display: flex; align-items: center; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+  .acquisto__riga label { font-family: var(--f-d); font-size: 13px; font-weight: 600; color: var(--ink2); }
+  .acquisto__riga input {
+    width: 4.5rem; padding: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 15px;
   }
-  .conferma-aggiunta { color: var(--cuoio); font-weight: 600; margin-top: 0.75rem; }
+  .acquisto__riga .buy { width: auto; flex: 1 1 auto; margin-top: 0; }
+
+  .acquisto__disponibilita { margin-top: 12px; font-size: 14.5px; color: var(--ink2); }
+  .conferma-aggiunta { margin-top: 12px; font-size: 14.5px; color: var(--ok); font-weight: 600; }
+
+  .non-in-vendita__nota { margin: 14px 0 0; font-size: 15px; color: var(--ink2); }
+
+  .confronto-pdp { margin-top: 30px; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 26px; font-size: 15px; }
+  th, td { text-align: left; padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-family: var(--f-d); font-size: 11px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink3); width: 11rem; padding-right: 16px;
+  }
+  td { font-variant-numeric: tabular-nums; color: var(--ink2); }
+  @media (max-width: 520px) {
+    th { width: auto; display: block; border: 0; padding-bottom: 1px; }
+    td { display: block; padding-top: 0; }
+  }
+
+  .pdp-extra { max-width: 62ch; padding-bottom: 40px; }
+  .descrizione p { margin: 0 0 1em; }
+
+  .care { background: var(--card); border: 1px solid var(--line); padding: 22px; margin-top: 30px; }
+  .care h3 { margin: 0 0 10px; }
+  .care p { margin: 0 0 10px; font-size: 15.5px; color: var(--ink2); line-height: 1.55; }
+  .care ul { margin: 0; padding-left: 19px; font-size: 15.5px; color: var(--ink2); line-height: 1.55; }
+  .care li { margin-bottom: 5px; }
 </style>

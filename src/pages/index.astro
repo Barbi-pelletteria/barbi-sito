@@ -1,61 +1,95 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { categorie, prodotti } from '../data/prodotti.js';
+import ConfrontoSpessore from '../components/ConfrontoSpessore.astro';
+import FotoSegnaposto from '../components/FotoSegnaposto.astro';
+import { prodotti } from '../data/prodotti.js';
 ---
 <Layout title="Home">
-  <section class="sezione contenitore hero">
-    <h1>Pelletteria artigianale, fatta a mano dal 1992</h1>
-    <p class="hero__testo">
-      Portafogli, borse e portachiavi lavorati a mano nel laboratorio di Stefano Barbi.
+  <section class="hero contenitore">
+    <h1>Portafogli in pelle conciata al vegetale, fatti a mano</h1>
+    <p class="sub">
+      Stefano Barbi lavora la pelle dal 1992. Due modelli, tre colori,
+      spedizione gratuita in tutta Italia.
     </p>
-    <a class="pulsante" href="/portafogli/">Vedi i portafogli</a>
+    <div class="strip">
+      <div>Spedizione gratuita in tutta Italia</div>
+      <div>Consegna in 1-3 giorni</div>
+      <div>14 giorni per cambiare idea</div>
+      <div>Garanzia legale 2 anni</div>
+    </div>
+  </section>
+
+  <section class="sezione contenitore" style="padding-top:8px">
+    <div class="grid2">
+      {prodotti.map((p) => <ProductCard prodotto={p} />)}
+    </div>
+    <ConfrontoSpessore prodotti={prodotti} class="confronto-home" />
   </section>
 
   <section class="sezione contenitore">
-    <h2>Categorie</h2>
-    <div class="griglia-categorie">
-      {categorie.map((cat) => (
-        <a class="scheda-categoria" href={`/${cat.slug}/`}>{cat.nome}</a>
-      ))}
+    <p class="kicker">Perché sono diversi</p>
+    <div class="three">
+      <div>
+        <h3>Concia al vegetale</h3>
+        <p>La pelle è conciata e tinta con metodi naturali, senza protezioni chimiche. È un materiale vivo: si segna, cambia tono e con l’uso prende la forma di chi lo porta.</p>
+      </div>
+      <div>
+        <h3>Fatti uno per volta</h3>
+        <p>Ogni pezzo esce dal laboratorio di Stefano, in Campania. I bordi sono tinti a mano, uno alla volta.</p>
+      </div>
+      <div>
+        <h3>Le tue iniziali, +10 €</h3>
+        <p>Impresse sulla pelle in cinque minuti di lavoro. Non allungano di un giorno i tempi di consegna.</p>
+      </div>
     </div>
   </section>
 
   <section class="sezione contenitore">
-    <h2>In evidenza</h2>
-    <div class="griglia-prodotti">
-      {prodotti.map((p) => <ProductCard prodotto={p} />)}
+    <div class="maker">
+      <FotoSegnaposto etichetta="Foto — Stefano al banco" ratio="1 / 1" />
+      <div>
+        <p class="kicker" style="margin-top:0">Chi le fa</p>
+        <h2 style="margin-bottom:16px">Stefano</h2>
+        <p>Stefano Barbi lavora la pelle dal 1992. Per anni l’ha fatto per marchi più conosciuti del suo; dal 2023 lavora nel proprio laboratorio, in Campania, e vende quello che produce nelle fiere di tutta Italia.</p>
+        <p>Questo sito serve a comprare gli stessi portafogli senza aspettare che passi dalla vostra città.</p>
+      </div>
     </div>
   </section>
 </Layout>
 
 <style>
-  .hero { text-align: center; padding-top: 4.5rem; padding-bottom: 4rem; }
-  .hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 720px; margin-left: auto; margin-right: auto; }
-  .hero__testo { max-width: 520px; margin: 0 auto 1.75rem; color: var(--testo-tenue); font-size: 1.05rem; }
+  .hero { padding: 56px 0 34px; }
+  .sub { margin: 0; font-size: clamp(17px, 2.2vw, 20px); color: var(--ink2); max-width: 44ch; line-height: 1.5; }
+  .strip {
+    display: flex; flex-wrap: wrap; gap: 0; margin-top: 30px;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .strip div {
+    flex: 1 1 180px; padding: 13px 16px 13px 0;
+    font-family: var(--f-d); font-size: 12.5px; font-weight: 500;
+    color: var(--ink2); letter-spacing: .01em;
+  }
+  .strip div + div { padding-left: 16px; border-left: 1px solid var(--line); }
+  @media (max-width: 640px) {
+    .strip div { flex: 1 1 100%; padding: 9px 0; border-left: 0 !important; }
+    .strip div + div { border-top: 1px solid var(--line); padding-left: 0; }
+  }
 
-  .griglia-categorie {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-  }
-  .scheda-categoria {
-    display: block;
-    text-align: center;
-    padding: 1.5rem 1rem;
-    border: 1px solid var(--bordo);
-    border-radius: 6px;
-    text-decoration: none;
-    color: var(--testo);
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 1.15rem;
-    background: #fff;
-  }
-  .scheda-categoria:hover { border-color: var(--cuoio); color: var(--cuoio); }
+  .confronto-home { margin-top: 40px; }
 
-  .griglia-prodotti {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1.5rem;
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--line2); }
+  .three > div { padding: 26px 22px 26px 0; }
+  .three > div + div { padding-left: 22px; border-left: 1px solid var(--line); }
+  .three p { margin: 0; font-size: 16px; color: var(--ink2); line-height: 1.55; }
+  @media (max-width: 760px) {
+    .three { grid-template-columns: 1fr; }
+    .three > div { padding: 20px 0; }
+    .three > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
   }
+
+  .maker { display: grid; grid-template-columns: 5fr 7fr; gap: 34px; align-items: start; }
+  @media (max-width: 760px) { .maker { grid-template-columns: 1fr; } }
+  .maker p { font-size: 18px; line-height: 1.62; margin: 0 0 14px; color: var(--ink2); }
+  .maker p:first-of-type { color: var(--ink); }
 </style>

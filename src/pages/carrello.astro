@@ -16,6 +16,7 @@ import Layout from '../layouts/Layout.astro';
           <th>Prodotto</th>
           <th>Prezzo</th>
           <th>Quantità</th>
+          <th>Subtotale</th>
           <th></th>
         </tr>
       </thead>
@@ -23,15 +24,30 @@ import Layout from '../layouts/Layout.astro';
     </table>
 
     <div id="riepilogo-carrello" class="riepilogo-carrello" hidden>
-      <p><strong>Totale:</strong> <span class="segnaposto">[DA COMPLETARE — dati mancanti, vedi blocco 4 DOMANDE_APERTURA.md]</span></p>
+      <p><strong>Totale:</strong> <span id="totale-carrello"></span></p>
       <a class="pulsante" id="btn-vai-checkout" href="/checkout/">Vai al pagamento</a>
     </div>
   </section>
 </Layout>
 
 <script>
-  import { getCart, updateQuantita, removeFromCart } from '../scripts/cart.js';
-  import { getProdottoBySlug, PLACEHOLDER } from '../data/prodotti.js';
+  import { getCart, updateQuantita, removeFromCart, lineKey } from '../scripts/cart.js';
+  import { getProdottoBySlug, getColore, formatEuro, INIZIALI_CENTESIMI } from '../data/prodotti.js';
+
+  function prezzoRiga(prodotto, riga) {
+    return prodotto.prezzoCentesimi + (riga.iniziali ? INIZIALI_CENTESIMI : 0);
+  }
+
+  // Massimo aggiungibile per una riga: stock del colore meno i pezzi di altre
+  // righe con lo stesso modello+colore (es. stesso colore con e senza iniziali).
+  function maxRiga(cart, prodotto, riga) {
+    const colore = getColore(prodotto, riga.colore);
+    const stock = colore ? colore.stock : 0;
+    const altri = cart
+      .filter((r) => r.slug === riga.slug && r.colore === riga.colore && r !== riga)
+      .reduce((t, r) => t + r.quantita, 0);
+    return Math.max(0, stock - altri);
+  }
 
   function render() {
     const cart = getCart();
@@ -39,6 +55,7 @@ import Layout from '../layouts/Layout.astro';
     const tabella = document.getElementById('tabella-carrello');
     const riepilogo = document.getElementById('riepilogo-carrello');
     const corpo = document.getElementById('righe-carrello');
+    const totaleEl = document.getElementById('totale-carrello');
 
     if (cart.length === 0) {
       vuoto.hidden = false;
@@ -51,33 +68,54 @@ import Layout from '../layouts/Layout.astro';
     tabella.hidden = false;
     riepilogo.hidden = false;
     corpo.innerHTML = '';
+    let totale = 0;
 
     cart.forEach((riga) => {
       const prodotto = getProdottoBySlug(riga.slug);
       if (!prodotto) return;
+      const colore = getColore(prodotto, riga.colore);
+      const unit = prezzoRiga(prodotto, riga);
+      const sub = unit * riga.quantita;
+      totale += sub;
+      const key = lineKey(riga.slug, riga.colore, riga.iniziali);
+      const maxQ = maxRiga(cart, prodotto, riga);
+
+      const dettaglio = [
+        colore ? colore.nome : riga.colore,
+        riga.iniziali ? `iniziali: ${riga.iniziali}` : null,
+      ].filter(Boolean).join(' · ');
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${prodotto.nome}</td>
-        <td>${PLACEHOLDER}</td>
         <td>
-          <input type="number" min="1" value="${riga.quantita}" data-slug="${riga.slug}" class="input-quantita" />
+          <strong>${prodotto.nome}</strong><br>
+          <span class="riga-dettaglio">${dettaglio}</span>
         </td>
-        <td><button class="link-rimuovi" data-slug="${riga.slug}">Rimuovi</button></td>
+        <td>${formatEuro(unit)}</td>
+        <td>
+          <input type="number" min="1" max="${maxQ}" value="${riga.quantita}" data-key="${key}" class="input-quantita" />
+        </td>
+        <td>${formatEuro(sub)}</td>
+        <td><button class="link-rimuovi" data-key="${key}">Rimuovi</button></td>
       `;
       corpo.appendChild(tr);
     });
 
+    totaleEl.textContent = formatEuro(totale);
+
     corpo.querySelectorAll('.input-quantita').forEach((el) => {
       el.addEventListener('change', (e) => {
-        const slug = e.target.getAttribute('data-slug');
-        const q = Math.max(1, parseInt(e.target.value, 10) || 1);
-        updateQuantita(slug, q);
+        const key = e.target.getAttribute('data-key');
+        const max = parseInt(e.target.getAttribute('max'), 10) || 1;
+        let q = Math.max(1, parseInt(e.target.value, 10) || 1);
+        if (q > max) q = max;
+        updateQuantita(key, q);
         render();
       });
     });
     corpo.querySelectorAll('.link-rimuovi').forEach((el) => {
       el.addEventListener('click', (e) => {
-        removeFromCart(e.target.getAttribute('data-slug'));
+        removeFromCart(e.target.getAttribute('data-key'));
         render();
       });
     });
@@ -93,8 +131,11 @@ import Layout from '../layouts/Layout.astro';
     text-align: left;
     padding: 0.85rem 0.5rem;
     border-bottom: 1px solid var(--bordo);
+    vertical-align: top;
   }
+  .riga-dettaglio { color: var(--testo-tenue); font-size: 0.9rem; }
   .input-quantita { width: 4rem; padding: 0.4rem; border: 1px solid var(--bordo); border-radius: 4px; }
   .link-rimuovi { background: none; border: none; color: var(--testo-tenue); text-decoration: underline; cursor: pointer; padding: 0; }
   .riepilogo-carrello { margin-top: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  #totale-carrello { font-size: 1.15rem; }
 </style>

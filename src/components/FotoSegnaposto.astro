@@ -1,0 +1,30 @@
+---
+// Segnaposto foto "voluto, non rotto": tratteggio diagonale tenue su fondo
+// incassato, con scritta che dice cosa ci andrà. Quando c'è lo scatto vero
+// (src/data/immagini.js) il chiamante mostra una <img> al suo posto.
+const { etichetta, ratio = '4 / 5', id } = Astro.props;
+---
+<div class="foto-segnaposto" style={`aspect-ratio:${ratio}`} id={id}>
+  <b>{etichetta}</b>
+</div>
+
+<style>
+  .foto-segnaposto {
+    background: var(--sunk);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: repeating-linear-gradient(45deg, transparent 0 11px, rgba(120, 110, 100, .055) 11px 22px);
+    padding: 14px;
+    text-align: center;
+  }
+  .foto-segnaposto b {
+    font-family: var(--f-d);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink3);
+  }
+</style>

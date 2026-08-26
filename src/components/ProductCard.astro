@@ -1,38 +1,113 @@
 ---
-import { PLACEHOLDER } from '../data/prodotti.js';
+import { formatEuro } from '../data/prodotti.js';
+import { immagineProdotto } from '../data/immagini.js';
+import FotoSegnaposto from './FotoSegnaposto.astro';
+
 const { prodotto } = Astro.props;
+const stockTotale = prodotto.colori.reduce((t, c) => t + c.stock, 0);
+const esaurito = stockTotale === 0;
+const url = `/prodotto/${prodotto.slug}/`;
+
+const coloreAttivo = prodotto.colori.find((c) => c.stock > 0) || prodotto.colori[0];
+const fotoAttiva = immagineProdotto(prodotto.slug, coloreAttivo.slug);
+const fotoId = `foto-${prodotto.slug}`;
+
+// Le tre cifre in vista sotto il prezzo: testo curato per prodotto (verbatim
+// dall'anteprima approvata). Se un domani arriva un prodotto senza voce
+// dedicata, si ricava dalle specifiche invece di lasciare la riga vuota.
+const SPECLINE = {
+  sottile: ['8 tasche carte', 'spessore 0,55 cm', '50 g'],
+  completo: ['5 tasche carte', 'portamonete', 'spessore 0,65 cm'],
+};
+function speclineDaSpecifiche(p) {
+  const capienza = p.specifiche.find(([voce]) => voce === 'Capienza')?.[1] || '';
+  const tasche = capienza.match(/\d+ tasche carte/)?.[0];
+  const spessore = p.specifiche.find(([voce]) => voce === 'Spessore')?.[1];
+  const peso = p.specifiche.find(([voce]) => voce === 'Peso')?.[1];
+  return [tasche, spessore && `spessore ${spessore}`, peso].filter(Boolean);
+}
+const specline = SPECLINE[prodotto.slug] || speclineDaSpecifiche(prodotto);
 ---
-<a class="scheda-prodotto" href={`/prodotto/${prodotto.slug}/`}>
-  <img src={prodotto.immagine} alt={prodotto.nome === PLACEHOLDER ? 'Immagine prodotto da caricare' : prodotto.nome} loading="lazy" />
-  <div class="scheda-prodotto__corpo">
-    <p class="scheda-prodotto__nome segnaposto">{prodotto.nome}</p>
-    <p class="scheda-prodotto__prezzo segnaposto">{PLACEHOLDER}</p>
+<div class="scheda-prodotto">
+  <a href={url} class="scheda-prodotto__foto" aria-hidden="true" tabindex="-1">
+    {fotoAttiva ? (
+      <img src={fotoAttiva} alt="" loading="lazy" />
+    ) : (
+      <FotoSegnaposto id={fotoId} etichetta={`Foto — ${prodotto.nome}, ${coloreAttivo.nome.toLowerCase()}`} />
+    )}
+  </a>
+
+  <p class="p-kick">{prodotto.occhiello}</p>
+  <a href={url} class="p-name">{prodotto.nome}</a>
+  <div class="p-price">
+    {formatEuro(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em>
+    {esaurito && <span class="p-esaurito">Esaurito</span>}
   </div>
-</a>
+
+  <div class="swatches" data-foto-target={fotoId} data-nome-prodotto={prodotto.nome}>
+    {prodotto.colori.map((c) => (
+      <button
+        type="button"
+        class:list={['sw', { on: c.slug === coloreAttivo.slug }]}
+        data-c={c.slug}
+        data-nome={c.nome}
+        title={c.nome}
+        disabled={c.stock === 0}
+        aria-label={c.nome + (c.stock === 0 ? ' (esaurito)' : '')}
+      ></button>
+    ))}
+    <span class="sw-label">{prodotto.colori.length} colori</span>
+  </div>
+
+  <div class="specline">
+    {specline.map((s) => <span>{s}</span>)}
+  </div>
+</div>
 
 <style>
-  .scheda-prodotto {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    border: 1px solid var(--bordo);
-    border-radius: 6px;
-    overflow: hidden;
-    background: #fff;
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  .scheda-prodotto { display: block; color: inherit; }
+  .scheda-prodotto__foto { display: block; text-decoration: none; }
+
+  .p-kick { font-family: var(--f-d); font-size: 12.5px; font-weight: 500; color: var(--ink3); letter-spacing: .02em; margin: 16px 0 0; }
+  .p-name {
+    display: block; font-family: var(--f-d); font-weight: 700; font-size: 22px;
+    letter-spacing: -.02em; margin: 2px 0 0; color: var(--ink); text-decoration: none;
   }
-  .scheda-prodotto:hover {
-    box-shadow: 0 6px 18px rgba(43, 35, 24, 0.1);
-    transform: translateY(-2px);
+  .p-name:hover { text-decoration: underline; }
+  .p-price {
+    font-family: var(--f-d); font-weight: 700; font-size: 22px;
+    letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-top: 10px;
   }
-  .scheda-prodotto img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    display: block;
-    background: var(--crema-scuro);
+  .p-price em { font-style: normal; font-size: 12.5px; font-weight: 500; color: var(--ink3); margin-left: 8px; letter-spacing: .02em; }
+  .p-esaurito {
+    display: inline-block; margin-left: 10px; font-family: var(--f-d); font-size: 11px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); border: 1px solid var(--line2); padding: 3px 8px;
+    vertical-align: middle;
   }
-  .scheda-prodotto__corpo { padding: 1rem; }
-  .scheda-prodotto__nome { margin: 0 0 0.3rem; font-weight: 500; }
-  .scheda-prodotto__prezzo { margin: 0; }
+
+  .specline {
+    margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--line);
+    font-family: var(--f-d); font-size: 12.5px; color: var(--ink2);
+    display: flex; flex-wrap: wrap; gap: 6px 18px; font-variant-numeric: tabular-nums;
+  }
 </style>
+
+<script>
+  document.querySelectorAll('.swatches[data-foto-target]').forEach((gruppo) => {
+    const nomeProdotto = gruppo.getAttribute('data-nome-prodotto') || '';
+    const foto = document.getElementById(gruppo.getAttribute('data-foto-target') || '');
+    const etichetta = foto?.querySelector('b');
+
+    gruppo.querySelectorAll('.sw').forEach((sw) => {
+      sw.addEventListener('click', () => {
+        if (sw.hasAttribute('disabled')) return;
+        gruppo.querySelectorAll('.sw').forEach((x) => x.classList.remove('on'));
+        sw.classList.add('on');
+        if (etichetta) {
+          const nomeColore = (sw.getAttribute('data-nome') || '').toLowerCase();
+          etichetta.textContent = `Foto — ${nomeProdotto}, ${nomeColore}`;
+        }
+      });
+    });
+  });
+</script>

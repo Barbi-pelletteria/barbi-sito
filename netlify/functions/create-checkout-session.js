@@ -46,20 +46,29 @@ exports.handler = async (event) => {
     const stripe = Stripe(stripeSecretKey);
     const origin = siteUrl || process.env.URL || 'http://localhost:8888';
 
-    // NOTA: prezzoTestCentesimi è un valore tecnico di collaudo (vedi
-    // src/data/prodotti.js), non un prezzo reale. Ogni riga usa quel valore
-    // finché blocco 4 (DOMANDE_APERTURA.md) non porta il prezzo vero.
-    const line_items = items.map((it) => ({
-      price_data: {
-        currency: 'eur',
-        product_data: { name: `Prodotto di collaudo — ${it.slug}` },
-        unit_amount: it.prezzoTestCentesimi,
-      },
-      quantity: it.quantita,
-    }));
+    // Prezzo unitario = prezzo del prodotto + eventuale sovrapprezzo iniziali.
+    // Il totale è sempre ricalcolato qui dai singoli importi, non fidandosi di
+    // un totale mandato dal client.
+    const unitAmount = (it) =>
+      (it.prezzoCentesimi || 0) + (it.iniziali ? it.inizialiCentesimi || 0 : 0);
+
+    const line_items = items.map((it) => {
+      const dettagli = [it.colore, it.iniziali ? `iniziali: ${it.iniziali}` : null]
+        .filter(Boolean)
+        .join(' · ');
+      const nome = it.nome || it.slug;
+      return {
+        price_data: {
+          currency: 'eur',
+          product_data: { name: dettagli ? `${nome} (${dettagli})` : nome },
+          unit_amount: unitAmount(it),
+        },
+        quantity: it.quantita,
+      };
+    });
 
     const totaleCentesimi = items.reduce(
-      (somma, it) => somma + it.prezzoTestCentesimi * it.quantita,
+      (somma, it) => somma + unitAmount(it) * it.quantita,
       0
     );
 

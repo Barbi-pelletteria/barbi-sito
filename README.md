@@ -2,19 +2,21 @@
 
 Sito e-commerce su misura (Astro + Netlify + Stripe), costruito secondo `DECISIONI.md` D-005.
 
-**Nessun contenuto reale è ancora presente.** Ogni testo rivolto al cliente (nomi, prezzi,
-descrizioni, pagine legali) mostra il segnaposto esatto
-`[DA COMPLETARE — dati mancanti, vedi blocco 4 DOMANDE_APERTURA.md]` finché non arrivano
-i dati veri dai blocchi 4-7 dell'interrogatorio a Stefano/Jacopo. Non modificare quel testo
-a intuito: si sostituisce solo con dati veri, in `src/data/prodotti.js` e nelle pagine legali.
+**Contenuti reali inseriti** (catalogo, testi, pagine legali) dal pacchetto
+`PACCHETTO_SETUP_TECNICO` / catalogo 2026-08-25. Il catalogo ha due prodotti
+(Sottile, Completo) con stock per colore. L'unico segnaposto rimasto di proposito è la
+dicitura fiscale del regime forfettario in `termini-e-condizioni.astro`, in attesa della
+formula del commercialista.
 
 ## Cosa c'è
 
-- Home, 3 pagine categoria (portafogli / borse / portachiavi), 1 pagina prodotto
-  (template, un solo prodotto placeholder), carrello, checkout collegato a Stripe
-  (modalità test), pagina di conferma ordine, 4 pagine legali vuote con solo il titolo.
-- Tracciamento GA4 con i 5 eventi del funnel (`page_view`, `view_item`, `add_to_cart`,
-  `begin_checkout`, `purchase`).
+- Home, 1 pagina categoria (portafogli), pagine prodotto (Sottile / Completo), carrello,
+  checkout collegato a Stripe (modalità test), conferma ordine, pagine legali compilate,
+  Chi siamo, Contatti.
+- Interruttore `VENDITA_ATTIVA` in `src/data/prodotti.js`: a `false` i pulsanti "Aggiungi
+  al carrello" diventano "Disponibile a breve"; a `true` il sito vende.
+- Stock per singolo colore: un colore a zero è mostrato esaurito e non aggiungibile.
+- GA4 con consenso preventivo: non parte finché il visitatore non accetta il banner cookie.
 - Carrello lato client in localStorage — nessun backend, nessun database: coerente con
   un sito statico su Netlify.
 

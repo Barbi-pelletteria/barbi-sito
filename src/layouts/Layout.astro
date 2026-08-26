@@ -1,6 +1,7 @@
 ---
-const { title, description = 'Pelletteria artigianale fatta a mano dal 1992.' } = Astro.props;
+const { title, description = 'Portafogli in pelle conciata al vegetale, fatti a mano.' } = Astro.props;
 const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
 <!doctype html>
 <html lang="it">
@@ -19,34 +20,26 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap" rel="stylesheet" />
 
-  {gaId && (
-    <>
-      <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
-      <script define:vars={{ gaId }}>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){ window.dataLayer.push(arguments); }
-        window.gtag = gtag;
-        gtag('js', new Date());
-        gtag('config', gaId);
-      </script>
-    </>
-  )}
+  <!--
+    GA4 NON viene caricato qui: parte solo dopo il consenso esplicito dato
+    tramite il banner cookie in fondo alla pagina. Vedi src/scripts/consent.js.
+  -->
 </head>
 <body>
   <a class="salta-contenuto" href="#contenuto">Vai al contenuto</a>
-  <header class="sito-header">
-    <div class="contenitore sito-header__riga">
-      <a class="logo" href="/">Barbi <span>Pelletteria</span></a>
-      <nav class="nav-principale" aria-label="Categorie">
-        <a href="/portafogli/">Portafogli</a>
-        <a href="/borse/">Borse</a>
-        <a href="/portachiavi/">Portachiavi</a>
-      </nav>
-      <a class="carrello-link" href="/carrello/" aria-label="Vai al carrello">
-        🛍️ <span id="contatore-carrello">0</span>
-      </a>
+  <header class="nav">
+    <div class="contenitore nav-in">
+      <a class="mark" href="/">Barbi <span>Pelletteria</span></a>
+      <div class="right">
+        <nav class="menu" aria-label="Menu principale">
+          <a href="/portafogli/" class="hideable">Portafogli</a>
+          <a href="/chi-siamo/" class="hideable">Chi siamo</a>
+          <a href="/contatti/" class="hideable">Contatti</a>
+        </nav>
+        <a class="carrello-link" href="/carrello/" aria-label="Vai al carrello">Carrello (<span id="contatore-carrello">0</span>)</a>
+      </div>
     </div>
   </header>
 
@@ -54,21 +47,63 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
     <slot />
   </main>
 
-  <footer class="sito-footer">
-    <div class="contenitore sito-footer__griglia">
-      <div>
-        <p class="sito-footer__marchio">Barbi Pelletteria</p>
-        <p>Laboratorio artigianale dal 1992.</p>
-      </div>
-      <nav aria-label="Informazioni legali">
-        <a href="/privacy/">Privacy</a>
-        <a href="/termini-e-condizioni/">Termini e condizioni</a>
-        <a href="/diritto-di-recesso/">Diritto di recesso</a>
-        <a href="/spedizioni-e-resi/">Spedizioni e resi</a>
+  <footer class="site-footer">
+    <div class="contenitore">
+      <nav class="flinks" aria-label="Informazioni legali">
+        <a href="/termini-e-condizioni/">Informazioni legali</a>
+        <a href="/spedizioni-e-resi/">Spedizioni e consegne</a>
+        <a href="/diritto-di-recesso/">Recesso e resi</a>
+        <a href="/termini-e-condizioni/#garanzia">Garanzia</a>
+        <a href="/termini-e-condizioni/#pagamenti-e-prezzi">Pagamenti e prezzi</a>
+        <a href="/privacy/">Privacy e cookie</a>
       </nav>
+      <p class="fine">
+        Barbi Stefano — impresa individuale · Via Nazionale delle Puglie 98, 80026 Casoria (NA)<br />
+        Partita IVA 10311791213 · REA NA-1097798 · <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>
+      </p>
     </div>
-    <p class="sito-footer__nota">Sito in allestimento — ambiente di test, nessun pagamento reale.</p>
   </footer>
+
+  {gaId && (
+    <div id="cookie-banner" class="cookie-banner" role="dialog" aria-live="polite" aria-label="Informativa cookie" data-ga-id={gaId} hidden>
+      <p class="cookie-banner__testo">
+        Questo sito usa Google Analytics per contare le visite in forma anonima.
+        Parte solo se lo accetti. Vedi la <a href="/privacy/">privacy e cookie</a>.
+      </p>
+      <div class="cookie-banner__azioni">
+        <button type="button" class="pulsante" id="cookie-accetta">Accetta</button>
+        <button type="button" class="pulsante pulsante-secondario" id="cookie-rifiuta">Rifiuta</button>
+      </div>
+    </div>
+  )}
+
+  <script>
+    // Consenso preventivo: legge il Measurement ID dal banner (se presente) e
+    // carica GA4 solo dopo un "Accetta". Nessuna richiesta di rete prima.
+    import { getConsent, setConsent, loadAnalytics } from '../scripts/consent.js';
+
+    const banner = document.getElementById('cookie-banner');
+    const gaId = banner?.getAttribute('data-ga-id') || '';
+
+    if (gaId) {
+      const scelta = getConsent();
+      if (scelta === 'accepted') {
+        loadAnalytics(gaId);
+      } else if (scelta !== 'rejected') {
+        banner.hidden = false;
+      }
+
+      document.getElementById('cookie-accetta')?.addEventListener('click', () => {
+        setConsent('accepted');
+        banner.hidden = true;
+        loadAnalytics(gaId);
+      });
+      document.getElementById('cookie-rifiuta')?.addEventListener('click', () => {
+        setConsent('rejected');
+        banner.hidden = true;
+      });
+    }
+  </script>
 
   <script>
     import { getCartCount } from '../scripts/cart.js';
@@ -82,121 +117,204 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
 
   <style is:global>
     :root {
-      --crema: #faf6ee;
-      --crema-scuro: #e8e0cd;
-      --testo: #2b2318;
-      --testo-tenue: #6b5f4a;
-      --cuoio: #6b4226;
-      --cuoio-scuro: #4a2d18;
-      --bordo: #d9cfb4;
-      --accento: #a8763e;
-      font-family: 'Inter', system-ui, sans-serif;
+      --paper: #F6F5F2;
+      --card: #FFFFFF;
+      --sunk: #EEECE7;
+      --ink: #14100F;
+      --ink2: #5F5A56;
+      --ink3: #8E8781;
+      --line: #DFDBD4;
+      --line2: #C6C0B7;
+      --blu: #2B3A55;
+      --bordeaux: #6E2230;
+      --marrone: #7A5230;
+      --ok: #2C5B43;
+      --f-d: "Archivo", system-ui, sans-serif;
+      --f-b: "Newsreader", Georgia, serif;
     }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #131110;
+        --card: #1B1817;
+        --sunk: #231F1D;
+        --ink: #F1EDE8;
+        --ink2: #B0A8A1;
+        --ink3: #847C75;
+        --line: #302B28;
+        --line2: #463F3A;
+        --blu: #7C93BE;
+        --bordeaux: #C97F8B;
+        --marrone: #C09466;
+        --ok: #7FB79C;
+      }
+    }
+    :root[data-theme="dark"] {
+      --paper: #131110;
+      --card: #1B1817;
+      --sunk: #231F1D;
+      --ink: #F1EDE8;
+      --ink2: #B0A8A1;
+      --ink3: #847C75;
+      --line: #302B28;
+      --line2: #463F3A;
+      --blu: #7C93BE;
+      --bordeaux: #C97F8B;
+      --marrone: #C09466;
+      --ok: #7FB79C;
+    }
+
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: var(--crema);
-      color: var(--testo);
-      line-height: 1.55;
-    }
-    h1, h2, h3, .titolo-serif {
-      font-family: 'Fraunces', Georgia, serif;
-      font-weight: 600;
-      line-height: 1.15;
-      margin: 0 0 0.5em;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--f-b);
+      font-size: 17px;
+      line-height: 1.6;
+      -webkit-text-size-adjust: 100%;
     }
     a { color: inherit; }
-    .contenitore {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
+    img { max-width: 100%; display: block; }
+
+    h1, h2, h3 {
+      font-family: var(--f-d);
+      letter-spacing: -.025em;
+      margin: 0 0 8px;
+      text-wrap: balance;
     }
+    h1 {
+      font-weight: 800;
+      font-size: clamp(31px, 5.6vw, 58px);
+      line-height: 1.02;
+      letter-spacing: -.035em;
+      margin: 0 0 18px;
+      max-width: 15ch;
+    }
+    h2 {
+      font-weight: 700;
+      font-size: clamp(23px, 3.2vw, 32px);
+    }
+    h3 {
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: -.01em;
+    }
+
+    .contenitore { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+    .sezione { padding: 48px 0; }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+    @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; gap: 34px; } }
+
+    .kicker {
+      font-family: var(--f-d);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--ink3);
+      margin: 0 0 14px;
+    }
+
     .salta-contenuto {
       position: absolute;
       left: -999px;
       top: 0;
-      background: var(--cuoio);
-      color: #fff;
+      background: var(--ink);
+      color: var(--paper);
       padding: 0.75rem 1rem;
       z-index: 100;
+      font-family: var(--f-d);
+      font-size: 14px;
     }
     .salta-contenuto:focus { left: 0.5rem; top: 0.5rem; }
 
-    .sito-header {
-      border-bottom: 1px solid var(--bordo);
-      background: var(--crema);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    /* ---- header ---- */
+    .nav { border-bottom: 1px solid var(--line); background: var(--card); position: sticky; top: 0; z-index: 10; }
+    .nav-in { display: flex; align-items: center; gap: 26px; padding-top: 14px; padding-bottom: 14px; }
+    .mark {
+      font-family: var(--f-d); font-weight: 800; font-size: 19px;
+      letter-spacing: -.03em; text-transform: uppercase;
+      text-decoration: none; color: var(--ink); white-space: nowrap;
     }
-    .sito-header__riga {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-      padding: 1.1rem 1.5rem;
+    .mark span { font-weight: 400; color: var(--ink3); letter-spacing: .02em; }
+    .right { margin-left: auto; display: flex; gap: 20px; align-items: center; }
+    .menu { display: flex; gap: 20px; }
+    .right a, .menu a {
+      font-family: var(--f-d); font-size: 13.5px; font-weight: 500;
+      color: var(--ink2); text-decoration: none; white-space: nowrap;
     }
-    .logo {
-      font-family: 'Fraunces', Georgia, serif;
-      font-size: 1.3rem;
-      text-decoration: none;
-      font-weight: 600;
-      color: var(--cuoio-scuro);
-    }
-    .logo span { font-weight: 400; color: var(--testo-tenue); }
-    .nav-principale { display: flex; gap: 1.75rem; flex: 1; justify-content: center; }
-    .nav-principale a { text-decoration: none; font-weight: 500; color: var(--testo); }
-    .nav-principale a:hover { color: var(--cuoio); }
-    .carrello-link { text-decoration: none; font-weight: 600; white-space: nowrap; }
+    .right a:hover, .menu a:hover { color: var(--ink); }
+    @media (max-width: 640px) { .menu a.hideable { display: none; } }
 
-    .sito-footer {
-      border-top: 1px solid var(--bordo);
-      margin-top: 4rem;
-      padding: 2.5rem 0 1rem;
-      background: var(--crema-scuro);
-      color: var(--testo-tenue);
-    }
-    .sito-footer__griglia {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 1.5rem;
-    }
-    .sito-footer__marchio { font-family: 'Fraunces', Georgia, serif; font-size: 1.1rem; color: var(--testo); margin: 0; }
-    .sito-footer nav { display: flex; flex-direction: column; gap: 0.4rem; }
-    .sito-footer nav a { text-decoration: none; font-size: 0.92rem; }
-    .sito-footer nav a:hover { text-decoration: underline; }
-    .sito-footer__nota { text-align: center; font-size: 0.8rem; margin: 2rem 0 0; opacity: 0.8; }
-
+    /* ---- pulsanti ---- */
     .pulsante {
       display: inline-block;
-      background: var(--cuoio);
-      color: #fff;
-      border: none;
-      padding: 0.85rem 1.6rem;
-      border-radius: 4px;
-      font-weight: 600;
-      font-size: 1rem;
-      text-decoration: none;
+      font-family: var(--f-d); font-size: 15px; font-weight: 600; letter-spacing: .01em;
+      background: var(--ink); color: var(--paper);
+      border: 1px solid var(--ink);
+      padding: 14px 24px;
+      text-decoration: none; text-align: center;
       cursor: pointer;
-      transition: background 0.15s ease;
     }
-    .pulsante:hover { background: var(--cuoio-scuro); }
-    .pulsante:disabled { opacity: 0.5; cursor: not-allowed; }
-    .pulsante-secondario {
-      background: transparent;
-      color: var(--cuoio);
-      border: 1px solid var(--cuoio);
-    }
-    .pulsante-secondario:hover { background: var(--crema-scuro); }
+    .pulsante:hover { opacity: .88; }
+    .pulsante:disabled, .pulsante[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+    .pulsante-secondario { background: transparent; color: var(--ink); }
+    .pulsante-secondario:hover { background: var(--sunk); opacity: 1; }
 
     .segnaposto {
-      color: var(--testo-tenue);
+      color: var(--ink3);
       font-style: italic;
-      font-size: 0.92em;
+      font-size: 0.95em;
     }
 
-    .sezione { padding: 3rem 0; }
+    /* ---- pastiglie colore (scheda + pagina prodotto) ---- */
+    .swatches { display: flex; gap: 7px; margin-top: 13px; align-items: center; flex-wrap: wrap; }
+    .sw {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, .18); cursor: pointer; position: relative;
+      padding: 0; appearance: none; -webkit-appearance: none;
+    }
+    :root:not([data-theme="light"]) .sw { border-color: rgba(255, 255, 255, .16); }
+    .sw[data-c="blu"] { background: var(--blu); }
+    .sw[data-c="bordeaux"] { background: var(--bordeaux); }
+    .sw[data-c="marrone"] { background: var(--marrone); }
+    .sw.on::after {
+      content: ""; position: absolute; inset: -5px; border-radius: 50%;
+      border: 1.5px solid var(--ink);
+    }
+    .sw:disabled { opacity: .3; cursor: not-allowed; }
+    .sw-label { font-family: var(--f-d); font-size: 12px; color: var(--ink3); margin-left: 6px; letter-spacing: .02em; }
+
+    /* ---- footer ---- */
+    .site-footer { border-top: 1px solid var(--line2); margin-top: 20px; padding: 40px 0 60px; }
+    .flinks { display: flex; flex-wrap: wrap; gap: 10px 22px; font-family: var(--f-d); font-size: 13px; }
+    .flinks a { color: var(--ink2); text-decoration: none; }
+    .flinks a:hover { color: var(--ink); text-decoration: underline; }
+    .fine { margin-top: 20px; font-family: var(--f-d); font-size: 12px; color: var(--ink3); line-height: 1.6; }
+    .fine a { color: var(--ink3); }
+
+    /* ---- banner cookie ---- */
+    .cookie-banner {
+      position: fixed; left: 16px; right: 16px; bottom: 16px;
+      max-width: 640px; margin: 0 auto;
+      background: var(--card); border: 1px solid var(--line2);
+      padding: 18px 20px; z-index: 50;
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 12px 20px; justify-content: space-between;
+    }
+    .cookie-banner__testo { margin: 0; font-size: 15px; color: var(--ink2); flex: 1 1 260px; }
+    .cookie-banner__testo a { color: var(--ink); }
+    .cookie-banner__azioni { display: flex; gap: 10px; }
+    .cookie-banner__azioni .pulsante { padding: 10px 18px; font-size: 14px; }
+
+    :where(a, button, input):focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   </style>
 </body>
 </html>

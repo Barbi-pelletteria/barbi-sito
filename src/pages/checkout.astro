@@ -13,6 +13,7 @@ import Layout from '../layouts/Layout.astro';
 
     <div id="checkout-contenuto" hidden>
       <ul id="riepilogo-righe" class="riepilogo-righe"></ul>
+      <p class="checkout__totale"><strong>Totale:</strong> <span id="checkout-totale"></span></p>
       <button class="pulsante" id="btn-paga">Procedi al pagamento</button>
       <p id="errore-checkout" class="errore-checkout" hidden></p>
     </div>
@@ -21,31 +22,46 @@ import Layout from '../layouts/Layout.astro';
 
 <script>
   import { getCart } from '../scripts/cart.js';
-  import { getProdottoBySlug, PLACEHOLDER } from '../data/prodotti.js';
+  import { getProdottoBySlug, getColore, formatEuro, INIZIALI_CENTESIMI } from '../data/prodotti.js';
   import { trackEvent } from '../scripts/analytics.js';
 
   const cart = getCart();
   const vuoto = document.getElementById('checkout-vuoto');
   const contenuto = document.getElementById('checkout-contenuto');
   const lista = document.getElementById('riepilogo-righe');
+  const totaleEl = document.getElementById('checkout-totale');
   const btnPaga = document.getElementById('btn-paga');
   const errore = document.getElementById('errore-checkout');
+
+  function unitCentesimi(prodotto, riga) {
+    return prodotto.prezzoCentesimi + (riga.iniziali ? INIZIALI_CENTESIMI : 0);
+  }
 
   if (cart.length === 0) {
     vuoto.hidden = false;
   } else {
     contenuto.hidden = false;
+    let totale = 0;
     cart.forEach((riga) => {
       const prodotto = getProdottoBySlug(riga.slug);
       if (!prodotto) return;
+      const colore = getColore(prodotto, riga.colore);
+      const unit = unitCentesimi(prodotto, riga);
+      totale += unit * riga.quantita;
+      const dettaglio = [
+        colore ? colore.nome : riga.colore,
+        riga.iniziali ? `iniziali: ${riga.iniziali}` : null,
+      ].filter(Boolean).join(' · ');
       const li = document.createElement('li');
-      li.textContent = `${prodotto.nome} × ${riga.quantita} — ${PLACEHOLDER}`;
+      li.textContent = `${prodotto.nome} (${dettaglio}) × ${riga.quantita} — ${formatEuro(unit * riga.quantita)}`;
       lista.appendChild(li);
     });
+    totaleEl.textContent = formatEuro(totale);
 
-    // GA4 — begin_checkout: si accende all'apertura della pagina checkout (B4).
+    // GA4 — begin_checkout: parte solo se il consenso ai cookie è stato dato.
     trackEvent('begin_checkout', {
       currency: 'EUR',
+      value: totale / 100,
       items: cart.map((r) => ({ item_id: r.slug, quantity: r.quantita })),
     });
   }
@@ -60,11 +76,15 @@ import Layout from '../layouts/Layout.astro';
         .map((r) => {
           const prodotto = getProdottoBySlug(r.slug);
           if (!prodotto) return null;
+          const colore = getColore(prodotto, r.colore);
           return {
             slug: r.slug,
+            nome: prodotto.nome,
+            colore: colore ? colore.nome : r.colore,
+            iniziali: r.iniziali || '',
             quantita: r.quantita,
-            // Vedi nota in src/data/prodotti.js: valore SOLO di collaudo tecnico.
-            prezzoTestCentesimi: prodotto.prezzoTestCentesimi,
+            prezzoCentesimi: prodotto.prezzoCentesimi,
+            inizialiCentesimi: r.iniziali ? INIZIALI_CENTESIMI : 0,
           };
         })
         .filter(Boolean);
@@ -82,9 +102,6 @@ import Layout from '../layouts/Layout.astro';
       }
 
       if (!risposta.ok || !dati || !dati.url) {
-        // Risposta non-JSON o senza url: quasi sempre vuol dire che la funzione
-        // Netlify non è ancora raggiungibile in questo ambiente (es. "astro
-        // preview" locale, senza "netlify dev", oppure B1/B2 non ancora collegati).
         const messaggioServer = dati && dati.error;
         throw new Error(
           messaggioServer ||
@@ -106,5 +123,6 @@ import Layout from '../layouts/Layout.astro';
   .checkout { max-width: 640px; }
   .riepilogo-righe { list-style: none; padding: 0; margin: 1.5rem 0; }
   .riepilogo-righe li { padding: 0.6rem 0; border-bottom: 1px solid var(--bordo); }
+  .checkout__totale { font-size: 1.1rem; margin: 1rem 0 1.5rem; }
   .errore-checkout { color: #a3342a; margin-top: 1rem; }
 </style>

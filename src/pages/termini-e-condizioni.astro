@@ -1,13 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
-<Layout title="Termini e condizioni">
+<Layout title="Informazioni legali">
   <section class="sezione contenitore pagina-legale">
-    <h1>Termini e condizioni</h1>
-    <p class="segnaposto">[DA COMPLETARE — dati mancanti, vedi blocco 4 DOMANDE_APERTURA.md]</p>
+    <h1>Informazioni legali</h1>
+    <p>
+      Barbi Stefano — impresa individuale<br />
+      Via Nazionale delle Puglie 98, 80026 Casoria (NA)<br />
+      Partita IVA 10311791213<br />
+      REA NA-1097798<br />
+      Email: <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>
+    </p>
+
+    <h2>Pagamenti e prezzi</h2>
+    <p>Pagamenti con carta tramite Stripe. I dati della carta non passano mai da questo sito.</p>
+    <p>I prezzi indicati sono finali e comprendono la spedizione.</p>
+    <p class="segnaposto-fiscale">[DA CONFERMARE COL COMMERCIALISTA DI STEFANO — dicitura fiscale del regime forfettario]</p>
+
+    <h2>Garanzia</h2>
+    <p>Su ogni portafoglio vale la garanzia legale di conformità di 24 mesi prevista dal Codice del Consumo. Se il prodotto arriva difettoso o si rivela non conforme, scrivici.</p>
+    <p>Attenzione: i segni, i cambi di tono e la patina che la pelle conciata al vegetale sviluppa con l’uso non sono difetti — sono il comportamento normale di questo materiale.</p>
   </section>
 </Layout>
 
 <style>
   .pagina-legale { max-width: 720px; }
+  .pagina-legale h2 { margin-top: 2rem; }
+  .segnaposto-fiscale {
+    color: var(--testo-tenue);
+    font-style: italic;
+    background: var(--crema-scuro);
+    padding: 0.6rem 0.85rem;
+    border-radius: 4px;
+  }
 </style>
