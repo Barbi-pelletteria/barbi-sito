@@ -315,6 +315,10 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       display: flex; flex-wrap: wrap; align-items: center;
       gap: 14px 20px; justify-content: space-between;
     }
+    /* .cookie-banner{display:flex} e [hidden]{display:none} hanno la
+       stessa specificità (0,1,0): senza questa regola più specifica,
+       banner.hidden = true da JS non nasconde nulla — vince sempre flex. */
+    .cookie-banner[hidden] { display: none; }
     .cookie-banner__testo { margin: 0; font-size: 16.5px; color: var(--ink2); flex: 1 1 260px; line-height: 1.5; }
     .cookie-banner__testo a { color: var(--brass-testo); }
     .cookie-banner__azioni { display: flex; gap: 10px; }
