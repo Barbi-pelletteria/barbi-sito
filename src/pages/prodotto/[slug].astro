@@ -392,6 +392,9 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
     display: flex; align-items: center; justify-content: center;
     width: 88px; height: 58px; margin-top: 14px; border: 1px solid var(--line2);
   }
+  /* stessa causa del bug banner cookie: display:flex batte [hidden] a
+     parità di specificità, quindi anteprima.hidden = true da solo non basta. */
+  .iniziali-anteprima[hidden] { display: none; }
   .iniziali-anteprima[data-c="blu"] { background: var(--blu); }
   .iniziali-anteprima[data-c="bordeaux"] { background: var(--bordeaux); }
   .iniziali-anteprima[data-c="marrone"] { background: var(--marrone); }

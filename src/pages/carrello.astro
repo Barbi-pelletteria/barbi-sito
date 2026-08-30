@@ -171,6 +171,9 @@ import Layout from '../layouts/Layout.astro';
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 18px;
   }
+  /* stessa causa del bug banner cookie: display:flex batte [hidden] a
+     parità di specificità, quindi riepilogo.hidden = true da solo non basta. */
+  .riepilogo-carrello[hidden] { display: none; }
   .riepilogo-carrello__totale {
     margin: 0; font-family: var(--f-display); font-size: 27px; font-variant-numeric: tabular-nums;
   }
