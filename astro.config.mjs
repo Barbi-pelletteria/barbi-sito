@@ -1,8 +1,12 @@
 import { defineConfig } from 'astro/config';
 
-// SETUP.md spiega cosa cambiare qui una volta creato il progetto Netlify (B1).
+// Dominio vero (PACCHETTO_DEPLOY_2026-08-30, punto 5): barbipelletteria.it
+// è già registrato. Finché il collegamento Netlify → dominio non è fatto
+// (serve il pannello Netlify + il registrar, mani umane), il sito resta
+// raggiungibile sul sottodominio *.netlify.app assegnato al progetto — questo
+// valore serve solo a generare URL assoluti corretti (canonical, sitemap),
+// non blocca il deploy.
 export default defineConfig({
-  // TODO (B1): sostituire con l'URL reale assegnato da Netlify, es. https://nome-a-caso.netlify.app
-  site: 'https://barbi-pelletteria.netlify.app',
+  site: 'https://barbipelletteria.it',
   output: 'static',
 });
