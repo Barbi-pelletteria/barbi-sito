@@ -1,4 +1,8 @@
 ---
+// Ricerca per nome e filtri (modello, colore) aggiunti il 27/08/2026
+// (PACCHETTO_RIFINITURA + richiesta diretta del Founder). Filtrano solo su
+// dati reali già nel catalogo — nessun attributo inventato (niente taglie,
+// niente genere: quei dati non esistono in nessun documento del progetto).
 import Layout from '../layouts/Layout.astro';
 import ProductCard from './ProductCard.astro';
 import { categorie, getProdottiByCategoria } from '../data/prodotti.js';
@@ -6,6 +10,9 @@ import { categorie, getProdottiByCategoria } from '../data/prodotti.js';
 const { categoriaSlug } = Astro.props;
 const categoria = categorie.find((c) => c.slug === categoriaSlug);
 const prodottiCategoria = getProdottiByCategoria(categoriaSlug);
+
+const modelli = [...new Set(prodottiCategoria.map((p) => p.nome))];
+const coloriDisponibili = [...new Set(prodottiCategoria.flatMap((p) => p.colori.map((c) => c.nome)))];
 ---
 <Layout title={categoria.nome}>
   <div class="contenitore">
@@ -14,16 +21,127 @@ const prodottiCategoria = getProdottiByCategoria(categoriaSlug);
         <h1>{categoria.nome}</h1>
         <p>Quello che c’è davvero in laboratorio oggi. Non un catalogo: un banco di lavoro.</p>
       </div>
-      {prodottiCategoria.length === 0 && (
-        <p class="segnaposto">Catalogo di questa categoria da popolare — nessun prodotto ancora caricato.</p>
+
+      {prodottiCategoria.length === 0 ? (
+        <div class="categoria-vuota">
+          <p class="segnaposto">Non ancora online: {categoria.nome.toLowerCase()} arriveranno nei prossimi mesi, quando saranno pronti in laboratorio.</p>
+          <p><a class="pulsante pulsante-secondario" href="/portafogli/">Vedi i portafogli disponibili ora</a></p>
+        </div>
+      ) : (
+        <>
+          {(modelli.length > 1 || coloriDisponibili.length > 1) && (
+            <div class="filtri" id="filtri-catalogo">
+              <div class="filtri__cerca">
+                <label for="cerca-prodotto" class="sr-only">Cerca per nome</label>
+                <input type="search" id="cerca-prodotto" placeholder="Cerca per nome…" autocomplete="off" />
+              </div>
+              {modelli.length > 1 && (
+                <div class="filtri__gruppo" role="group" aria-label="Filtra per modello">
+                  <span class="filtri__etichetta">Modello</span>
+                  <button type="button" class="filtro-chip is-attivo" data-filtro-modello="">Tutti</button>
+                  {modelli.map((m) => <button type="button" class="filtro-chip" data-filtro-modello={m.toLowerCase()}>{m}</button>)}
+                </div>
+              )}
+              {coloriDisponibili.length > 1 && (
+                <div class="filtri__gruppo" role="group" aria-label="Filtra per colore">
+                  <span class="filtri__etichetta">Colore</span>
+                  <button type="button" class="filtro-chip is-attivo" data-filtro-colore="">Tutti</button>
+                  {coloriDisponibili.map((c) => <button type="button" class="filtro-chip" data-filtro-colore={c.toLowerCase()}>{c}</button>)}
+                </div>
+              )}
+            </div>
+          )}
+
+          <p class="filtri__esito" id="filtri-esito" hidden>Nessun prodotto corrisponde alla ricerca.</p>
+
+          <div class="grid2" id="griglia-prodotti">
+            {prodottiCategoria.map((p) => (
+              <div class="scheda-wrap" data-nome={p.nome.toLowerCase()} data-colori={p.colori.map((c) => c.nome.toLowerCase()).join(',')}>
+                <ProductCard prodotto={p} />
+              </div>
+            ))}
+          </div>
+        </>
       )}
-      <div class="grid2">
-        {prodottiCategoria.map((p) => <ProductCard prodotto={p} />)}
-      </div>
     </section>
   </div>
 </Layout>
 
 <style>
   h1 { font-size: clamp(30px, 4.4vw, 44px); max-width: none; margin: 0 auto 12px; }
+
+  .categoria-vuota { text-align: center; }
+  .categoria-vuota .segnaposto { display: block; margin-bottom: 26px; }
+
+  .filtri {
+    display: flex; flex-wrap: wrap; gap: 18px 32px; align-items: flex-start;
+    margin-bottom: 36px; padding-bottom: 30px; border-bottom: 1px solid var(--line);
+  }
+  .filtri__cerca { flex: 1 1 220px; }
+  .filtri__cerca input {
+    width: 100%; padding: 13px 16px; border: 1px solid var(--line2);
+    background: var(--sunk); color: var(--ink); font-family: var(--f-text); font-size: 16px;
+  }
+  .filtri__cerca input::placeholder { color: var(--ink3); }
+  .filtri__gruppo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .filtri__etichetta {
+    font-family: var(--f-label); font-size: 10px; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink3); margin-right: 4px;
+  }
+  .filtro-chip {
+    font-family: var(--f-label); font-size: 11px; font-weight: 500; letter-spacing: .05em;
+    padding: 8px 14px; border: 1px solid var(--line2); background: transparent; color: var(--ink2);
+    cursor: pointer;
+  }
+  .filtro-chip.is-attivo { background: var(--brass); border-color: var(--brass); color: var(--ink); }
+  .filtro-chip:hover:not(.is-attivo) { border-color: var(--brass); }
+
+  .filtri__esito { color: var(--ink2); margin: 0 0 30px; }
+  .scheda-wrap.is-nascosta { display: none; }
 </style>
+
+<script>
+  const input = document.getElementById('cerca-prodotto');
+  const contenitore = document.getElementById('filtri-catalogo');
+  const griglia = document.getElementById('griglia-prodotti');
+  const esito = document.getElementById('filtri-esito');
+
+  if (griglia && esito) {
+    const schede = Array.from(griglia.querySelectorAll('.scheda-wrap'));
+    let filtroModello = '';
+    let filtroColore = '';
+
+    function applica() {
+      const testo = (input?.value || '').trim().toLowerCase();
+      let visibili = 0;
+      schede.forEach((el) => {
+        const nome = el.getAttribute('data-nome') || '';
+        const colori = (el.getAttribute('data-colori') || '').split(',');
+        const passaTesto = !testo || nome.includes(testo);
+        const passaModello = !filtroModello || nome === filtroModello;
+        const passaColore = !filtroColore || colori.includes(filtroColore);
+        const mostra = passaTesto && passaModello && passaColore;
+        el.classList.toggle('is-nascosta', !mostra);
+        if (mostra) visibili++;
+      });
+      esito.hidden = visibili > 0;
+    }
+
+    input?.addEventListener('input', applica);
+
+    contenitore?.querySelectorAll('[data-filtro-modello]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filtroModello = btn.getAttribute('data-filtro-modello') || '';
+        contenitore.querySelectorAll('[data-filtro-modello]').forEach((b) => b.classList.toggle('is-attivo', b === btn));
+        applica();
+      });
+    });
+    contenitore?.querySelectorAll('[data-filtro-colore]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filtroColore = btn.getAttribute('data-filtro-colore') || '';
+        contenitore.querySelectorAll('[data-filtro-colore]').forEach((b) => b.classList.toggle('is-attivo', b === btn));
+        applica();
+      });
+    });
+  }
+</script>

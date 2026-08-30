@@ -37,7 +37,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Corpo della richiesta non valido.' }) };
   }
 
-  const { items, siteUrl } = body;
+  const { items, siteUrl, consensoMarketing } = body;
   if (!Array.isArray(items) || items.length === 0) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Carrello vuoto.' }) };
   }
@@ -82,6 +82,11 @@ exports.handler = async (event) => {
       // valuta dopo. Senza questo campo Stripe non chiede un indirizzo e
       // Stefano non saprebbe dove spedire.
       shipping_address_collection: { allowed_countries: ['IT'] },
+      // Consenso email marketing (offerte/promozioni), scelto nel checkout:
+      // registrato qui, non in un database che non esiste — Stefano lo vede
+      // nel dettaglio dell'ordine su Stripe. Le email sugli ordini non
+      // dipendono da questo: quelle sono transazionali, non marketing.
+      metadata: { consenso_marketing: consensoMarketing ? 'si' : 'no' },
       success_url: `${origin}/conferma-ordine?session_id={CHECKOUT_SESSION_ID}&value=${(totaleCentesimi / 100).toFixed(2)}&currency=EUR`,
       cancel_url: `${origin}/carrello`,
     });

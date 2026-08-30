@@ -35,7 +35,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     <div class="nav-in">
       <Marchio href="/" />
       <nav class="nav-right" aria-label="Menu principale">
-        <a href="/portafogli/" class="hideable">Portafogli</a>
+        <a href="/prodotti/" class="hideable">Prodotti</a>
         <a href="/chi-siamo/" class="hideable">Il laboratorio</a>
         <a href="/contatti/" class="hideable">Contatti</a>
         <a href="/carrello/">Carrello (<span id="contatore-carrello">0</span>)</a>
@@ -58,7 +58,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       <a href="/privacy/">Privacy e cookie</a>
     </nav>
     <p class="fine">
-      Barbi Stefano — impresa individuale · Via Nazionale delle Puglie 98, 80026 Casoria (NA)<br />
+      Barbi Stefano<br />
       Partita IVA 10311791213 · REA NA-1097798 · <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>
     </p>
   </footer>
@@ -116,24 +116,30 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
 
   <style is:global>
     /* ─────────────────────────────────────────────────────────────────
-       Tema unico, scuro e caldo. È la scelta di un marchio, non una
+       Tema unico, chiaro e caldo. È la scelta di un marchio, non una
        preferenza di sistema: niente @media (prefers-color-scheme),
-       niente [data-theme]. Su fondo scuro la pelle risalta.
+       niente [data-theme]. Stesso asse cromatico di prima (crema/ottone),
+       solo con la luminosità invertita — cambiati il 27/08/2026 su
+       richiesta del Founder (troppo scuro), vedi RESOCONTO_RIFINITURA.
 
        L'ottone è il colore dello strumento che imprime le iniziali:
-       per questo è l'unico accento, e va usato con parsimonia.
-       Tutti i colori stanno qui e da nessun'altra parte.
-       ───────────────────────────────────────────────────────────────── */
+       per questo è l'unico accento, e va usato con parsimonia. Come
+       BORDO/FILETTO/CORNICE/RIBATTINO resta --brass anche sui fondi
+       chiari (contrasto ~2:1, ok per un elemento non testuale). Come
+       TESTO userebbe un ottone illeggibile: per quello c'è --brass-testo,
+       la stessa famiglia di colore ma scura abbastanza da leggersi.
+       Tutti i colori stanno qui e da nessun'altra parte. ─────────────── */
     :root {
-      --ground: #171310;
-      --raise: #211B17;
-      --sunk: #100D0B;
-      --ink: #F2EAE0;
-      --ink2: #BCADA0;
-      --ink3: #9B8C7E;
-      --line: #312822;
-      --line2: #4A3D34;
+      --ground: #F2EAE0;
+      --raise: #FBF6EC;
+      --sunk: #E3D8C7;
+      --ink: #211B17;
+      --ink2: #5C4F45;
+      --ink3: #6E6355;
+      --line: #CFC3B4;
+      --line2: #BBAFA0;
       --brass: #C6A15B;
+      --brass-testo: #7A5D28;
       --blu: #7E97C6;
       --bordeaux: #C97F8B;
       --marrone: #BE9163;
@@ -142,13 +148,13 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
          e i filetti trasparenti (rgba). Stanno qui perché anche una
          trasparenza è un colore, e i colori non si scrivono nei componenti. */
       --brass-rgb: 198, 161, 91;
-      --ink-rgb: 242, 234, 224;
+      --ink-rgb: 33, 27, 23;
 
       --f-display: "Bodoni Moda", Didot, "Times New Roman", serif;
       --f-text: "EB Garamond", Garamond, Georgia, serif;
       --f-label: "Archivo", system-ui, sans-serif;
 
-      color-scheme: dark;
+      color-scheme: light;
     }
 
     * { box-sizing: border-box; }
@@ -187,7 +193,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     }
     h2 { font-size: clamp(27px, 3.7vw, 42px); line-height: 1.14; }
     /* Una parola in corsivo e in ottone. Una sola. */
-    h1 em, h2 em { font-style: italic; color: var(--brass); }
+    h1 em, h2 em { font-style: italic; color: var(--brass-testo); }
     h3 { font-family: var(--f-display); font-weight: 400; font-size: 23px; margin: 0 0 6px; }
 
     .lede { font-size: clamp(18px, 2.1vw, 21px); color: var(--ink2); max-width: 52ch; margin: 0 auto; line-height: 1.6; }
@@ -195,7 +201,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     .eyebrow {
       font-family: var(--f-label); font-size: 10.5px; font-weight: 600;
       letter-spacing: .24em; text-indent: .24em; text-transform: uppercase;
-      color: var(--brass); margin: 0 0 22px;
+      color: var(--brass-testo); margin: 0 0 22px;
     }
 
     /* ---- testata ---- */
@@ -233,20 +239,20 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       display: inline-block;
       font-family: var(--f-label); font-size: 12.5px; font-weight: 600;
       letter-spacing: .16em; text-transform: uppercase;
-      background: var(--brass); color: var(--ground);
+      background: var(--brass); color: var(--ink);
       border: 1px solid var(--brass); padding: 17px 26px;
       text-decoration: none; text-align: center; cursor: pointer;
     }
     .buy:hover, .pulsante:hover { filter: brightness(1.08); }
     .buy:disabled, .pulsante:disabled, .pulsante[aria-disabled="true"] { opacity: .45; cursor: not-allowed; filter: none; }
-    .buy.soon, .pulsante-secondario { background: transparent; color: var(--brass); }
+    .buy.soon, .pulsante-secondario { background: transparent; color: var(--brass-testo); }
 
     /* ---- prezzo, ricorre su scheda e pagina prodotto ---- */
     .p-price { font-family: var(--f-display); font-size: 23px; margin-top: 12px; font-variant-numeric: tabular-nums; }
     .p-price em { font-style: italic; font-size: 15px; color: var(--ink3); margin-left: 10px; }
     .p-kick {
       font-family: var(--f-label); font-size: 10px; font-weight: 600; letter-spacing: .19em;
-      text-transform: uppercase; color: var(--brass); margin: 22px 0 0;
+      text-transform: uppercase; color: var(--brass-testo); margin: 22px 0 0;
     }
 
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 46px; }
@@ -258,7 +264,12 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     .pagina-testo h2 { font-size: clamp(22px, 2.6vw, 27px); margin: 44px 0 12px; }
     .pagina-testo p { margin: 0 0 20px; }
     .pagina-testo li { margin-bottom: 8px; }
-    .pagina-testo a { color: var(--brass); }
+    /* :not(.pulsante) impedisce a questa regola di vincere sul colore del
+       testo bottone quando un .pulsante sta dentro una pagina di testo (es.
+       "Compila il modulo di recesso"): senza, .pagina-testo a (0,1,1) batte
+       .pulsante (0,1,0) per specificità e il bottone diventa illeggibile
+       (ottone su ottone). */
+    .pagina-testo a:not(.pulsante) { color: var(--brass-testo); }
 
     .riquadro { border: 1px solid var(--line); background: var(--raise); padding: 26px; margin-top: 34px; }
     .riquadro h2 { margin-top: 0; }
@@ -271,11 +282,9 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
     }
 
-    hr.div { border: 0; border-top: 1px solid var(--line2); margin: 0; }
-
     .salta-contenuto {
       position: absolute; left: -999px; top: 0;
-      background: var(--brass); color: var(--ground);
+      background: var(--brass); color: var(--ink);
       padding: 12px 16px; z-index: 100;
       font-family: var(--f-label); font-size: 12px; font-weight: 600;
       letter-spacing: .1em; text-transform: uppercase;
@@ -306,7 +315,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       gap: 14px 20px; justify-content: space-between;
     }
     .cookie-banner__testo { margin: 0; font-size: 16.5px; color: var(--ink2); flex: 1 1 260px; line-height: 1.5; }
-    .cookie-banner__testo a { color: var(--brass); }
+    .cookie-banner__testo a { color: var(--brass-testo); }
     .cookie-banner__azioni { display: flex; gap: 10px; }
     .cookie-banner__azioni .pulsante { padding: 12px 18px; font-size: 11px; }
 

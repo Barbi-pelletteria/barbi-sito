@@ -15,9 +15,15 @@ export const EMAIL_CONTATTO = 'stefano-barbi@libero.it';
 // Sovrapprezzo per l'incisione delle iniziali (in centesimi). +10,00 €.
 export const INIZIALI_CENTESIMI = 1000;
 
-// Una sola categoria: "Portafogli". Con due prodotti le altre non servono.
+// Tre categorie. Portachiavi e borse sono reali (il racconto lo dice già:
+// "arriveranno gli altri pezzi che Stefano porta già in fiera — borse,
+// portachiavi") ma non ancora in laboratorio pronti per il sito: restano
+// vuote finché non arrivano pezzi veri, mai riempite a intuito (STATO.md,
+// divieto 3).
 export const categorie = [
   { slug: 'portafogli', nome: 'Portafogli' },
+  { slug: 'portachiavi', nome: 'Portachiavi' },
+  { slug: 'borse', nome: 'Borse' },
 ];
 
 // Blocco "Come si cura", identico su entrambe le schede (testo verbatim).

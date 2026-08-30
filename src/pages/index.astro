@@ -3,7 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import Citazione from '../components/Citazione.astro';
 import ComeNasce from '../components/ComeNasce.astro';
-import Racconto from '../components/Racconto.astro';
 import ConfrontoSpessore from '../components/ConfrontoSpessore.astro';
 import { prodotti } from '../data/prodotti.js';
 ---
@@ -11,9 +10,10 @@ import { prodotti } from '../data/prodotti.js';
   <!-- 2 · titolo grande centrato, una parola in corsivo ottone -->
   <div class="contenitore">
     <section class="hero">
-      <p class="eyebrow">Laboratorio di pelletteria · Campania</p>
+      <p class="eyebrow">Laboratorio di pelletteria</p>
       <h1>Trentaquattro anni di mestiere, in <em>un portafoglio</em></h1>
-      <p class="lede">Stefano Barbi lavora la pelle dal 1992. Per molti di quegli anni l’ha fatta per marchi che portavano il nome di qualcun altro. Dal 2023 mette il proprio.</p>
+      <p class="lede">Stefano Barbi lavora la pelle dal 1992.<br />Per molti di quegli anni l’ha fatto per marchi che portavano il nome di qualcun altro.<br />Dal 2023 decide di dare vita al proprio cognome.</p>
+      <a class="pulsante hero-cta" href="/prodotti/">Scopri i prodotti</a>
     </section>
   </div>
 
@@ -44,20 +44,29 @@ import { prodotti } from '../data/prodotti.js';
     </section>
   </div>
 
-  <!-- 6 · la citazione di Stefano -->
+  <!--
+    Rifinitura 27/08/2026: il racconto lungo in sei capitoli è stato tolto
+    da qui — resta solo su /chi-siamo/ (PACCHETTO_RIFINITURA, punto 3). La
+    home si chiude con la citazione breve (che ora porta un link a
+    /chi-siamo/) e con "Come nasce un portafoglio", che resta perché è
+    visivo e breve, non un secondo racconto da leggere.
+  -->
+
+  <!-- 6 · la citazione di Stefano, con link alla storia -->
   <Citazione />
 
   <!-- 7 · come nasce un portafoglio -->
   <ComeNasce />
-
-  <hr class="div" />
-
-  <!-- 8 · il racconto lungo -->
-  <Racconto />
 </Layout>
 
 <style>
   .hero { padding: 74px 0 0; text-align: center; }
+  /*
+    Rifinitura 27/08/2026: chi apre il sito vuole comprare — un tasto grande
+    verso il catalogo entra nel primo schermo, senza aspettare lo scroll
+    fino alle due schede prodotto più in basso.
+  */
+  .hero-cta { margin-top: 40px; font-size: 13.5px; padding: 19px 34px; }
 
   .hero-frame {
     margin-top: 52px;
@@ -76,7 +85,7 @@ import { prodotti } from '../data/prodotti.js';
   }
   .hero-frame span {
     font-family: var(--f-label); font-size: 10.5px; font-weight: 600;
-    letter-spacing: .2em; text-transform: uppercase; color: var(--ink3);
+    letter-spacing: .2em; text-transform: uppercase; color: var(--ink2);
   }
 
   .strip { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }

@@ -1,6 +1,13 @@
 ---
-// Il racconto lungo del laboratorio. Sta nella home E resta come pagina a sé
-// (/chi-siamo/): per questo è un componente e non testo scritto due volte.
+// Il racconto lungo del laboratorio. Dal 27/08/2026 vive solo su /chi-siamo/
+// (PACCHETTO_RIFINITURA, punto 3 — prima stava anche in home). Resta un
+// componente a sé perché lo stesso testo non va scritto due volte.
+//
+// Intestazione "Chi è Stefano?" a sinistra, non centrata: voluta dal Founder
+// il 27/08/2026 al posto del vecchio occhiello "Il laboratorio" + titolo
+// "Stefano" centrati. Da quando il componente vive solo su chi-siamo, il
+// titolo è sempre un h1 — tolta la prop `titolo` che serviva a renderlo h2
+// quando il racconto stava anche in home.
 //
 // Testi verbatim dall'anteprima approvata. Nel capitolo "2023 · Il proprio
 // nome" il nome del figlio di Stefano era stato tolto il 26/08/2026 (restava
@@ -12,14 +19,9 @@
 // dove mancavano le parole di Stefano. Sostituiti il 27/08/2026 con le sue
 // frasi vere, verbatim, arrivate dal QG: nel racconto non resta nessun
 // placeholder.
-const { titolo = 'h2' } = Astro.props;
-const Titolo = titolo;
 ---
 <section class="sec contenitore">
-  <div class="sec-top">
-    <p class="eyebrow">Il laboratorio</p>
-    <Titolo>Stefano</Titolo>
-  </div>
+  <h1 class="story-title">Chi è Stefano?</h1>
 
   <div class="narrow story">
     <h3>1992</h3>
@@ -45,10 +47,10 @@ const Titolo = titolo;
     </div>
 
     <h3>Oggi</h3>
-    <p>Questo sito è la prima volta che i portafogli di Stefano si possono comprare senza aspettare che la fiera passi dalla vostra città. Quello che trovate qui esce dallo stesso banco di lavoro, dalle stesse mani e dalla stessa pelle: cambia soltanto il modo in cui arriva fino a voi.</p>
+    <p>Questo sito è la prima volta che i portafogli di Stefano si possono comprare senza aspettare che la fiera passi dalla tua città. Quello che trovi qui esce dallo stesso banco di lavoro, dalle stesse mani e dalla stessa pelle: cambia soltanto il modo in cui arriva fino a te.</p>
 
     <h3>Dove vogliamo andare</h3>
-    <p>Per ora trovate due modelli e tre colori, ed è esattamente quello che c’è in laboratorio: non abbiamo messo online niente che non possiamo spedirvi oggi. Nei prossimi mesi arriveranno gli altri pezzi che Stefano porta già in fiera — borse, portachiavi, altri portafogli — e i colori che qui ancora non ci sono.</p>
+    <p>Per ora trovi due modelli e tre colori, ed è esattamente quello che c’è in laboratorio: non abbiamo messo online niente che non possiamo spedirti oggi. Nei prossimi mesi arriveranno gli altri pezzi che Stefano porta già in fiera — borse, portachiavi, altri portafogli — e i colori che qui ancora non ci sono.</p>
     <p>Cresceremo alla velocità con cui una persona riesce a produrre, non a quella di un magazzino. È il limite del lavoro fatto così, ed è anche l’unica ragione per cui vale la pena comprarlo.</p>
 
     <p>Il sogno di Stefano per il laboratorio non si ferma al prossimo portafoglio: lo vede diventare un punto di riferimento per l’eccellenza artigianale, un posto dove i giovani possano imparare un mestiere che lui è convinto tornerà centrale — perché chi oggi impara a lavorare la pelle con le mani avrà domani, ne è certo, uno dei mestieri più belli che esistano. Formare chi verrà dopo non è un’idea lontana: è il modo in cui Stefano vuole che quello che suo padre gli ha lasciato continui a vivere, oltre di lui.</p>
@@ -56,6 +58,16 @@ const Titolo = titolo;
 </section>
 
 <style>
+  /* A sinistra, non centrato: l'allineamento di default di .sec-top (in
+     Layout.astro) è center, per questo qui non si usa quella classe. Il
+     riquadro condivide larghezza e centratura di .narrow così il testo
+     "Chi è Stefano?" risulta allineato con il testo del racconto sotto. */
+  .story-title {
+    text-align: left;
+    max-width: 660px;
+    margin: 0 auto 36px;
+  }
+
   /* Gli occhielli dei capitoli sono etichette in ottone, non titoli Bodoni. */
   .story h3 {
     font-family: var(--f-label);
@@ -63,7 +75,7 @@ const Titolo = titolo;
     font-weight: 600;
     letter-spacing: .2em;
     text-transform: uppercase;
-    color: var(--brass);
+    color: var(--brass-testo);
     margin: 52px 0 14px;
   }
   .story h3:first-child { margin-top: 0; }
@@ -76,7 +88,7 @@ const Titolo = titolo;
     font-size: 64px;
     line-height: .82;
     padding: 6px 12px 0 0;
-    color: var(--brass);
+    color: var(--brass-testo);
   }
 
   .figures {
@@ -94,7 +106,7 @@ const Titolo = titolo;
     font-family: var(--f-display);
     font-size: 34px;
     font-weight: 400;
-    color: var(--brass);
+    color: var(--brass-testo);
     line-height: 1;
     font-variant-numeric: tabular-nums;
   }

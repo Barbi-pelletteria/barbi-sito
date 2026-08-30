@@ -1,10 +1,16 @@
 ---
 // Citazione a tutta larghezza fra i prodotti e il processo.
 // Testo verbatim dall'anteprima approvata.
+//
+// Il link a /chi-siamo/ è stato aggiunto il 27/08/2026 (PACCHETTO_RIFINITURA):
+// da quando il racconto lungo è stato tolto dalla home, questa è l'unica
+// porta che ci resta verso la storia di Stefano. Solo qui perché Citazione
+// è usato solo in home.
 ---
 <div class="quote">
   <blockquote>«Un portafoglio ridimensionato per lo stile di vita odierno.»</blockquote>
   <cite>Stefano Barbi, sul modello Sottile</cite>
+  <a class="quote__link" href="/chi-siamo/">Scopri la nostra storia</a>
 </div>
 
 <style>
@@ -58,6 +64,17 @@
     font-weight: 600;
     letter-spacing: .2em;
     text-transform: uppercase;
-    color: var(--brass);
+    color: var(--brass-testo);
   }
+  .quote__link {
+    display: inline-block;
+    margin-top: 26px;
+    font-family: var(--f-label);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--brass-testo);
+  }
+  .quote__link:hover, .quote__link:focus-visible { color: var(--brass); }
 </style>

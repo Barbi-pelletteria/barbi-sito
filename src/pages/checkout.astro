@@ -15,6 +15,12 @@ import Layout from '../layouts/Layout.astro';
       <div id="checkout-contenuto" hidden>
         <ul id="riepilogo-righe" class="riepilogo-righe"></ul>
         <p class="checkout__totale">Totale <span id="checkout-totale"></span></p>
+
+        <label class="checkout__consenso">
+          <input type="checkbox" id="consenso-marketing" />
+          <span>Voglio ricevere email su nuovi arrivi, offerte e promozioni. Le email sugli ordini arrivano comunque: non dipendono da questa scelta.</span>
+        </label>
+
         <button class="pulsante" id="btn-paga">Procedi al pagamento</button>
         <p id="errore-checkout" class="errore-checkout" hidden></p>
       </div>
@@ -91,10 +97,12 @@ import Layout from '../layouts/Layout.astro';
         })
         .filter(Boolean);
 
+      const consensoMarketing = document.getElementById('consenso-marketing')?.checked || false;
+
       const risposta = await fetch('/.netlify/functions/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, siteUrl: window.location.origin }),
+        body: JSON.stringify({ items, siteUrl: window.location.origin, consensoMarketing }),
       });
 
       let dati = null;
@@ -131,7 +139,7 @@ import Layout from '../layouts/Layout.astro';
 
   .nota-test {
     font-family: var(--f-label); font-size: 12px; line-height: 1.7; letter-spacing: .04em;
-    color: var(--ink3); background: var(--sunk); border-left: 2px solid var(--line2);
+    color: var(--ink2); background: var(--sunk); border-left: 2px solid var(--line2);
     padding: 14px 16px; margin: 0 0 30px;
   }
   .checkout__vuoto-testo { color: var(--ink2); margin: 0 0 26px; }
@@ -146,6 +154,15 @@ import Layout from '../layouts/Layout.astro';
     margin: 0 0 26px; font-family: var(--f-display); font-size: 27px;
     font-variant-numeric: tabular-nums;
   }
+
+  .checkout__consenso {
+    display: flex; gap: 12px; align-items: flex-start; cursor: pointer;
+    margin: 0 0 26px; padding: 17px; border: 1px solid var(--line); background: var(--raise);
+  }
+  .checkout__consenso input[type="checkbox"] {
+    margin: 3px 0 0; width: 17px; height: 17px; accent-color: var(--brass); flex: 0 0 auto;
+  }
+  .checkout__consenso span { font-size: 15.5px; color: var(--ink2); line-height: 1.5; }
 
   /*
     La tavolozza non prevede un rosso e l'ottone è l'unico accento: l'errore
