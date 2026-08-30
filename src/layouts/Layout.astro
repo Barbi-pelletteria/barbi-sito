@@ -39,8 +39,16 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
         <a href="/chi-siamo/" class="hideable">Il laboratorio</a>
         <a href="/contatti/" class="hideable">Contatti</a>
         <a href="/carrello/">Carrello (<span id="contatore-carrello">0</span>)</a>
+        <button type="button" class="nav-burger" id="nav-burger" aria-expanded="false" aria-controls="nav-menu-mobile" aria-label="Apri il menu">
+          <span></span><span></span><span></span>
+        </button>
       </nav>
     </div>
+    <nav class="nav-menu-mobile" id="nav-menu-mobile" aria-label="Menu principale, mobile" hidden>
+      <a href="/prodotti/">Prodotti</a>
+      <a href="/chi-siamo/">Il laboratorio</a>
+      <a href="/contatti/">Contatti</a>
+    </nav>
   </header>
 
   <main id="contenuto">
@@ -113,6 +121,18 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     }
     aggiornaContatore();
     window.addEventListener('barbi:cart-changed', aggiornaContatore);
+  </script>
+
+  <script>
+    // Tasto menu mobile: mostra/nasconde il pannello con le sezioni che
+    // da computer stanno nella barra in alto (Prodotti, Il laboratorio,
+    // Contatti), nascoste su schermi stretti per mancanza di spazio.
+    const burger = document.getElementById('nav-burger');
+    const menuMobile = document.getElementById('nav-menu-mobile');
+    burger?.addEventListener('click', () => {
+      menuMobile.hidden = !menuMobile.hidden;
+      burger.setAttribute('aria-expanded', String(!menuMobile.hidden));
+    });
   </script>
 
   <style is:global>
@@ -214,9 +234,38 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       text-transform: uppercase; color: var(--ink2); text-decoration: none; white-space: nowrap;
     }
     .nav a:hover { color: var(--brass); }
+
+    /* Tasto menu mobile (tre lineette): invisibile da computer, il menu
+       a comparsa sotto sostituisce i link .hideable nascosti in basso. */
+    .nav-burger {
+      display: none;
+      flex-direction: column; justify-content: center; align-items: stretch;
+      gap: 5px; width: 30px; height: 30px; padding: 0; margin: 0;
+      background: none; border: 0; cursor: pointer;
+    }
+    .nav-burger span { display: block; height: 2px; background: var(--ink); }
+
+    /* display:none di base, senza condizioni: a computer il pannello non
+       esiste mai, qualunque sia lo stato di [hidden] — nessun conflitto
+       di specificità possibile (unica dichiarazione di display in gioco). */
+    .nav-menu-mobile { display: none; }
+
     @media (max-width: 680px) {
       .nav a.hideable { display: none; }
       .nav-in { gap: 14px; padding: 16px 22px; }
+      .nav-burger { display: flex; }
+      .nav-menu-mobile {
+        display: flex; flex-direction: column;
+        border-top: 1px solid var(--line);
+        background: var(--raise);
+      }
+      /* stessa causa del bug banner cookie (C-13): serve sempre questa
+         regola più specifica, altrimenti [hidden] non vince su display:flex. */
+      .nav-menu-mobile[hidden] { display: none; }
+      .nav-menu-mobile a {
+        padding: 16px 22px; border-bottom: 1px solid var(--line);
+      }
+      .nav-menu-mobile a:last-child { border-bottom: 0; }
     }
 
     /* ---- pastiglie colore (scheda + pagina prodotto) ---- */
