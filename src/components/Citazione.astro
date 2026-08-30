@@ -9,11 +9,36 @@
 
 <style>
   .quote {
+    position: relative;
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
     padding: 66px 22px;
     text-align: center;
+    background-color: var(--raise);
+    /* Cornice a cucitura sui due lati (i filetti orizzontali restano quelli
+       sopra/sotto) più una grana bassissima generata via feTurbulence: zero
+       asset caricati, sotto i 3kb. */
+    background-image:
+      repeating-linear-gradient(180deg, rgba(var(--brass-rgb), .6) 0 4px, transparent 4px 8px),
+      repeating-linear-gradient(180deg, rgba(var(--brass-rgb), .6) 0 4px, transparent 4px 8px),
+      url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='120'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.85'%20numOctaves='2'%20stitchTiles='stitch'%20result='t'/%3E%3CfeColorMatrix%20in='t'%20type='matrix'%20values='0%200%200%200%200.7765%200%200%200%200%200.6314%200%200%200%200%200.3569%200%200%200%200.05%200'/%3E%3C/filter%3E%3Crect%20width='120'%20height='120'%20filter='url(%23n)'/%3E%3C/svg%3E");
+    background-position: left top, right top, center;
+    background-size: 1px 100%, 1px 100%, 120px 120px;
+    background-repeat: no-repeat, no-repeat, repeat;
   }
+  /* Dettaglio angolare: due ribattini dove il bordo cucito incontra il filetto. */
+  .quote::before,
+  .quote::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--brass);
+  }
+  .quote::before { left: 10px; }
+  .quote::after { right: 10px; }
   blockquote {
     margin: 0 auto;
     max-width: 24ch;

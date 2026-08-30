@@ -2,14 +2,16 @@
 // Il racconto lungo del laboratorio. Sta nella home E resta come pagina a sé
 // (/chi-siamo/): per questo è un componente e non testo scritto due volte.
 //
-// Testi verbatim dall'anteprima approvata, con una sola differenza decisa dal
-// QG il 26/08/2026: nel capitolo "2023 · Il proprio nome" il nome del figlio
-// di Stefano è stato tolto (resta "Con il figlio che passa a dare una mano
-// quando serve"), perché sul sito esiste solo Stefano e il suo laboratorio.
+// Testi verbatim dall'anteprima approvata. Nel capitolo "2023 · Il proprio
+// nome" il nome del figlio di Stefano era stato tolto il 26/08/2026 (restava
+// "Con il figlio che passa a dare una mano quando serve"). Il QG l'ha
+// rimesso il 27/08/2026: è un fatto vero e verificato, non il nome di chi
+// gestisce il sito (quelli restano fuori) ma il figlio di Stefano.
 //
-// I due <span class="gap"> in ottone sono PROMEMORIA VISIBILI: segnano i punti
-// dove mancano le parole di Stefano. Vanno tolti solo quando arrivano le sue
-// frasi vere — non riempiti d'invenzione.
+// I due <span class="gap"> in ottone erano PROMEMORIA VISIBILI per i punti
+// dove mancavano le parole di Stefano. Sostituiti il 27/08/2026 con le sue
+// frasi vere, verbatim, arrivate dal QG: nel racconto non resta nessun
+// placeholder.
 const { titolo = 'h2' } = Astro.props;
 const Titolo = titolo;
 ---
@@ -23,14 +25,14 @@ const Titolo = titolo;
     <h3>1992</h3>
     <p class="first">Stefano Barbi ha diciassette anni quando comincia a lavorare la pelle. Non è una scelta di carriera. In Campania, allora, la pelletteria è un mestiere che si impara stando accanto a chi lo sa già fare: si guarda, si prova, si sbaglia, si ricomincia. Le prime cose che gli riescono bene sono quelle che nessuno vede — un bordo dritto, una piega che non si apre.</p>
 
-    <span class="gap">Da completare — da chi ha imparato, dove, il primo pezzo che ha fatto tutto da solo</span>
+    <p>Prima della pelle ci sono state le scarpe: la sua infanzia si consuma tra forme e pellami, in una famiglia dove il mestiere si tramanda da prima di lui — il padre lavorava già così. Quando arriva il momento di imparare per davvero, è il fratello a passargli il testimone: gli insegna la pelletteria, un passo oltre le scarpe di famiglia. Stefano ci si ritrova dentro senza cercarlo, gli piace, e da lì non si ferma più.</p>
 
     <h3>Gli anni per gli altri</h3>
     <p>Per gran parte della sua vita professionale Stefano ha fatto portafogli, borse e cinture che portavano il nome di qualcun altro. Marchi più conosciuti del suo. È il modo in cui funziona davvero la pelletteria italiana: dietro molte etichette famose ci sono laboratori piccoli e mani che nessuno nomina.</p>
     <p>Sono anche gli anni in cui si impara la parte lunga del mestiere. Quanto tirare un filo. Quando una pelle è pronta e quando no. Perché due pezzi tagliati dallo stesso pellame, a distanza di dieci centimetri, non invecchiano allo stesso modo.</p>
 
     <h3>2023 · Il proprio nome</h3>
-    <p>Poi Stefano ha deciso di mettere il proprio nome sui pezzi che fa. Ha aperto la sua attività e il suo laboratorio, in Campania, e ha ricominciato da capo: senza un marchio noto alle spalle, senza vetrine, senza catalogo. Con il figlio che passa a dare una mano quando serve.</p>
+    <p>Poi Stefano ha deciso di mettere il proprio nome sui pezzi che fa. Ha aperto la sua attività e il suo laboratorio, in Campania, e ha ricominciato da capo: senza un marchio noto alle spalle, senza vetrine, senza catalogo. Con il figlio Jacopo che passa a dare una mano quando serve.</p>
 
     <h3>Le fiere</h3>
     <p>Da allora vende come si vendeva prima che esistessero i negozi: di persona. Quattro fiere al mese, una cinquantina in un anno, in giro per l’Italia. Un banco, i portafogli in fila, e la parte che nessun sito potrà mai sostituire — qualcuno che prende un pezzo in mano, lo apre, lo gira contro la luce, e chiede quanto costa.</p>
@@ -49,7 +51,7 @@ const Titolo = titolo;
     <p>Per ora trovate due modelli e tre colori, ed è esattamente quello che c’è in laboratorio: non abbiamo messo online niente che non possiamo spedirvi oggi. Nei prossimi mesi arriveranno gli altri pezzi che Stefano porta già in fiera — borse, portachiavi, altri portafogli — e i colori che qui ancora non ci sono.</p>
     <p>Cresceremo alla velocità con cui una persona riesce a produrre, non a quella di un magazzino. È il limite del lavoro fatto così, ed è anche l’unica ragione per cui vale la pena comprarlo.</p>
 
-    <span class="gap">Da completare — una frase di Stefano, sue parole, su cosa vuole che diventi</span>
+    <p>Il sogno di Stefano per il laboratorio non si ferma al prossimo portafoglio: lo vede diventare un punto di riferimento per l’eccellenza artigianale, un posto dove i giovani possano imparare un mestiere che lui è convinto tornerà centrale — perché chi oggi impara a lavorare la pelle con le mani avrà domani, ne è certo, uno dei mestieri più belli che esistano. Formare chi verrà dopo non è un’idea lontana: è il modo in cui Stefano vuole che quello che suo padre gli ha lasciato continui a vivere, oltre di lui.</p>
   </div>
 </section>
 
@@ -75,19 +77,6 @@ const Titolo = titolo;
     line-height: .82;
     padding: 6px 12px 0 0;
     color: var(--brass);
-  }
-
-  /* Promemoria visibili: qui mancano le parole di Stefano. */
-  .story .gap {
-    display: block;
-    font-family: var(--f-label);
-    font-size: 11px;
-    letter-spacing: .06em;
-    color: var(--brass);
-    border-left: 2px solid var(--brass);
-    padding: 8px 0 8px 14px;
-    margin: 0 0 20px;
-    opacity: .85;
   }
 
   .figures {

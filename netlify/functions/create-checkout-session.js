@@ -52,15 +52,17 @@ exports.handler = async (event) => {
     const unitAmount = (it) =>
       (it.prezzoCentesimi || 0) + (it.iniziali ? it.inizialiCentesimi || 0 : 0);
 
+    // Nome leggibile nel dashboard/app Stripe di Stefano: il colore separato
+    // da un trattino lungo, le iniziali fra parentesi se presenti. Da questo
+    // testo, e da questo soltanto, Stefano capisce cosa preparare.
     const line_items = items.map((it) => {
-      const dettagli = [it.colore, it.iniziali ? `iniziali: ${it.iniziali}` : null]
-        .filter(Boolean)
-        .join(' · ');
       const nome = it.nome || it.slug;
+      const conColore = it.colore ? `${nome} — ${it.colore}` : nome;
+      const nomeCompleto = it.iniziali ? `${conColore} (iniziali: ${it.iniziali})` : conColore;
       return {
         price_data: {
           currency: 'eur',
-          product_data: { name: dettagli ? `${nome} (${dettagli})` : nome },
+          product_data: { name: nomeCompleto },
           unit_amount: unitAmount(it),
         },
         quantity: it.quantita,
@@ -76,6 +78,10 @@ exports.handler = async (event) => {
       mode: 'payment',
       payment_method_types: ['card'],
       line_items,
+      // Solo Italia per ora, coerente con DECISIONI.md D-006: l'estero si
+      // valuta dopo. Senza questo campo Stripe non chiede un indirizzo e
+      // Stefano non saprebbe dove spedire.
+      shipping_address_collection: { allowed_countries: ['IT'] },
       success_url: `${origin}/conferma-ordine?session_id={CHECKOUT_SESSION_ID}&value=${(totaleCentesimi / 100).toFixed(2)}&currency=EUR`,
       cancel_url: `${origin}/carrello`,
     });
