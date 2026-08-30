@@ -27,22 +27,24 @@ const passi = [
   },
 ];
 ---
-<section class="sec contenitore">
-  <div class="sec-top">
-    <h2>Come nasce <em>un portafoglio</em></h2>
-    <p>Due o tre ore di lavoro. Ecco dove finiscono.</p>
-  </div>
-  <div class="steps">
-    {passi.map((p) => (
-      <div class="step">
-        <div>
-          <h3>{p.titolo}</h3>
-          <p>{p.testo}</p>
+<div class="contenitore">
+  <section class="sec">
+    <div class="sec-top">
+      <h2>Come nasce <em>un portafoglio</em></h2>
+      <p>Due o tre ore di lavoro. Ecco dove finiscono.</p>
+    </div>
+    <div class="steps">
+      {passi.map((p) => (
+        <div class="step">
+          <div>
+            <h3>{p.titolo}</h3>
+            <p>{p.testo}</p>
+          </div>
         </div>
-      </div>
-    ))}
-  </div>
-</section>
+      ))}
+    </div>
+  </section>
+</div>
 
 <style>
   .steps { counter-reset: s; display: grid; gap: 16px; max-width: 760px; margin: 0 auto; }
