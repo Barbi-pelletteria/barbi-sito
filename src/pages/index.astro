@@ -41,6 +41,8 @@ import { prodotti } from '../data/prodotti.js';
       </div>
 
       <ConfrontoSpessore prodotti={prodotti} class="confronto-home" />
+
+      <p class="prossimamente">Presto anche borse e portachiavi. <a href="/prodotti/">Guarda tutti i prodotti</a>.</p>
     </section>
   </div>
 
@@ -103,4 +105,11 @@ import { prodotti } from '../data/prodotti.js';
   }
 
   .confronto-home { margin: 56px auto 0; }
+
+  /* Un accenno, non una sezione (PACCHETTO_VETRINA punto 7): la home resta
+     sfoltita, niente card intere per categorie ancora vuote. */
+  .prossimamente {
+    text-align: center; margin: 44px 0 0; color: var(--ink3); font-size: 15px;
+  }
+  .prossimamente a { color: var(--brass-testo); }
 </style>

@@ -54,6 +54,11 @@ export const prodotti = [
     // Riga singola mostrata sulla scheda in home (testo verbatim dall'anteprima).
     sommario: 'Mezzo centimetro di spessore. Sta nella tasca interna di una giacca senza deformarla.',
     prezzoCentesimi: 4900,
+    // Gli stessi due fatti già scritti in "Capienza" qui sotto, ma in forma
+    // strutturata: servono a TabellaConfronto.astro per non dover leggere
+    // (e sbagliare) una frase libera.
+    tascheCarte: 8,
+    portamonete: false,
     immagine: '/prodotti/placeholder.svg',
     descrizione: [
       'Otto tasche per le carte, lo spazio per i documenti e per le banconote, e nient’altro. Chiuso è alto 8,5 cm e spesso poco più di mezzo centimetro: sta nella tasca interna di una giacca senza deformarla, e in quella dei pantaloni senza farsi sentire.',
@@ -84,6 +89,8 @@ export const prodotti = [
     // Riga singola mostrata sulla scheda in home (testo verbatim dall'anteprima).
     sommario: 'Il classico di tutti i giorni. Non lascia fuori niente, spiccioli compresi.',
     prezzoCentesimi: 5500,
+    tascheCarte: 5,
+    portamonete: true,
     immagine: '/prodotti/placeholder.svg',
     descrizione: [
       'Cinque tasche per le carte, lo spazio per documenti e banconote, e il portamonete. È il portafoglio classico: quello che serve quando in tasca finisce di tutto, spiccioli compresi.',

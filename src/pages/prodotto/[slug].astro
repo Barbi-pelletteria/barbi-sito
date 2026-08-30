@@ -97,6 +97,16 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
             <>
               <label for="iniziali" class="sr-only">Iniziali</label>
               <input type="text" id="iniziali" name="iniziali" maxlength="3" autocomplete="off" placeholder="es. G.B." class="opt__input" hidden />
+              <!--
+                Anteprima simbolica, CSS puro (PACCHETTO_VETRINA punto 8):
+                colore reale dello swatch selezionato, iniziali "impresse" via
+                text-shadow. Non è una foto della pelle: lo dice anche il testo
+                sotto, apposta.
+              -->
+              <div class="iniziali-anteprima" id="iniziali-anteprima" data-c={coloreIniziale.slug} hidden>
+                <span id="iniziali-anteprima-testo">AB</span>
+              </div>
+              <p class="iniziali-anteprima__nota" id="iniziali-anteprima-nota" hidden>Anteprima simbolica del colore e delle iniziali — non è una foto della pelle vera.</p>
             </>
           )}
         </div>
@@ -109,7 +119,6 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
               <button class="buy" type="button" id="btn-aggiungi">Aggiungi al carrello</button>
             </div>
             <p id="disponibilita" class="avviso" hidden></p>
-            <p id="conferma-aggiunta" class="avviso avviso--ok" hidden>Aggiunto al carrello.</p>
           </form>
         ) : (
           <div class="non-in-vendita">
@@ -148,6 +157,8 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
       {prodotto.descrizione.map((par) => <p>{par}</p>)}
     </div>
   </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </Layout>
 
 <script type="application/json" id="prodotto-dati" is:inline set:html={JSON.stringify(datiClient)}></script>
@@ -173,7 +184,22 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
       const inputQ = document.getElementById('quantita');
       const inputIniziali = document.getElementById('iniziali');
       const disponibilita = document.getElementById('disponibilita');
-      const conferma = document.getElementById('conferma-aggiunta');
+      const toast = document.getElementById('toast');
+      let toastTimer = null;
+
+      // Notifica "toast" (PACCHETTO_VETRINA punto 3): non invasiva, sparisce
+      // da sola. Il testo include modello e colore, non solo "Aggiunto".
+      function mostraToast(messaggio) {
+        if (!toast) return;
+        toast.textContent = messaggio;
+        toast.hidden = false;
+        toast.classList.add('toast--visibile');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove('toast--visibile');
+          setTimeout(() => { toast.hidden = true; }, 200);
+        }, 2500);
+      }
 
       // Le pastiglie stanno fuori dal form, quindi la ricerca è sul documento:
       // c'è comunque un solo selettore colore per pagina.
@@ -245,8 +271,8 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
           items: [{ item_id: prodotto.slug, quantity: quantita }],
         });
 
-        conferma.hidden = false;
-        setTimeout(() => { conferma.hidden = true; }, 2500);
+        const nomeColore = prodotto.colori.find((x) => x.slug === colore)?.nome || colore;
+        mostraToast(`${prodotto.nome} — ${nomeColore} aggiunto al carrello.`);
         aggiorna();
       });
 
@@ -259,10 +285,18 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
       });
     }
 
-    // Sotto qui solo la vista: etichetta scorta accanto alle pastiglie e
-    // didascalia del segnaposto foto. Non tocca stock, carrello o VENDITA_ATTIVA.
+    // Sotto qui solo la vista: etichetta scorta accanto alle pastiglie,
+    // didascalia del segnaposto foto, anteprima iniziali. Non tocca stock,
+    // carrello o VENDITA_ATTIVA.
     const stockLabel = document.getElementById('stock-label');
     const didascalia = document.querySelector('#foto-pdp b');
+    const anteprima = document.getElementById('iniziali-anteprima');
+    const anteprimaTesto = document.getElementById('iniziali-anteprima-testo');
+    const anteprimaNota = document.getElementById('iniziali-anteprima-nota');
+
+    // Soglia scorte basse: PACCHETTO_VETRINA punto 1 — 5 pezzi o meno,
+    // sui numeri veri già in prodotti.js (nessuna soglia diversa altrove).
+    const SOGLIA_SCORTE_BASSE = 5;
 
     function aggiornaVista() {
       const scelto = document.querySelector('input[name="colore"]:checked');
@@ -270,16 +304,41 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
       const c = prodotto.colori.find((x) => x.slug === scelto.value);
       if (!c) return;
       if (stockLabel) {
-        stockLabel.textContent = c.stock > 0 ? `${c.nome} · ${c.stock} disponibili` : `${c.nome} · esaurito`;
+        const bassa = c.stock > 0 && c.stock <= SOGLIA_SCORTE_BASSE;
+        stockLabel.textContent =
+          c.stock === 0 ? `${c.nome} · esaurito`
+          : bassa ? `${c.nome} · solo ${c.stock} rimasti`
+          : `${c.nome} · ${c.stock} disponibili`;
+        stockLabel.classList.toggle('sw-label--scorte-basse', bassa);
       }
       if (didascalia) {
         didascalia.textContent = `Foto — ${prodotto.nome}, ${c.nome.toLowerCase()}`;
+      }
+      if (anteprima) {
+        anteprima.setAttribute('data-c', c.slug);
       }
     }
     document.querySelectorAll('input[name="colore"]').forEach((el) => {
       el.addEventListener('change', aggiornaVista);
     });
     aggiornaVista();
+
+    // Anteprima "impressione" delle iniziali (PACCHETTO_VETRINA punto 8):
+    // compare solo quando la casella iniziali è spuntata e c'è testo,
+    // segue il colore scelto sopra. Puro CSS/JS, zero immagini.
+    if (anteprima && anteprimaTesto) {
+      const inputIn = document.getElementById('iniziali');
+      function aggiornaAnteprimaIniziali() {
+        const valore = (inputIn?.value || '').trim().toUpperCase();
+        const mostra = !inputIn?.hidden && valore.length > 0;
+        anteprima.hidden = !mostra;
+        if (anteprimaNota) anteprimaNota.hidden = !mostra;
+        if (mostra) anteprimaTesto.textContent = valore;
+      }
+      inputIn?.addEventListener('input', aggiornaAnteprimaIniziali);
+      document.getElementById('iniziali-checkbox')?.addEventListener('change', aggiornaAnteprimaIniziali);
+      aggiornaAnteprimaIniziali();
+    }
   }
 </script>
 
@@ -308,6 +367,10 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
   .sw-wrap input:disabled + .sw { opacity: .32; }
   .sw-wrap input:focus-visible + .sw { outline: 2px solid var(--brass); outline-offset: 4px; }
 
+  /* Scorte basse (PACCHETTO_VETRINA punto 1): stesso ottone degli avvisi,
+     mai un rosso — la tavolozza non ne ha uno, vedi checkout.astro. */
+  .sw-label--scorte-basse { color: var(--brass-testo); font-weight: 600; }
+
   .opt { margin-top: 22px; padding: 17px; border: 1px solid var(--line); background: var(--raise); }
   .opt__label { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
   .opt__label--statico { cursor: default; }
@@ -318,6 +381,30 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
     margin-top: 14px; width: 9rem; padding: 11px; border: 1px solid var(--line2);
     background: var(--sunk); color: var(--ink); font-family: var(--f-label);
     font-size: 14px; letter-spacing: .1em; text-transform: uppercase;
+  }
+
+  /*
+    Anteprima iniziali (PACCHETTO_VETRINA punto 8): un riquadro nel colore
+    reale scelto, lettere "impresse" solo via text-shadow — nessun riempimento
+    pieno, per non sembrare un'etichetta stampata ma un'impronta nella pelle.
+  */
+  .iniziali-anteprima {
+    display: flex; align-items: center; justify-content: center;
+    width: 88px; height: 58px; margin-top: 14px; border: 1px solid var(--line2);
+  }
+  .iniziali-anteprima[data-c="blu"] { background: var(--blu); }
+  .iniziali-anteprima[data-c="bordeaux"] { background: var(--bordeaux); }
+  .iniziali-anteprima[data-c="marrone"] { background: var(--marrone); }
+  .iniziali-anteprima span {
+    font-family: var(--f-display); font-size: 23px; letter-spacing: .07em;
+    text-transform: uppercase; color: rgba(255, 255, 255, .16);
+    text-shadow:
+      -1px -1px 1px rgba(255, 255, 255, .5),
+      1px 1.5px 1.5px rgba(0, 0, 0, .55);
+  }
+  .iniziali-anteprima__nota {
+    margin: 8px 0 0; font-size: 12.5px; font-style: italic; color: var(--ink3);
+    max-width: 22rem;
   }
 
   .buy { margin-top: 26px; width: 100%; }
@@ -334,11 +421,40 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
   }
   .acquisto__riga .buy { width: auto; flex: 1 1 12rem; margin-top: 0; }
 
+  /*
+    Bottone carrello fisso su mobile (PACCHETTO_VETRINA punto 4): solo sotto
+    i 740px, sempre raggiungibile col pollice. Il padding-bottom sul form
+    evita che il bottone fisso copra l'ultimo contenuto durante lo scroll.
+  */
+  @media (max-width: 740px) {
+    .acquisto { padding-bottom: 76px; }
+    .acquisto__riga .buy {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+      width: 100%; flex: none; margin: 0; padding: 18px 26px;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, .12);
+    }
+  }
+
   .avviso { margin-top: 14px; font-size: 16.5px; color: var(--ink2); }
-  .avviso--ok { color: var(--brass-testo); }
 
   .non-in-vendita__nota { margin: 16px 0 0; font-size: 16.5px; color: var(--ink2); }
   .non-in-vendita__nota a { color: var(--brass-testo); }
+
+  /*
+    Toast (PACCHETTO_VETRINA punto 3): fisso, non invasivo, sparisce da solo
+    (2,5s, gestito in JS). Scuro anche sul tema chiaro — un contrasto
+    volutamente diverso dal resto della pagina rende la notifica riconoscibile.
+  */
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(8px);
+    max-width: calc(100% - 32px); z-index: 60;
+    background: var(--ink); color: var(--ground);
+    font-family: var(--f-label); font-size: 13px; font-weight: 600; letter-spacing: .03em;
+    padding: 15px 24px; text-align: center; box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+    opacity: 0; transition: opacity .2s ease, transform .2s ease;
+  }
+  .toast--visibile { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (max-width: 740px) { .toast { bottom: 92px; } }
 
   .confronto-pdp { margin-top: 36px; }
 

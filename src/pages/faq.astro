@@ -1,0 +1,46 @@
+---
+// FAQ aggiunte il 27/08/2026 (PACCHETTO_VETRINA, punto 5). Solo testo già
+// verificato: la cura è lo stesso blocco `curaProdotto` già sulla scheda
+// prodotto (non riscritto), la concia vegetale cita le parole dirette di
+// Stefano da DATI_REALI/BARBI_FATTI.md, il prezzo richiama D-007
+// (spedizione già inclusa, non un costo che compare dopo).
+import Layout from '../layouts/Layout.astro';
+import { curaProdotto } from '../data/prodotti.js';
+---
+<Layout title="Domande frequenti">
+  <div class="contenitore">
+    <section class="pagina-testo faq">
+      <h1>Domande frequenti</h1>
+
+      <article class="faq__voce">
+        <h2>Cos’è la concia vegetale, e perché questi portafogli non hanno protezioni chimiche?</h2>
+        <p>La pelle è di capra, conciata e tinta al vegetale, spessore 1,2-1,3 mm. Stefano la descrive così: «conciata e tinta naturalmente, senza protezioni chimiche: materiale vivo e delicato» — ed è insieme il pregio e il limite di questo materiale. Vivo, perché si segna e cambia tono con l’uso, diventando unico. Delicato, perché senza le protezioni sintetiche di una pelle trattata industrialmente teme più facilmente acqua, oli e sole: per questo vale la pena saperla curare.</p>
+      </article>
+
+      <article class="faq__voce">
+        <h2>{curaProdotto.titolo}</h2>
+        <p>{curaProdotto.intro}</p>
+        <ul>
+          {curaProdotto.punti.map((p) => <li>{p}</li>)}
+        </ul>
+        <p>{curaProdotto.chiusura}</p>
+      </article>
+
+      <article class="faq__voce">
+        <h2>Perché il prezzo è quello che è?</h2>
+        <p>Il prezzo che vedi è quello finale: comprende già la spedizione, non è un costo che si aggiunge dopo al checkout. Dentro ci sono anche le 2-3 ore di lavoro che richiede ogni pezzo — dal taglio della pelle ai bordi tinti a mano, uno per uno — e la pelle di capra conciata al vegetale, un materiale più delicato e più caro dei sintetici da lavorare.</p>
+      </article>
+
+      <p class="faq__altro">Altre domande? <a href="/contatti/">Scrivi a Stefano</a> o <a href="/prodotto-personalizzato/">chiedi un pezzo su misura</a>.</p>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .faq h1 { margin-bottom: 40px; }
+  .faq__voce { margin-bottom: 44px; padding-bottom: 44px; border-bottom: 1px solid var(--line); }
+  .faq__voce:last-of-type { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+  .faq__voce h2 { font-size: clamp(20px, 2.4vw, 24px); margin: 0 0 14px; }
+  .faq__altro { margin-top: 12px; color: var(--ink2); }
+  .faq__altro a { color: var(--brass-testo); }
+</style>
