@@ -33,7 +33,10 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
 
   <header class="nav">
     <div class="nav-in">
-      <Marchio href="/" />
+      <a href="/" class="nav-marchio" aria-label="Barbi Pelletteria, dal 1992">
+        <img src="/marchio-pelle-logo.jpg" alt="" width="1010" height="280" />
+        <span class="nav-marchio__sub">Pelletteria · dal 1992</span>
+      </a>
       <nav class="nav-right" aria-label="Menu principale">
         <a href="/prodotti/" class="hideable">Prodotti</a>
         <a href="/chi-siamo/" class="hideable">Il laboratorio</a>
@@ -238,12 +241,26 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     }
 
     /* ---- testata ---- */
-    .nav { border-bottom: 1px solid var(--line); }
-    .nav-in { max-width: 1120px; margin: 0 auto; padding: 20px 22px; display: flex; align-items: center; gap: 28px; }
+    /* Sfondo in pelle vera (foto), su richiesta diretta del Founder — deroga
+       esplicita a C-11 (CORREZIONI.md), registrata in DECISIONI.md. #16110E
+       è il colore medio della pelle nella foto stessa (campionato via
+       canvas), non un marrone a caso: dove la foto non copre tutta la barra
+       (schermi molto larghi/stretti) il colore continua senza taglio netto.
+       Testo e tasto menu passano da --ink2/--ink a un chiaro per il nuovo
+       fondo scuro — verificato per contrasto, non solo "sembra giusto". */
+    .nav { background: #16110E; border-bottom: 1px solid var(--brass); }
+    .nav-in { max-width: 1120px; margin: 0 auto; padding: 14px 22px; display: flex; align-items: center; gap: 28px; }
+    .nav-marchio { display: flex; flex-direction: column; gap: 6px; text-decoration: none; }
+    .nav-marchio img { display: block; height: 46px; width: auto; }
+    .nav-marchio__sub {
+      font-family: var(--f-label); font-size: 8px; font-weight: 500;
+      letter-spacing: .26em; text-indent: .26em; text-transform: uppercase;
+      color: var(--raise); opacity: .75;
+    }
     .nav-right { margin-left: auto; display: flex; gap: 24px; align-items: center; }
     .nav a {
       font-family: var(--f-label); font-size: 12.5px; font-weight: 500; letter-spacing: .05em;
-      text-transform: uppercase; color: var(--ink2); text-decoration: none; white-space: nowrap;
+      text-transform: uppercase; color: var(--raise); text-decoration: none; white-space: nowrap;
     }
     .nav a:hover { color: var(--brass); }
 
@@ -255,7 +272,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       gap: 5px; width: 30px; height: 30px; padding: 0; margin: 0;
       background: none; border: 0; cursor: pointer;
     }
-    .nav-burger span { display: block; height: 2px; background: var(--ink); }
+    .nav-burger span { display: block; height: 2px; background: var(--raise); }
 
     /* display:none di base, senza condizioni: a computer il pannello non
        esiste mai, qualunque sia lo stato di [hidden] — nessun conflitto
@@ -264,7 +281,8 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
 
     @media (max-width: 680px) {
       .nav a.hideable { display: none; }
-      .nav-in { gap: 14px; padding: 16px 22px; }
+      .nav-in { gap: 14px; padding: 12px 22px; }
+      .nav-marchio img { height: 36px; }
       .nav-burger { display: flex; }
       .nav-menu-mobile {
         display: flex; flex-direction: column;
