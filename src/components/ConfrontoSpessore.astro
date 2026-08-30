@@ -47,7 +47,10 @@ const H = PAD * 2 + ROW_H * righe.length - (ROW_H - BAR_H);
 </div>
 
 <style>
-  .confronto-spessore { max-width: 500px; }
+  /* margin-top qui, stesso motivo di TabellaConfronto.astro: una classe
+     passata dal genitore (class="confronto-home") non eredita il suo
+     scoping CSS e non riceverebbe mai la regola se scritta lì. */
+  .confronto-spessore { max-width: 500px; margin: 56px auto 0; }
   .confronto-spessore__titolo { margin-bottom: 16px; }
   svg { width: 100%; height: auto; display: block; overflow: visible; }
   .ce-nome {

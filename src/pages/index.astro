@@ -12,7 +12,7 @@ import { prodotti } from '../data/prodotti.js';
     <section class="hero">
       <p class="eyebrow">Laboratorio di pelletteria</p>
       <h1>Trentaquattro anni di mestiere, in <em>un portafoglio</em></h1>
-      <p class="lede">Stefano Barbi lavora la pelle dal 1992.<br />Per molti di quegli anni l’ha fatto per marchi che portavano il nome di qualcun altro.<br />Dal 2023 decide di dare vita al proprio cognome.</p>
+      <p class="lede">Stefano Barbi lavora la pelle dal 1992 — per anni nel nome di altri marchi, dal 2023 nel proprio.</p>
       <a class="pulsante hero-cta" href="/prodotti/">Scopri i prodotti</a>
     </section>
   </div>
@@ -40,9 +40,7 @@ import { prodotti } from '../data/prodotti.js';
         {prodotti.map((p) => <ProductCard prodotto={p} />)}
       </div>
 
-      <ConfrontoSpessore prodotti={prodotti} class="confronto-home" />
-
-      <p class="prossimamente">Presto anche borse e portachiavi. <a href="/prodotti/">Guarda tutti i prodotti</a>.</p>
+      <ConfrontoSpessore prodotti={prodotti} />
     </section>
   </div>
 
@@ -103,13 +101,4 @@ import { prodotti } from '../data/prodotti.js';
     .strip div:nth-child(3), .strip div:nth-child(4) { border-top: 1px solid var(--line); }
     .strip div:nth-child(3) { border-left: 0; }
   }
-
-  .confronto-home { margin: 56px auto 0; }
-
-  /* Un accenno, non una sezione (PACCHETTO_VETRINA punto 7): la home resta
-     sfoltita, niente card intere per categorie ancora vuote. */
-  .prossimamente {
-    text-align: center; margin: 44px 0 0; color: var(--ink3); font-size: 15px;
-  }
-  .prossimamente a { color: var(--brass-testo); }
 </style>

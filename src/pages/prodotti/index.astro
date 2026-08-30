@@ -4,11 +4,9 @@
 // e borse sono reali — il racconto le cita già — ma restano vuote finché
 // non arrivano pezzi veri in laboratorio: zero prodotti finti.
 import Layout from '../../layouts/Layout.astro';
-import TabellaConfronto from '../../components/TabellaConfronto.astro';
 import { categorie, getProdottiByCategoria } from '../../data/prodotti.js';
 
 const conteggi = categorie.map((c) => ({ ...c, quantita: getProdottiByCategoria(c.slug).length }));
-const portafogli = getProdottiByCategoria('portafogli');
 ---
 <Layout title="Prodotti">
   <div class="contenitore">
@@ -25,11 +23,11 @@ const portafogli = getProdottiByCategoria('portafogli');
             <p>{c.quantita > 0 ? `${c.quantita} modell${c.quantita === 1 ? 'o' : 'i'} disponibil${c.quantita === 1 ? 'e' : 'i'}` : 'In arrivo'}</p>
           </a>
         ))}
+        <a href="/prodotto-personalizzato/" class="categoria-card">
+          <h2>Su misura</h2>
+          <p>Chiedilo a Stefano</p>
+        </a>
       </div>
-
-      {portafogli.length > 1 && <TabellaConfronto prodotti={portafogli} class="prodotti__tabella" />}
-
-      <p class="prodotti__su-misura">Non trovi quello che cerchi? <a href="/prodotto-personalizzato/">Chiedi un pezzo su misura</a>.</p>
     </section>
   </div>
 </Layout>
@@ -37,14 +35,7 @@ const portafogli = getProdottiByCategoria('portafogli');
 <style>
   h1 { font-size: clamp(30px, 4.4vw, 44px); max-width: none; margin: 0 auto 12px; }
 
-  .prodotti__tabella { margin: 56px auto 0; }
-
-  .prodotti__su-misura {
-    text-align: center; margin: 40px 0 0; color: var(--ink2); font-size: 16.5px;
-  }
-  .prodotti__su-misura a { color: var(--brass-testo); }
-
-  .categorie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .categorie-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
   @media (max-width: 740px) { .categorie-grid { grid-template-columns: 1fr; } }
 
   .categoria-card {

@@ -55,7 +55,7 @@ export const prodotti = [
     sommario: 'Mezzo centimetro di spessore. Sta nella tasca interna di una giacca senza deformarla.',
     prezzoCentesimi: 4900,
     // Gli stessi due fatti già scritti in "Capienza" qui sotto, ma in forma
-    // strutturata: servono a TabellaConfronto.astro per non dover leggere
+    // strutturata: servono a ProductCard.astro per non dover leggere
     // (e sbagliare) una frase libera.
     tascheCarte: 8,
     portamonete: false,
