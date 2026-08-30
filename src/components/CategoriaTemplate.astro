@@ -123,6 +123,15 @@ const coloriDisponibili = [...new Set(prodottiCategoria.flatMap((p) => p.colori.
         const mostra = passaTesto && passaModello && passaColore;
         el.classList.toggle('is-nascosta', !mostra);
         if (mostra) visibili++;
+
+        // Filtrare per colore deve mostrare davvero quel colore sulla
+        // scheda, non solo nascondere/mostrare la scheda intera: si
+        // simula il click sulla stessa pastiglia già usata sulla scheda
+        // (ProductCard.astro), così foto e scorte si aggiornano da sole.
+        if (mostra && filtroColore) {
+          const sw = el.querySelector(`.sw[data-c="${filtroColore}"]`);
+          if (sw && !sw.disabled && !sw.classList.contains('on')) sw.click();
+        }
       });
       esito.hidden = visibili > 0;
     }
