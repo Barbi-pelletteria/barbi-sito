@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────
 // Interruttore VENDITA ATTIVA (punto 4C del pacchetto catalogo).
 //   false → i pulsanti "Aggiungi al carrello" diventano "Disponibile a breve"
-//           con un link che scrive a stefano-barbi@libero.it. Carrello e
-//           checkout restano raggiungibili ma non pubblicizzati.
+//           con un link che scrive a info.barbipelletteria@gmail.com. Carrello
+//           e checkout restano raggiungibili ma non pubblicizzati.
 //   true  → il sito vende normalmente.
 // Il sito va online per essere visitato PRIMA del via libera fiscale: si passa
 // alla vendita cambiando solo questo valore.
@@ -10,7 +10,7 @@
 export const VENDITA_ATTIVA = false;
 
 // Email di contatto pubblica del laboratorio.
-export const EMAIL_CONTATTO = 'stefano-barbi@libero.it';
+export const EMAIL_CONTATTO = 'info.barbipelletteria@gmail.com';
 
 // Sovrapprezzo per l'incisione delle iniziali (in centesimi). +10,00 €.
 export const INIZIALI_CENTESIMI = 1000;
