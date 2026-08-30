@@ -21,7 +21,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Archivo:wght@500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Archivo:wght@500;600&display=swap" rel="stylesheet" />
 
   <!--
     GA4 NON viene caricato qui: parte solo dopo il consenso esplicito dato
@@ -171,8 +171,16 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       --brass-rgb: 198, 161, 91;
       --ink-rgb: 33, 27, 23;
 
-      --f-display: "Bodoni Moda", Didot, "Times New Roman", serif;
-      --f-text: "EB Garamond", Garamond, Georgia, serif;
+      /* Cambiati dal Bodoni/EB Garamond originali su richiesta del Founder:
+         "un font più visibile ed artigianale" — Bodoni Moda è un Didone con
+         contrasto estremo fra pieni e filetti, elegante ma poco leggibile ed
+         effetto moda-editoriale, non artigianale. Fraunces è un serif con
+         asse "soft" pensato apposta per marchi di piccola manifattura/artigianato
+         (ceramiche, caffè, pelletteria): più visibile, meno rigido, stesso
+         registro premium. Lora accompagna nel testo lungo con lo stesso spirito
+         più caldo e leggibile di Fraunces, al posto del più sottile EB Garamond. */
+      --f-display: "Fraunces", Georgia, serif;
+      --f-text: "Lora", Georgia, serif;
       --f-label: "Archivo", system-ui, sans-serif;
 
       color-scheme: light;
