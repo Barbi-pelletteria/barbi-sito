@@ -242,13 +242,22 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
 
     /* ---- testata ---- */
     /* Sfondo in pelle vera (foto), su richiesta diretta del Founder — deroga
-       esplicita a C-11 (CORREZIONI.md), registrata in DECISIONI.md. #16110E
-       è il colore medio della pelle nella foto stessa (campionato via
-       canvas), non un marrone a caso: dove la foto non copre tutta la barra
-       (schermi molto larghi/stretti) il colore continua senza taglio netto.
-       Testo e tasto menu passano da --ink2/--ink a un chiaro per il nuovo
-       fondo scuro — verificato per contrasto, non solo "sembra giusto". */
-    .nav { background: #16110E; border-bottom: 1px solid var(--brass); }
+       esplicita a C-11 (CORREZIONI.md), registrata in DECISIONI.md. Non un
+       colore piatto: marchio-pelle-texture.jpg è un ritaglio della stessa
+       foto (zona senza scritta), specchiato una volta per ripetersi senza
+       taglio netto (repeat-x), così tutta la barra è coperta dalla stessa
+       texture, non solo la zona del logo. #16110E (colore medio della pelle,
+       campionato via canvas) resta sotto come sfondo di riserva mentre la
+       texture carica. Testo e tasto menu passano da --ink2/--ink a un
+       chiaro per il nuovo fondo scuro — contrasto verificato, non a occhio. */
+    .nav {
+      background-color: #16110E;
+      background-image: url('/marchio-pelle-texture.jpg');
+      background-repeat: repeat-x;
+      background-position: left top;
+      background-size: auto 100%;
+      border-bottom: 1px solid var(--brass);
+    }
     .nav-in { max-width: 1120px; margin: 0 auto; padding: 14px 22px; display: flex; align-items: center; gap: 28px; }
     .nav-marchio { display: flex; flex-direction: column; gap: 6px; text-decoration: none; }
     .nav-marchio img { display: block; height: 46px; width: auto; }
