@@ -1,5 +1,5 @@
 ---
-import { formatEuro } from '../data/prodotti.js';
+import { formatEuro, MACRO_PELLE } from '../data/prodotti.js';
 import { immagineProdotto, coloreVetrina } from '../data/immagini.js';
 import FotoSegnaposto from './FotoSegnaposto.astro';
 
@@ -64,6 +64,8 @@ const etichettaScorta = (c) =>
         title={c.nome}
         disabled={c.stock === 0}
         aria-label={c.nome + (c.stock === 0 ? ' (esaurito)' : '')}
+        aria-pressed={c.slug === coloreAttivo.slug ? 'true' : 'false'}
+        style={MACRO_PELLE[c.slug] ? `background-image:url(${MACRO_PELLE[c.slug]})` : undefined}
       ></button>
     ))}
     <span class="sw-label">{etichettaScorta(coloreAttivo)}</span>
@@ -101,8 +103,12 @@ const etichettaScorta = (c) =>
     gruppo.querySelectorAll('.sw').forEach((sw) => {
       sw.addEventListener('click', () => {
         if (sw.hasAttribute('disabled')) return;
-        gruppo.querySelectorAll('.sw').forEach((x) => x.classList.remove('on'));
+        gruppo.querySelectorAll('.sw').forEach((x) => {
+          x.classList.remove('on');
+          x.setAttribute('aria-pressed', 'false');
+        });
         sw.classList.add('on');
+        sw.setAttribute('aria-pressed', 'true');
         const slug = sw.getAttribute('data-c') || '';
         if (didascalia) {
           didascalia.textContent = `Foto — ${nomeProdotto}, ${(sw.getAttribute('data-nome') || '').toLowerCase()}`;

@@ -129,11 +129,33 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     // Tasto menu mobile: mostra/nasconde il pannello con le sezioni che
     // da computer stanno nella barra in alto (Prodotti, Il laboratorio,
     // Contatti), nascoste su schermi stretti per mancanza di spazio.
+    // PACCHETTO_INTERFACCIA punto 3: chiusura al click fuori e con Esc,
+    // focus sulla prima voce all'apertura — mancavano.
     const burger = document.getElementById('nav-burger');
     const menuMobile = document.getElementById('nav-menu-mobile');
+
+    function apriMenuMobile() {
+      menuMobile.hidden = false;
+      burger.setAttribute('aria-expanded', 'true');
+      menuMobile.querySelector('a')?.focus();
+    }
+    function chiudiMenuMobile(restituisciFocus) {
+      menuMobile.hidden = true;
+      burger.setAttribute('aria-expanded', 'false');
+      if (restituisciFocus) burger.focus();
+    }
+
     burger?.addEventListener('click', () => {
-      menuMobile.hidden = !menuMobile.hidden;
-      burger.setAttribute('aria-expanded', String(!menuMobile.hidden));
+      if (menuMobile.hidden) apriMenuMobile();
+      else chiudiMenuMobile(false);
+    });
+    document.addEventListener('click', (e) => {
+      if (menuMobile.hidden) return;
+      if (menuMobile.contains(e.target) || burger.contains(e.target)) return;
+      chiudiMenuMobile(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menuMobile.hidden) chiudiMenuMobile(true);
     });
   </script>
 
@@ -295,21 +317,50 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       /* stessa causa del bug banner cookie (C-13): serve sempre questa
          regola più specifica, altrimenti [hidden] non vince su display:flex. */
       .nav-menu-mobile[hidden] { display: none; }
+      /* PACCHETTO_INTERFACCIA punto 3, causa reale trovata: .nav a
+         (globale, sopra) imposta color:var(--raise) per l'header scuro —
+         qui si eredita su un pannello che invece ha sfondo --raise chiaro,
+         testo su testo, contrasto 1:1 (misurato). Serve un colore scuro
+         esplicito, non ereditato. */
       .nav-menu-mobile a {
         padding: 16px 22px; border-bottom: 1px solid var(--line);
+        color: var(--ink);
       }
       .nav-menu-mobile a:last-child { border-bottom: 0; }
+      .nav-menu-mobile a:hover, .nav-menu-mobile a:focus-visible { color: var(--brass-testo); }
     }
 
     /* ---- pastiglie colore (scheda + pagina prodotto) ---- */
     .swatches { display: flex; gap: 11px; margin-top: 20px; align-items: center; flex-wrap: wrap; }
+    /* PACCHETTO_INTERFACCIA punto 2 — causa reale trovata: sulla pagina
+       prodotto .sw è uno <span> (pattern radio+span, diverso dal <button>
+       usato sulle schede). Uno span resta display:inline di default, e un
+       elemento inline IGNORA width/height per specifica CSS — non è un
+       problema di flex che comprime, è che 26px (poi 44px) non venivano
+       proprio applicati: misurato display:inline con getComputedStyle,
+       dimensione reale 2×26px contro i 44×44 dichiarati. Sui <button>
+       delle schede il difetto era mascherato perché i bottoni sono già
+       block-level di default. display:inline-block è la correzione alla
+       radice; aspect-ratio e flex:0 0 auto restano come seconda difesa nel
+       caso .sw finisca in un contenitore flex che tenti comunque di
+       comprimerlo. 44px è anche la soglia minima di area toccabile. */
     .sw {
-      width: 26px; height: 26px; border-radius: 50%; cursor: pointer; position: relative;
+      display: inline-block;
+      width: 44px; height: 44px; aspect-ratio: 1; flex: 0 0 auto;
+      border-radius: 50%; cursor: pointer; position: relative;
       border: 1px solid rgba(var(--ink-rgb), .22); padding: 0; appearance: none; -webkit-appearance: none;
+      background-size: cover; background-position: center;
     }
-    .sw[data-c="blu"] { background: var(--blu); }
-    .sw[data-c="bordeaux"] { background: var(--bordeaux); }
-    .sw[data-c="marrone"] { background: var(--marrone); }
+    .sw[data-c="blu"] { background-color: var(--blu); }
+    .sw[data-c="bordeaux"] { background-color: var(--bordeaux); }
+    .sw[data-c="marrone"] { background-color: var(--marrone); }
+    /* PACCHETTO_INTERFACCIA punto 1: la macro (quando esiste, vedi
+       MACRO_PELLE in prodotti.js) arriva come background-image inline,
+       scritto solo quando il percorso non è null — finché è null non c'è
+       nessuno stile inline e resta la tinta piatta qui sopra, invariata.
+       Il ritaglio è già quadrato-poi-cerchio: object-fit non si applica a
+       un background, l'equivalente qui è background-size:cover (sopra) su
+       un elemento già border-radius:50%. */
     .sw.on::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--brass); }
     .sw:disabled { opacity: .32; cursor: not-allowed; }
     .sw-label {

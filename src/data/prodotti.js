@@ -15,6 +15,21 @@ export const EMAIL_CONTATTO = 'info.barbipelletteria@gmail.com';
 // Sovrapprezzo per l'incisione delle iniziali (in centesimi). +10,00 €.
 export const INIZIALI_CENTESIMI = 1000;
 
+// Macro della pelle vera per ogni colore, usata sugli swatch al posto
+// della tinta piatta (PACCHETTO_INTERFACCIA_2026-08-30 punto 1). Unica
+// fonte per colore (non per prodotto: lo stesso blu è lo stesso blu su
+// Sottile e Completo). Oggi tutti null — NESSUNA macro esiste ancora, e
+// non se ne genera o cerca una sostitutiva (divieto 22/26): finché resta
+// null quel colore mostra la tinta piatta di sempre (--blu/--bordeaux/
+// --marrone in Layout.astro), invariata. Basta valorizzare il campo con
+// il percorso del file vero (es. '/pelle/blu.jpg') quando la foto arriva:
+// nessun'altra modifica di codice serve.
+export const MACRO_PELLE = {
+  blu: null,
+  bordeaux: null,
+  marrone: null,
+};
+
 // Tre categorie. Portachiavi e borse sono reali (il racconto lo dice già:
 // "arriveranno gli altri pezzi che Stefano porta già in fiera — borse,
 // portachiavi") ma non ancora in laboratorio pronti per il sito: restano

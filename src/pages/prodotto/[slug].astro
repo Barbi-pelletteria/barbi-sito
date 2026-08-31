@@ -11,6 +11,7 @@ import {
   VENDITA_ATTIVA,
   EMAIL_CONTATTO,
   INIZIALI_CENTESIMI,
+  MACRO_PELLE,
 } from '../../data/prodotti.js';
 
 export function getStaticPaths() {
@@ -72,7 +73,12 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
                   disabled={c.stock === 0}
                   checked={c.slug === primoDisponibile}
                 />
-                <span class="sw" data-c={c.slug} title={c.nome}></span>
+                <span
+                  class="sw"
+                  data-c={c.slug}
+                  title={c.nome}
+                  style={MACRO_PELLE[c.slug] ? `background-image:url(${MACRO_PELLE[c.slug]})` : undefined}
+                ></span>
               </label>
             ))}
             <span class="sw-label" id="stock-label"></span>
@@ -356,8 +362,13 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
   .colori { border: 0; padding: 0; margin: 0; }
 
   .sw-wrap { position: relative; display: inline-block; line-height: 0; }
+  /* PACCHETTO_INTERFACCIA punto 2: niente più larghezza/altezza fisse a
+     26px — inset:0 da solo copre esattamente .sw (ora 44px, la soglia di
+     area toccabile), qualunque sia la sua dimensione reale. Un valore
+     fisso qui avrebbe lasciato l'area cliccabile piccola sotto un cerchio
+     visivo più grande. */
   .sw-wrap input {
-    position: absolute; inset: 0; width: 26px; height: 26px; margin: 0;
+    position: absolute; inset: 0; margin: 0;
     opacity: 0; cursor: pointer;
   }
   .sw-wrap input:disabled { cursor: not-allowed; }
