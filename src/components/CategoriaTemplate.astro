@@ -39,31 +39,33 @@ const descrizioneCategoria = prodottiCategoria.length > 0
       ) : (
         <>
           {(modelli.length > 1 || coloriDisponibili.length > 1) && (
-            <details class="filtri-toggle" id="filtri-toggle">
-              <summary class="filtri-toggle__riassunto">
-                <span id="filtri-etichetta">Filtri</span>
-              </summary>
-              <div class="filtri" id="filtri-catalogo">
-                <div class="filtri__cerca">
-                  <label for="cerca-prodotto" class="sr-only">Cerca per nome</label>
-                  <input type="search" id="cerca-prodotto" placeholder="Cerca per nome…" autocomplete="off" />
-                </div>
-                {modelli.length > 1 && (
-                  <div class="filtri__gruppo" role="group" aria-label="Filtra per modello">
-                    <span class="filtri__etichetta-gruppo">Modello</span>
-                    <button type="button" class="filtro-chip is-attivo" data-filtro-modello="">Tutti</button>
-                    {modelli.map((m) => <button type="button" class="filtro-chip" data-filtro-modello={m.toLowerCase()}>{m}</button>)}
-                  </div>
-                )}
-                {coloriDisponibili.length > 1 && (
-                  <div class="filtri__gruppo" role="group" aria-label="Filtra per colore">
-                    <span class="filtri__etichetta-gruppo">Colore</span>
-                    <button type="button" class="filtro-chip is-attivo" data-filtro-colore="">Tutti</button>
-                    {coloriDisponibili.map((c) => <button type="button" class="filtro-chip" data-filtro-colore={c.toLowerCase()}>{c}</button>)}
-                  </div>
-                )}
+            <div class="filtri-barra">
+              <div class="filtri__cerca">
+                <label for="cerca-prodotto" class="sr-only">Cerca per nome</label>
+                <input type="search" id="cerca-prodotto" placeholder="Cerca per nome…" autocomplete="off" />
               </div>
-            </details>
+              <details class="filtri-toggle" id="filtri-toggle">
+                <summary class="filtri-toggle__riassunto">
+                  <span id="filtri-etichetta">Filtri</span>
+                </summary>
+                <div class="filtri" id="filtri-catalogo">
+                  {modelli.length > 1 && (
+                    <div class="filtri__gruppo" role="group" aria-label="Filtra per modello">
+                      <span class="filtri__etichetta-gruppo">Modello</span>
+                      <button type="button" class="filtro-chip is-attivo" data-filtro-modello="">Tutti</button>
+                      {modelli.map((m) => <button type="button" class="filtro-chip" data-filtro-modello={m.toLowerCase()}>{m}</button>)}
+                    </div>
+                  )}
+                  {coloriDisponibili.length > 1 && (
+                    <div class="filtri__gruppo" role="group" aria-label="Filtra per colore">
+                      <span class="filtri__etichetta-gruppo">Colore</span>
+                      <button type="button" class="filtro-chip is-attivo" data-filtro-colore="">Tutti</button>
+                      {coloriDisponibili.map((c) => <button type="button" class="filtro-chip" data-filtro-colore={c.toLowerCase()}>{c}</button>)}
+                    </div>
+                  )}
+                </div>
+              </details>
+            </div>
           )}
 
           <p class="filtri__esito" id="filtri-esito" hidden>Nessun prodotto corrisponde alla ricerca.</p>
@@ -105,7 +107,15 @@ const descrizioneCategoria = prodottiCategoria.length > 0
      <summary> — stato apri/chiudi nativo e accessibile, niente div con
      solo onclick. La spunta la fa il browser: nessun JS serve per
      aprire/chiudere, solo per il conteggio nell'etichetta. */
-  .filtri-toggle { margin-bottom: 36px; }
+  /* Ricerca sempre visibile "affianco" a Filtri (richiesta diretta del
+     Founder): la barra è il contenitore comune, ma solo i chip di
+     modello/colore stanno dentro <details> — sono loro l'ingombro da
+     nascondere, non il campo di ricerca. */
+  .filtri-barra {
+    display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: flex-start;
+    margin-bottom: 36px;
+  }
+  .filtri-toggle { flex: 0 0 auto; margin-bottom: 0; }
   .filtri-toggle__riassunto {
     display: inline-flex; align-items: center; min-height: 44px;
     padding: 0 4px; cursor: pointer;
@@ -162,14 +172,15 @@ const descrizioneCategoria = prodottiCategoria.length > 0
     let filtroModello = '';
     let filtroColore = '';
 
-    // PACCHETTO_INTERFACCIA punto 4: "Filtri (2)" quando ci sono filtri
-    // attivi — altrimenti l'utente vede un catalogo filtrato senza sapere
-    // perché. Testo di ricerca, modello e colore contano come un filtro
-    // attivo ciascuno, indipendentemente dal risultato.
+    // PACCHETTO_INTERFACCIA punto 4 + correzione successiva: "Filtri (2)"
+    // quando ci sono filtri attivi dentro il pannello a comparsa —
+    // altrimenti l'utente lo apre senza sapere perché. La ricerca NON
+    // conta più qui: da quando il campo è sempre visibile affianco al
+    // pulsante (non più dentro <details>), il suo testo si vede già da
+    // solo, contarlo anche nell'etichetta sarebbe ridondante.
     function aggiornaEtichettaFiltri() {
       if (!etichettaFiltri) return;
-      const testo = (input?.value || '').trim();
-      const attivi = [testo.length > 0, !!filtroModello, !!filtroColore].filter(Boolean).length;
+      const attivi = [!!filtroModello, !!filtroColore].filter(Boolean).length;
       etichettaFiltri.textContent = attivi > 0 ? `Filtri (${attivi})` : 'Filtri';
     }
 
