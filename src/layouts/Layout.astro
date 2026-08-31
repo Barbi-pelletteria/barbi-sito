@@ -1,8 +1,23 @@
 ---
-const { title, description = 'Portafogli in pelle conciata al vegetale, fatti a mano.' } = Astro.props;
+// PACCHETTO_AUDIT_SITO, blocco C: description ora obbligatoria e specifica
+// per pagina (non più un default silenzioso identico ovunque — se una
+// pagina non la passa esplicitamente, l'errore di build lo dice subito
+// invece di lasciare il default a coprire la dimenticanza). canonical e
+// Open Graph/Twitter si costruiscono da qui, una sola volta: restano corretti
+// anche mentre il noindex resta attivo, pronti per il giorno in cui si toglie.
+export interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+}
+const { title, description, ogImage = '/marchio-pelle.jpg' } = Astro.props;
 const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
 import Marchio from '../components/Marchio.astro';
-import { EMAIL_CONTATTO } from '../data/prodotti.js';
+import { EMAIL_CONTATTO, VENDITA_ATTIVA } from '../data/prodotti.js';
+
+const titoloCompleto = `${title} · Barbi Pelletteria`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL(ogImage, Astro.site);
 ---
 <!doctype html>
 <html lang="it">
@@ -10,8 +25,9 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <title>{title} · Barbi Pelletteria</title>
+  <title>{titoloCompleto}</title>
   <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalURL} />
   <meta name="robots" content="noindex, nofollow" />
   <!--
     robots noindex volutamente attivo: FATTO QUANDO (B3) dice
@@ -19,6 +35,22 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     non ancora annunciato". Rimuovere questo meta tag solo quando si
     decide di far indicizzare il sito davvero (non è un compito di questo pacchetto).
   -->
+
+  <!-- Open Graph e Twitter Card: oggi servono già quando un link viene
+       condiviso su WhatsApp/Instagram (il noindex blocca solo i motori di
+       ricerca, non le anteprime social), e restano pronti per l'indicizzazione. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Barbi Pelletteria" />
+  <meta property="og:locale" content="it_IT" />
+  <meta property="og:title" content={titoloCompleto} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalURL} />
+  <meta property="og:image" content={ogImageURL} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={titoloCompleto} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImageURL} />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Archivo:wght@500;600&display=swap" rel="stylesheet" />
@@ -27,6 +59,11 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     GA4 NON viene caricato qui: parte solo dopo il consenso esplicito dato
     tramite il banner cookie in fondo alla pagina. Vedi src/scripts/consent.js.
   -->
+
+  <!-- Dati strutturati specifici di pagina (Product, FAQPage): iniettati
+       dalla pagina stessa tramite questo slot, non da qui — solo alcune
+       pagine ne hanno bisogno e solo la pagina conosce i valori veri. -->
+  <slot name="structured-data" />
 </head>
 <body>
   <a class="salta-contenuto" href="#contenuto">Vai al contenuto</a>
@@ -34,20 +71,27 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
   <header class="nav">
     <div class="nav-in">
       <a href="/" class="nav-marchio" aria-label="Barbi Pelletteria, dal 1992">
-        <img src="/marchio-pelle-lettere.png" alt="" width="1010" height="280" />
+        <img src="/marchio-pelle-lettere.png" alt="Barbi" width="1010" height="280" />
       </a>
       <nav class="nav-right" aria-label="Menu principale">
-        <a href="/prodotti/" class="hideable">Prodotti</a>
+        <a href="/portafogli/" class="hideable">Prodotti</a>
         <a href="/chi-siamo/" class="hideable">Il laboratorio</a>
         <a href="/contatti/" class="hideable">Contatti</a>
-        <a href="/carrello/">Carrello (<span id="contatore-carrello">0</span>)</a>
+        {/* PACCHETTO_AUDIT_SITO punto A2: niente contatore "(0)" finché non
+            si può comprendere nulla — mostrarlo contraddice il resto del
+            sito, che dice "vendita non ancora attiva". */}
+        {VENDITA_ATTIVA ? (
+          <a href="/carrello/">Carrello (<span id="contatore-carrello">0</span>)</a>
+        ) : (
+          <a href="/carrello/">Carrello</a>
+        )}
         <button type="button" class="nav-burger" id="nav-burger" aria-expanded="false" aria-controls="nav-menu-mobile" aria-label="Apri il menu">
           <span></span><span></span><span></span>
         </button>
       </nav>
     </div>
     <nav class="nav-menu-mobile" id="nav-menu-mobile" aria-label="Menu principale, mobile" hidden>
-      <a href="/prodotti/">Prodotti</a>
+      <a href="/portafogli/">Prodotti</a>
       <a href="/chi-siamo/">Il laboratorio</a>
       <a href="/contatti/">Contatti</a>
     </nav>

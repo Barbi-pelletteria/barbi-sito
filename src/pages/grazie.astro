@@ -1,0 +1,23 @@
+---
+// Pagina di conferma condivisa da tutti i moduli Netlify del sito
+// (PACCHETTO_AUDIT_SITO punto B6 + A5): recesso, richiesta su misura,
+// avvisami alla riapertura, contatto. Netlify invia qui via l'attributo
+// action del form dopo un invio senza JavaScript; è anche quello che vede
+// chi ha JS disattivato.
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Messaggio inviato" description="Il tuo messaggio è stato inviato a Stefano Barbi.">
+  <div class="contenitore">
+    <section class="pagina-stretta">
+      <h1>Ricevuto</h1>
+      <p>Il tuo messaggio è arrivato a Stefano. Ti risponde lui, di persona, di solito entro un giorno lavorativo.</p>
+      <p><a class="pulsante" href="/">Torna alla home</a></p>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .pagina-stretta { max-width: 660px; margin: 0 auto; padding: 100px 0; text-align: center; }
+  .pagina-stretta h1 { font-size: clamp(30px, 4.4vw, 44px); }
+  .pagina-stretta p { color: var(--ink2); margin: 0 0 28px; }
+</style>

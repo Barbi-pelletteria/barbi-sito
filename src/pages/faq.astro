@@ -6,8 +6,45 @@
 // (spedizione già inclusa, non un costo che compare dopo).
 import Layout from '../layouts/Layout.astro';
 import { curaProdotto } from '../data/prodotti.js';
+
+// PACCHETTO_AUDIT_SITO blocco C: FAQPage, stesso testo già in pagina (non
+// duplicato a mano — se una risposta cambia qui sopra, questo andrebbe
+// riallineato, ma il rischio è piccolo con solo tre domande).
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Cos’è la concia vegetale, e perché questi portafogli non hanno protezioni chimiche?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'La pelle è di capra, conciata e tinta al vegetale, spessore 1,2-1,3 mm: un materiale vivo e delicato, senza protezioni chimiche. Si segna e cambia tono con l’uso, e teme più facilmente acqua, oli e sole di una pelle trattata industrialmente.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Come si cura?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'La pelle conciata al vegetale è un materiale vivo: si segna e cambia tono con l’uso. Le istruzioni complete sono nella scheda di ogni prodotto, alla voce "Come si cura".',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Perché il prezzo è quello che è?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Il prezzo indicato è finale e comprende già la spedizione. Copre le 2-3 ore di lavoro per pezzo — dal taglio ai bordi tinti a mano — e la pelle di capra conciata al vegetale.',
+      },
+    },
+  ],
+};
 ---
-<Layout title="Domande frequenti">
+<Layout title="Domande frequenti" description="Concia vegetale, cura della pelle, prezzi: le risposte alle domande più comuni su Barbi Pelletteria.">
+  <Fragment slot="structured-data">
+    <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  </Fragment>
   <div class="contenitore">
     <section class="pagina-testo faq">
       <h1>Domande frequenti</h1>
@@ -18,12 +55,8 @@ import { curaProdotto } from '../data/prodotti.js';
       </article>
 
       <article class="faq__voce">
-        <h2>{curaProdotto.titolo}</h2>
-        <p>{curaProdotto.intro}</p>
-        <ul>
-          {curaProdotto.punti.map((p) => <li>{p}</li>)}
-        </ul>
-        <p>{curaProdotto.chiusura}</p>
+        <h2>Come si cura?</h2>
+        <p>La pelle conciata al vegetale è un materiale vivo: si segna e cambia tono con l'uso. Le istruzioni complete — cosa evitare, come conservarlo — sono nella scheda di ogni prodotto, alla voce <a href="/prodotto/sottile/#cura">«{curaProdotto.titolo}»</a>.</p>
       </article>
 
       <article class="faq__voce">

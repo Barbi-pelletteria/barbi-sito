@@ -35,10 +35,14 @@ export const MACRO_PELLE = {
 // portachiavi") ma non ancora in laboratorio pronti per il sito: restano
 // vuote finché non arrivano pezzi veri, mai riempite a intuito (STATO.md,
 // divieto 3).
+// genere: serve al testo generato per categorie vuote ("...pronti"/"...pronte"
+// in CategoriaTemplate.astro) — un'unica frase condivisa fra le tre categorie
+// non può accordarsi da sola al genere del nome (bug reale trovato: "borse
+// arriveranno... pronti", femminile col participio maschile).
 export const categorie = [
-  { slug: 'portafogli', nome: 'Portafogli' },
-  { slug: 'portachiavi', nome: 'Portachiavi' },
-  { slug: 'borse', nome: 'Borse' },
+  { slug: 'portafogli', nome: 'Portafogli', genere: 'm' },
+  { slug: 'portachiavi', nome: 'Portachiavi', genere: 'm' },
+  { slug: 'borse', nome: 'Borse', genere: 'f' },
 ];
 
 // Blocco "Come si cura", identico su entrambe le schede (testo verbatim).

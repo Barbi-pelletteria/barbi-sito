@@ -1,5 +1,5 @@
 ---
-import { formatEuro, MACRO_PELLE } from '../data/prodotti.js';
+import { formatEuro, MACRO_PELLE, VENDITA_ATTIVA } from '../data/prodotti.js';
 import { immagineProdotto, coloreVetrina } from '../data/immagini.js';
 import FotoSegnaposto from './FotoSegnaposto.astro';
 
@@ -30,8 +30,11 @@ function speclineDaSpecifiche(p) {
 }
 const specline = SPECLINE[prodotto.slug] || speclineDaSpecifiche(prodotto);
 
+// PACCHETTO_AUDIT_SITO punto A2: a vendita spenta un numero di "disponibili"
+// contraddice "disponibile a breve" scritto due righe sotto — resta solo il
+// nome del colore, il numero torna quando VENDITA_ATTIVA sarà vero.
 const etichettaScorta = (c) =>
-  c.stock > 0 ? `${c.nome} · ${c.stock} disponibili` : `${c.nome} · esaurito`;
+  VENDITA_ATTIVA ? (c.stock > 0 ? `${c.nome} · ${c.stock} ${c.stock === 1 ? 'disponibile' : 'disponibili'}` : `${c.nome} · esaurito`) : c.nome;
 ---
 <div class="scheda">
   <a href={url} class="scheda__foto" aria-hidden="true" tabindex="-1">
@@ -43,7 +46,7 @@ const etichettaScorta = (c) =>
   </a>
 
   <p class="p-kick">{prodotto.occhiello}</p>
-  <h3 class="p-name"><a href={url}>{prodotto.nome}</a></h3>
+  <h2 class="p-name"><a href={url}>{prodotto.nome}</a></h2>
   <div class="p-price">{formatEuro(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em></div>
   <p class="p-desc">{prodotto.sommario}</p>
 

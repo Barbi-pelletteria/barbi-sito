@@ -1,14 +1,27 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
-<Layout title="Carrello">
+<Layout title="Carrello" description="Il tuo carrello Barbi Pelletteria.">
   <div class="contenitore">
     <section class="pagina-carrello">
       <h1>Il tuo carrello</h1>
 
       <div id="carrello-vuoto" hidden>
-        <p class="carrello-vuoto__testo">Il carrello è vuoto.</p>
-        <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+        {VENDITA_ATTIVA ? (
+          <>
+            <p class="carrello-vuoto__testo">Il carrello è vuoto.</p>
+            <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+          </>
+        ) : (
+          <>
+            <p class="carrello-vuoto__testo">Il carrello è vuoto perché la vendita online non è ancora attiva — è per questo che è vuoto, non per un errore.</p>
+            <p class="carrello-vuoto__azioni">
+              <a class="pulsante" href="/portafogli/">Guarda i portafogli</a>
+              <a class="pulsante pulsante-secondario" href={`mailto:${EMAIL_CONTATTO}`}>Scrivici per informazioni</a>
+            </p>
+          </>
+        )}
       </div>
 
       <table id="tabella-carrello" class="tabella-carrello" hidden>
@@ -28,6 +41,8 @@ import Layout from '../layouts/Layout.astro';
         <p class="riepilogo-carrello__totale">Totale <span id="totale-carrello"></span></p>
         <a class="pulsante" id="btn-vai-checkout" href="/checkout/">Vai al pagamento</a>
       </div>
+      <!-- PACCHETTO_AUDIT_SITO punto B5 -->
+      <p id="pagamenti-riga-carrello" class="pagamenti-riga-carrello" hidden>Pagamenti con carta di credito e debito, gestiti in sicurezza da Stripe.</p>
     </section>
   </div>
 </Layout>
@@ -56,6 +71,7 @@ import Layout from '../layouts/Layout.astro';
     const vuoto = document.getElementById('carrello-vuoto');
     const tabella = document.getElementById('tabella-carrello');
     const riepilogo = document.getElementById('riepilogo-carrello');
+    const pagamentiRiga = document.getElementById('pagamenti-riga-carrello');
     const corpo = document.getElementById('righe-carrello');
     const totaleEl = document.getElementById('totale-carrello');
 
@@ -63,12 +79,14 @@ import Layout from '../layouts/Layout.astro';
       vuoto.hidden = false;
       tabella.hidden = true;
       riepilogo.hidden = true;
+      pagamentiRiga.hidden = true;
       return;
     }
 
     vuoto.hidden = true;
     tabella.hidden = false;
     riepilogo.hidden = false;
+    pagamentiRiga.hidden = false;
     corpo.innerHTML = '';
     let totale = 0;
 
@@ -136,7 +154,8 @@ import Layout from '../layouts/Layout.astro';
 <style is:global>
   .pagina-carrello { padding: 64px 0; }
   .pagina-carrello h1 { font-size: clamp(30px, 4.4vw, 44px); max-width: none; margin: 0 0 26px; }
-  .carrello-vuoto__testo { color: var(--ink2); margin: 0 0 26px; }
+  .carrello-vuoto__testo { color: var(--ink2); margin: 0 0 26px; max-width: 46ch; }
+  .carrello-vuoto__azioni { display: flex; flex-wrap: wrap; gap: 12px; }
 
   .tabella-carrello { width: 100%; border-collapse: collapse; margin-top: 30px; }
   .tabella-carrello th {
@@ -177,6 +196,7 @@ import Layout from '../layouts/Layout.astro';
   .riepilogo-carrello__totale {
     margin: 0; font-family: var(--f-display); font-size: 27px; font-variant-numeric: tabular-nums;
   }
+  .pagamenti-riga-carrello { margin: 14px 0 0; font-size: 14.5px; color: var(--ink3); }
 
   @media (max-width: 560px) {
     .tabella-carrello, .tabella-carrello tbody, .tabella-carrello tr, .tabella-carrello td { display: block; width: 100%; }

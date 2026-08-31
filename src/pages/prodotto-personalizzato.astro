@@ -1,65 +1,50 @@
 ---
 // Richiesta di un pezzo su misura, aggiunta il 27/08/2026 su richiesta
-// diretta del Founder. Stesso meccanismo già usato per il modulo di recesso
-// (diritto-di-recesso.astro): un'email già pronta verso Stefano, costruita
-// lato client. Nessun modulo che arriva a un sistema automatico — non esiste
-// un backend per riceverlo, e non se ne costruisce uno finto.
+// diretta del Founder. Dal 30/08/2026 (PACCHETTO_AUDIT_SITO punto B6) usa
+// un modulo Netlify reale invece di un mailto: — il compositore di email
+// non apre nulla su molti telefoni e su chi usa la webmail, e la richiesta
+// si perdeva senza che nessuno lo sapesse. I moduli Netlify sono inclusi
+// nel piano gratuito (100 invii/mese): niente database, risposte raccolte
+// nel pannello Netlify e inoltrate via email.
 import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
-<Layout title="Prodotto personalizzato">
+<Layout title="Prodotto personalizzato" description="Chiedi a Stefano un pezzo su misura: un colore diverso, una combinazione particolare, un'idea tua.">
   <div class="contenitore">
     <section class="pagina-testo">
       <h1>Un pezzo pensato per te</h1>
-      <p>Il catalogo online è quello che c’è oggi in laboratorio, ma Stefano lavora anche su richiesta: un colore diverso da quelli qui, una combinazione particolare, un’idea tua. Racconta cosa hai in mente — ti risponde lui, non un sistema automatico.</p>
+      <p>Il catalogo online è quello che c’è oggi in laboratorio, ma Stefano lavora anche su richiesta: un colore diverso da quelli qui, una combinazione particolare, un’idea tua. Racconta cosa hai in mente — ti risponde lui, non un sistema automatico, di solito entro un giorno lavorativo.</p>
 
-      <form id="form-personalizzato" class="form-personalizzato">
+      <form
+        name="su-misura"
+        method="POST"
+        action="/grazie/"
+        data-netlify="true"
+        netlify-honeypot="pp-azienda"
+        class="form-personalizzato"
+      >
+        <input type="hidden" name="form-name" value="su-misura" />
+        <p class="form-personalizzato__nascosto"><label>Non compilare questo campo <input name="pp-azienda" /></label></p>
+
         <label for="pp-cosa">Cosa vorresti</label>
-        <input type="text" id="pp-cosa" name="cosa" placeholder="Es. un portafoglio come il Sottile, ma verde" autocomplete="off" />
+        <input type="text" id="pp-cosa" name="cosa" placeholder="Es. un portafoglio come il Sottile, ma verde" autocomplete="off" required />
 
         <label for="pp-nome">Il tuo nome</label>
-        <input type="text" id="pp-nome" name="nome" placeholder="Come ti chiami" autocomplete="name" />
+        <input type="text" id="pp-nome" name="nome" placeholder="Come ti chiami" autocomplete="name" required />
+
+        <label for="pp-email">La tua email</label>
+        <input type="email" id="pp-email" name="email" placeholder="Per risponderti" autocomplete="email" required />
 
         <label for="pp-dettagli">Altri dettagli <span class="form-personalizzato__facoltativo">(facoltativo)</span></label>
         <textarea id="pp-dettagli" name="dettagli" rows="4" placeholder="Colore, iniziali, tempi, budget…"></textarea>
 
-        <a class="pulsante" id="pp-invia" href="#">Scrivi a Stefano</a>
+        <button type="submit" class="pulsante">Invia a Stefano</button>
       </form>
 
-      <p class="segnaposto">Il pulsante apre un’email già pronta verso {EMAIL_CONTATTO}, dal tuo programma di posta: puoi rileggerla e cambiarla prima di inviarla.</p>
+      <p class="segnaposto">In alternativa puoi scrivere direttamente a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>.</p>
     </section>
   </div>
 </Layout>
-
-<script>
-  import { EMAIL_CONTATTO } from '../data/prodotti.js';
-
-  const cosa = document.getElementById('pp-cosa');
-  const nome = document.getElementById('pp-nome');
-  const dettagli = document.getElementById('pp-dettagli');
-  const invia = document.getElementById('pp-invia');
-
-  function aggiornaLink() {
-    const oggetto = encodeURIComponent('Richiesta di un pezzo personalizzato');
-    const corpo = encodeURIComponent(
-      [
-        'Ciao Stefano,',
-        '',
-        'vorrei chiederti un pezzo personalizzato.',
-        '',
-        `Cosa vorrei: ${cosa.value || '—'}`,
-        `Altri dettagli: ${dettagli.value || '—'}`,
-        '',
-        'Grazie,',
-        nome.value || '',
-      ].join('\n')
-    );
-    invia.href = `mailto:${EMAIL_CONTATTO}?subject=${oggetto}&body=${corpo}`;
-  }
-
-  [cosa, nome, dettagli].forEach((el) => el?.addEventListener('input', aggiornaLink));
-  aggiornaLink();
-</script>
 
 <style>
   .form-personalizzato {
@@ -70,7 +55,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
     font-family: var(--f-label); font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
     text-transform: uppercase; color: var(--ink3); margin: 18px 0 2px;
   }
-  .form-personalizzato label:first-child { margin-top: 0; }
+  .form-personalizzato label:first-of-type { margin-top: 0; }
   .form-personalizzato__facoltativo { text-transform: none; letter-spacing: 0; font-weight: 500; }
   .form-personalizzato input, .form-personalizzato textarea {
     width: 100%; padding: 13px 14px; border: 1px solid var(--line2);
@@ -79,4 +64,5 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
   }
   .form-personalizzato input::placeholder, .form-personalizzato textarea::placeholder { color: var(--ink3); }
   .form-personalizzato .pulsante { margin-top: 22px; align-self: flex-start; }
+  .form-personalizzato__nascosto { position: absolute; left: -9999px; }
 </style>

@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
-<Layout title="Informazioni legali">
+<Layout title="Informazioni legali" description="Dati del venditore, pagamenti, prezzi e garanzia legale di conformità sui portafogli Barbi Pelletteria.">
   <div class="contenitore">
     <section class="pagina-testo">
       <h1>Informazioni legali</h1>
@@ -14,6 +14,10 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
         Email: <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>
       </p>
 
+      <h2>Come si conclude un ordine</h2>
+      <p>L'ordine che invii tramite il sito è una proposta di acquisto. Il contratto si considera concluso nel momento in cui il pagamento viene accettato da Stripe: da quel momento vedi la pagina di conferma sul sito, che riporta i dettagli dell'ordine. A seconda della configurazione dell'account di pagamento, potresti ricevere anche una ricevuta via email direttamente da Stripe.</p>
+      <p>Se un prezzo mostrato sul sito risultasse chiaramente errato per un problema tecnico (per esempio un valore palesemente sbagliato, non un prezzo semplicemente più alto o più basso di quanto ti aspettavi), ce ne accorgeremo prima di evadere l'ordine e ti contatteremo per proporti di confermare al prezzo corretto o annullare, con rimborso pieno se avevi già pagato.</p>
+
       <h2 id="pagamenti-e-prezzi">Pagamenti e prezzi</h2>
       <p>Pagamenti con carta tramite Stripe. I dati della carta non passano mai da questo sito.</p>
       <p>I prezzi indicati sono finali e comprendono la spedizione.</p>
@@ -21,6 +25,13 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       <h2 id="garanzia">Garanzia</h2>
       <p>Su ogni portafoglio vale la garanzia legale di conformità di 24 mesi prevista dal Codice del Consumo. Se il prodotto arriva difettoso o si rivela non conforme, scrivici.</p>
       <p>Attenzione: i segni, i cambi di tono e la patina che la pelle conciata al vegetale sviluppa con l’uso non sono difetti — sono il comportamento normale di questo materiale.</p>
+
+      <h2>Reclami</h2>
+      <p>Per qualsiasi reclamo scrivi a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>: rispondiamo entro un giorno lavorativo.</p>
+      <p>Se il reclamo riguarda un acquisto fatto online e non troviamo un accordo diretto, puoi rivolgerti alla <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">piattaforma europea di risoluzione delle controversie online (ODR)</a>, come previsto dal Regolamento UE 524/2013.</p>
+
+      <h2>Legge applicabile e foro competente</h2>
+      <p>Il contratto è regolato dalla legge italiana. Se sei un consumatore, per qualsiasi controversia è competente il giudice del luogo dove risiedi o hai domicilio, come previsto dall'art. 33, comma 2, lettera u, del Codice del Consumo — questa regola non può essere cambiata a tuo sfavore, nemmeno se il contratto dicesse diversamente.</p>
     </section>
   </div>
 </Layout>

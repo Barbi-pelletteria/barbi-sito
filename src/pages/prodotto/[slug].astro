@@ -32,13 +32,40 @@ const datiClient = {
   prezzoCentesimi: prodotto.prezzoCentesimi,
   inizialiCentesimi: INIZIALI_CENTESIMI,
   colori: prodotto.colori.map((c) => ({ slug: c.slug, nome: c.nome, stock: c.stock })),
+  venditaAttiva: VENDITA_ATTIVA,
 };
 
 const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent(
   'Disponibilità portafoglio ' + prodotto.nome
 )}`;
+
+// PACCHETTO_AUDIT_SITO blocco C: dati strutturati Product, valori veri (letti
+// da prodotti.js, non inventati). "availability" resta PreOrder finché
+// VENDITA_ATTIVA è false — il prodotto esiste ma non si può ancora
+// acquistare, non è né "in magazzino" né "esaurito" in senso schema.org.
+// Da rivedere il giorno in cui VENDITA_ATTIVA passa a true (InStock/
+// OutOfStock a seconda dello stock reale).
+const prodottoJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: prodotto.nome,
+  description: prodotto.sommario,
+  brand: { '@type': 'Brand', name: 'Barbi Pelletteria' },
+  offers: {
+    '@type': 'Offer',
+    priceCurrency: 'EUR',
+    price: (prodotto.prezzoCentesimi / 100).toFixed(2),
+    availability: VENDITA_ATTIVA
+      ? (esauritoTutto ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock')
+      : 'https://schema.org/PreOrder',
+    url: `${Astro.site}prodotto/${prodotto.slug}/`,
+  },
+};
 ---
-<Layout title={prodotto.nome}>
+<Layout title={prodotto.nome} description={`${prodotto.nome}: ${prodotto.sommario} ${formatEuro(prodotto.prezzoCentesimi)}, spedizione inclusa.`}>
+  <Fragment slot="structured-data">
+    <script type="application/ld+json" set:html={JSON.stringify(prodottoJsonLd)} />
+  </Fragment>
   <div class="contenitore">
     <div class="pdp">
       <div>
@@ -53,6 +80,18 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
         <p class="p-kick" style="margin-top:0">{prodotto.occhiello}</p>
         <h1>{prodotto.nome}</h1>
         <div class="p-price" style="font-size:27px">{formatEuro(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em></div>
+
+        <!--
+          PACCHETTO_AUDIT_SITO punto B1: il 64% degli utenti cerca queste
+          informazioni proprio nella scheda prodotto (dato Baymard citato nel
+          pacchetto), non nel footer dove stavano finora.
+        -->
+        <ul class="rassicurazioni">
+          <li>Spedizione gratuita in Italia</li>
+          <li>Consegna 1-3 giorni <a href="/spedizioni-e-resi/">dalla spedizione</a></li>
+          <li>Reso entro <a href="/diritto-di-recesso/">14 giorni</a></li>
+          <li>Garanzia <a href="/termini-e-condizioni/#garanzia">24 mesi</a></li>
+        </ul>
 
         <!--
           Le pastiglie colore stanno fuori dal form di acquisto (che esiste solo
@@ -140,7 +179,21 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
           <p class="avviso">Al momento tutti i colori sono esauriti.</p>
         )}
 
+        <!-- PACCHETTO_AUDIT_SITO punto B5: per un marchio che nessuno
+             conosce ancora, vedere il metodo di pagamento è un segnale di
+             normalità — oggi Stripe era nominato solo nei legali. -->
+        <p class="pagamenti-riga">Pagamenti con carta di credito e debito, gestiti in sicurezza da Stripe.</p>
+
         <ConfrontoSpessore prodotti={prodotti} class="confronto-pdp" />
+
+        <!-- PACCHETTO_AUDIT_SITO punto B4: la capienza espressa come la
+             cercano davvero i clienti (tasche, scomparto banconote,
+             portamonete sì/no), non solo dentro la frase libera qui sotto. -->
+        <ul class="capienza">
+          <li><b>{prodotto.tascheCarte}</b> tasche per le carte</li>
+          <li><b>{prodotto.portamonete ? 'Sì' : 'No'}</b> portamonete</li>
+          <li><b>Sì</b> scomparto banconote</li>
+        </ul>
 
         <table>
           {prodotto.specifiche.map(([voce, valore]) => (
@@ -148,8 +201,8 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
           ))}
         </table>
 
-        <div class="care">
-          <h3>{curaProdotto.titolo}</h3>
+        <div class="care" id="cura">
+          <h2>{curaProdotto.titolo}</h2>
           <p>{curaProdotto.intro}</p>
           <ul>
             {curaProdotto.punti.map((p) => <li>{p}</li>)}
@@ -237,7 +290,8 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
           disponibilita.textContent = 'Questo colore è esaurito.';
           disponibilita.hidden = false;
         } else if (rimasti <= 3) {
-          disponibilita.textContent = `Disponibili ${rimasti} pezzi in questo colore.`;
+          const uno = rimasti === 1;
+          disponibilita.textContent = `${uno ? 'Disponibile' : 'Disponibili'} ${rimasti} ${uno ? 'pezzo' : 'pezzi'} in questo colore.`;
           disponibilita.hidden = false;
         } else {
           disponibilita.hidden = true;
@@ -310,12 +364,20 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
       const c = prodotto.colori.find((x) => x.slug === scelto.value);
       if (!c) return;
       if (stockLabel) {
-        const bassa = c.stock > 0 && c.stock <= SOGLIA_SCORTE_BASSE;
-        stockLabel.textContent =
-          c.stock === 0 ? `${c.nome} · esaurito`
-          : bassa ? `${c.nome} · solo ${c.stock} rimasti`
-          : `${c.nome} · ${c.stock} disponibili`;
-        stockLabel.classList.toggle('sw-label--scorte-basse', bassa);
+        // PACCHETTO_AUDIT_SITO punto A2: a vendita spenta niente numeri di
+        // disponibilità — contraddicono "disponibile a breve" scritto sotto.
+        if (!prodotto.venditaAttiva) {
+          stockLabel.textContent = c.nome;
+          stockLabel.classList.remove('sw-label--scorte-basse');
+        } else {
+          const bassa = c.stock > 0 && c.stock <= SOGLIA_SCORTE_BASSE;
+          const uno = c.stock === 1;
+          stockLabel.textContent =
+            c.stock === 0 ? `${c.nome} · esaurito`
+            : bassa ? `${c.nome} · solo ${c.stock} ${uno ? 'rimasto' : 'rimasti'}`
+            : `${c.nome} · ${c.stock} ${uno ? 'disponibile' : 'disponibili'}`;
+          stockLabel.classList.toggle('sw-label--scorte-basse', bassa);
+        }
       }
       if (didascalia) {
         didascalia.textContent = `Foto — ${prodotto.nome}, ${c.nome.toLowerCase()}`;
@@ -358,6 +420,26 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
     max-width: none;
     text-align: left;
   }
+
+  .rassicurazioni {
+    display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0 0; padding: 0; list-style: none;
+    font-family: var(--f-label); font-size: 11.5px; font-weight: 500; letter-spacing: .04em;
+    color: var(--ink2);
+  }
+  .rassicurazioni li { display: flex; align-items: center; }
+  .rassicurazioni li::before { content: '·'; margin-right: 6px; color: var(--brass-testo); }
+  .rassicurazioni li:first-child::before { content: none; }
+  .rassicurazioni a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .rassicurazioni a:hover { color: var(--brass-testo); }
+
+  .pagamenti-riga { margin-top: 16px; font-size: 14.5px; color: var(--ink3); }
+
+  .capienza {
+    display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 34px 0 0; padding: 20px 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); list-style: none;
+  }
+  .capienza li { font-size: 15.5px; color: var(--ink2); }
+  .capienza b { font-family: var(--f-display); font-size: 19px; color: var(--ink); margin-right: 6px; }
 
   .colori { border: 0; padding: 0; margin: 0; }
 
@@ -485,7 +567,12 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
   }
 
   .care { border: 1px solid var(--line); background: var(--raise); padding: 26px; margin-top: 34px; }
-  .care h3 { margin: 0 0 12px; }
+  /* PACCHETTO_AUDIT_SITO punto C: era h3 (saltava da h1 senza un h2 nel
+     mezzo). Ora h2 per la gerarchia corretta — dimensione tenuta uguale a
+     prima (era pensata come sottotitolo, non come titolo di pagina). */
+  .care h2 {
+    font-family: var(--f-display); font-weight: 400; font-size: 23px; margin: 0 0 12px;
+  }
   .care p { margin: 0 0 12px; color: var(--ink2); font-size: 17px; }
   .care ul { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: 17px; }
   .care li { margin-bottom: 6px; }

@@ -4,23 +4,28 @@ import ProductCard from '../components/ProductCard.astro';
 import Citazione from '../components/Citazione.astro';
 import ComeNasce from '../components/ComeNasce.astro';
 import ConfrontoSpessore from '../components/ConfrontoSpessore.astro';
-import { prodotti } from '../data/prodotti.js';
+import { prodotti, VENDITA_ATTIVA } from '../data/prodotti.js';
 ---
-<Layout title="Home">
+<Layout title="Home" description="Portafogli in pelle conciata al vegetale, fatti a mano a Casoria da Stefano Barbi dal 1992. Spedizione gratuita in tutta Italia, reso 14 giorni, garanzia 24 mesi.">
   <!-- 2 · titolo grande centrato, una parola in corsivo ottone -->
   <div class="contenitore">
     <section class="hero">
       <p class="eyebrow">Laboratorio di pelletteria</p>
       <h1>La qualità che si sente in <em>ogni pezzo</em></h1>
       <p class="lede">Pelle conciata al vegetale, rifinita a mano bordo per bordo: la qualità si riconosce al tatto.</p>
-      <a class="pulsante hero-cta" href="/prodotti/">Scopri i prodotti</a>
+      <a class="pulsante hero-cta" href="/portafogli/">Scopri i prodotti</a>
     </section>
   </div>
 
   <!-- 3 · fascia foto 16:9 a tutta larghezza -->
   <div class="hero-frame"><span>Foto — un portafoglio nella luce del laboratorio</span></div>
 
-  <!-- 4 · fascia rassicurazione -->
+  <!--
+    PACCHETTO_AUDIT_SITO punto A2: a vendita spenta queste quattro non sono
+    promesse attive, sono impegni futuri — l'etichetta sopra la fascia lo
+    dice esplicitamente invece di lasciarle sembrare condizioni valide oggi.
+  -->
+  {!VENDITA_ATTIVA && <p class="strip-etichetta">Alla riapertura della vendita</p>}
   <div class="strip">
     <div>Spedizione gratuita</div>
     <div>Consegna 1-3 giorni</div>
@@ -57,6 +62,27 @@ import { prodotti } from '../data/prodotti.js';
 
   <!-- 7 · come nasce un portafoglio -->
   <ComeNasce />
+
+  <!--
+    PACCHETTO_AUDIT_SITO punto B7: prima la home finiva nel footer, senza
+    un ultimo invito dopo la sezione lunga sul processo.
+  -->
+  <div class="contenitore">
+    <section class="cta-finale">
+      {VENDITA_ATTIVA ? (
+        <>
+          <h2>Pronto a scegliere <em>il tuo</em>?</h2>
+          <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+        </>
+      ) : (
+        <>
+          <h2>Vuoi sapere <em>quando riapre</em>?</h2>
+          <p>Lascia il tuo contatto: ti scriviamo appena la vendita online riparte.</p>
+          <a class="pulsante" href="/contatti/#avvisami">Avvisami alla riapertura</a>
+        </>
+      )}
+    </section>
+  </div>
 </Layout>
 
 <style>
@@ -88,6 +114,11 @@ import { prodotti } from '../data/prodotti.js';
     letter-spacing: .2em; text-transform: uppercase; color: var(--ink2);
   }
 
+  .strip-etichetta {
+    text-align: center; margin: 40px 0 0;
+    font-family: var(--f-label); font-size: 10px; font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--brass-testo);
+  }
   .strip { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
   .strip div {
     flex: 1 1 200px; padding: 17px 0; text-align: center;
@@ -101,4 +132,8 @@ import { prodotti } from '../data/prodotti.js';
     .strip div:nth-child(3), .strip div:nth-child(4) { border-top: 1px solid var(--line); }
     .strip div:nth-child(3) { border-left: 0; }
   }
+
+  .cta-finale { padding: 70px 0 84px; text-align: center; }
+  .cta-finale h2 { margin: 0 0 16px; }
+  .cta-finale p { color: var(--ink2); max-width: 46ch; margin: 0 auto 28px; }
 </style>

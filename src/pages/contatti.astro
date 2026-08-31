@@ -1,19 +1,94 @@
 ---
+// PACCHETTO_AUDIT_SITO punto B6: due moduli Netlify reali al posto del
+// solo mailto: — "avvisami alla riapertura" (l'home ci punta con
+// /contatti/#avvisami) e un contatto generale. Stesso meccanismo del
+// modulo di recesso (diritto-di-recesso.astro) e della richiesta su
+// misura (prodotto-personalizzato.astro): piano gratuito Netlify, niente
+// database. Il numero WhatsApp menzionato nel pacchetto non è stato
+// aggiunto — serve la conferma di Stefano, non è nei dati del progetto.
 import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
-<Layout title="Contatti">
+<Layout title="Contatti" description="Scrivi a Stefano Barbi per informazioni sui portafogli, un ordine o un pezzo su misura. Rispondiamo entro un giorno lavorativo.">
   <div class="contenitore">
     <section class="pagina-testo">
       <h1>Contatti</h1>
       <p>Per informazioni sui portafogli, sugli ordini o sui resi, scrivi a:</p>
       <p class="contatti__email"><a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a></p>
+      <p>Rispondiamo entro un giorno lavorativo.</p>
+
+      <div class="riquadro" id="avvisami">
+        <h2>Avvisami alla riapertura</h2>
+        <p>La vendita online non è ancora attiva. Lascia la tua email: ti scriviamo appena riapre.</p>
+        <form
+          name="avvisami"
+          method="POST"
+          action="/grazie/"
+          data-netlify="true"
+          netlify-honeypot="av-azienda"
+          class="form-contatto"
+        >
+          <input type="hidden" name="form-name" value="avvisami" />
+          <p class="form-contatto__nascosto"><label>Non compilare questo campo <input name="av-azienda" /></label></p>
+          <label for="av-email" class="sr-only">La tua email</label>
+          <div class="form-contatto__riga">
+            <input type="email" id="av-email" name="email" placeholder="La tua email" autocomplete="email" required />
+            <button type="submit" class="pulsante">Avvisami</button>
+          </div>
+        </form>
+      </div>
+
+      <h2>Scrivici direttamente</h2>
+      <form
+        name="contatto"
+        method="POST"
+        action="/grazie/"
+        data-netlify="true"
+        netlify-honeypot="ct-azienda"
+        class="form-contatto"
+      >
+        <input type="hidden" name="form-name" value="contatto" />
+        <p class="form-contatto__nascosto"><label>Non compilare questo campo <input name="ct-azienda" /></label></p>
+
+        <label for="ct-nome">Il tuo nome</label>
+        <input type="text" id="ct-nome" name="nome" autocomplete="name" required />
+
+        <label for="ct-email">La tua email</label>
+        <input type="email" id="ct-email" name="email" autocomplete="email" required />
+
+        <label for="ct-messaggio">Messaggio</label>
+        <textarea id="ct-messaggio" name="messaggio" rows="5" required></textarea>
+
+        <button type="submit" class="pulsante">Invia</button>
+      </form>
     </section>
   </div>
 </Layout>
 
 <style>
-  .contatti__email { font-family: var(--f-display); font-size: 25px; }
+  .contatti__email { font-family: var(--f-display); font-size: 25px; margin-bottom: 8px; }
   .contatti__email a { text-decoration: none; }
   .contatti__email a:hover { text-decoration: underline; }
+
+  #avvisami { margin: 40px 0; }
+  #avvisami h2 { margin-top: 0; }
+
+  .form-contatto { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; }
+  .form-contatto label {
+    font-family: var(--f-label); font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink3); margin: 18px 0 2px;
+  }
+  .form-contatto label:first-of-type { margin-top: 0; }
+  .form-contatto input, .form-contatto textarea {
+    width: 100%; padding: 13px 14px; border: 1px solid var(--line2);
+    background: var(--sunk); color: var(--ink); font-family: var(--f-text); font-size: 16.5px;
+    resize: vertical;
+  }
+  .form-contatto input::placeholder, .form-contatto textarea::placeholder { color: var(--ink3); }
+  .form-contatto .pulsante { margin-top: 6px; align-self: flex-start; }
+  .form-contatto__nascosto { position: absolute; left: -9999px; }
+
+  #avvisami .form-contatto__riga { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 0; }
+  #avvisami .form-contatto__riga input { flex: 1 1 220px; }
+  #avvisami .form-contatto__riga .pulsante { margin-top: 0; }
 </style>

@@ -2,21 +2,48 @@
 import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
-<Layout title="Privacy e cookie">
+<Layout title="Privacy e cookie" description="Come trattiamo i tuoi dati personali: base giuridica, conservazione, responsabili del trattamento e i tuoi diritti.">
   <div class="contenitore">
     <section class="pagina-testo">
       <h1>Privacy e cookie</h1>
 
       <p>Il titolare del trattamento è Barbi Stefano, Via Nazionale delle Puglie 98, 80026 Casoria (NA). Per qualsiasi richiesta sui tuoi dati puoi scrivere a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>.</p>
 
+      <h2>Base giuridica e finalità</h2>
+      <p>I dati necessari a evadere un ordine (nome, indirizzo, contatti) sono trattati per eseguire il contratto di vendita (art. 6.1.b del Regolamento UE 2016/679). I dati raccolti tramite Google Analytics, e l'eventuale consenso a ricevere comunicazioni promozionali lasciato in fase di acquisto, sono trattati solo con il tuo consenso esplicito (art. 6.1.a), che puoi revocare in qualsiasi momento senza pregiudicare la liceità del trattamento già effettuato. I dati contenuti nei documenti fiscali (fatture, ricevute) sono trattati per adempiere a un obbligo di legge (art. 6.1.c).</p>
+
       <h2>Analytics e cookie</h2>
-      <p>Questo sito usa Google Analytics 4 per contare le visite in forma aggregata e capire quali pagine vengono lette. Analytics installa cookie sul tuo dispositivo.</p>
-      <p>Google Analytics non parte al caricamento della pagina: si attiva solo dopo che hai premuto <strong>Accetta</strong> nel banner dei cookie. Se premi <strong>Rifiuta</strong>, nessun cookie di analisi viene installato e nessun dato viene inviato. La tua scelta viene ricordata per le visite successive.</p>
+      <p>Questo sito usa Google Analytics 4 per contare le visite in forma aggregata e capire quali pagine vengono lette. Analytics installa cookie sul tuo dispositivo — per Google Analytics 4, il cookie principale (<code>_ga</code>) ha una durata di 2 anni secondo la configurazione predefinita di Google.</p>
+      <p>Google Analytics non parte al caricamento della pagina: si attiva solo dopo che hai premuto <strong>Accetta</strong> nel banner dei cookie. Se premi <strong>Rifiuta</strong>, nessun cookie di analisi viene installato e nessun dato viene inviato. La tua scelta viene ricordata per le visite successive, salvata solo sul tuo dispositivo.</p>
       <p>Puoi cambiare idea in qualsiasi momento:</p>
       <p><button type="button" class="pulsante pulsante-secondario" id="reset-consenso">Rivedi la scelta sui cookie</button></p>
 
       <h2>Dati di acquisto</h2>
       <p>I pagamenti sono gestiti da Stripe: i dati della carta vengono trattati direttamente da Stripe e non passano da questo sito. I dati necessari alla spedizione (nome, indirizzo, contatti) sono usati solo per evadere l’ordine.</p>
+
+      <h2>Per quanto tempo conserviamo i dati</h2>
+      <p>I documenti fiscali legati a un ordine (fatture, ricevute) si conservano per 10 anni, come richiesto dalla normativa fiscale italiana (art. 2220 del Codice Civile). I dati raccolti da Google Analytics restano soggetti ai criteri di conservazione di Google per Analytics 4. Se rifiuti i cookie di analisi, nessun dato di navigazione viene raccolto o conservato.</p>
+
+      <h2>A chi vengono comunicati i tuoi dati</h2>
+      <p>Alcuni fornitori trattano i tuoi dati per nostro conto, in qualità di responsabili del trattamento:</p>
+      <ul>
+        <li><strong>Netlify</strong> (Stati Uniti) — ospita il sito.</li>
+        <li><strong>Stripe</strong> (Stati Uniti/Irlanda) — gestisce i pagamenti con carta.</li>
+        <li><strong>Google</strong> (Stati Uniti/Irlanda) — fornisce Google Analytics 4, solo se hai dato il consenso.</li>
+      </ul>
+      <p>Netlify, Stripe e Google possono trattare i dati anche fuori dall'Unione Europea, in particolare negli Stati Uniti; tutti e tre dichiarano pubblicamente di basare questi trasferimenti sulle clausole contrattuali standard approvate dalla Commissione Europea, lo strumento previsto dal GDPR per queste situazioni.</p>
+
+      <h2>I tuoi diritti</h2>
+      <p>In qualsiasi momento puoi chiedere al titolare del trattamento, scrivendo a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>:</p>
+      <ul>
+        <li>accesso ai tuoi dati personali;</li>
+        <li>rettifica dei dati inesatti o incompleti;</li>
+        <li>cancellazione dei dati, quando non c'è più un motivo legittimo per conservarli;</li>
+        <li>portabilità dei dati che ci hai fornito, in un formato leggibile;</li>
+        <li>opposizione al trattamento basato sul consenso, in qualsiasi momento;</li>
+        <li>limitazione del trattamento, in casi specifici previsti dalla legge.</li>
+      </ul>
+      <p>Se ritieni che il trattamento dei tuoi dati violi il Regolamento, hai diritto di proporre reclamo al <a href="https://www.garanteprivacy.it/" target="_blank" rel="noopener">Garante per la protezione dei dati personali</a>.</p>
     </section>
   </div>
 </Layout>

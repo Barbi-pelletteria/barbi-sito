@@ -13,8 +13,17 @@ const prodottiCategoria = getProdottiByCategoria(categoriaSlug);
 
 const modelli = [...new Set(prodottiCategoria.map((p) => p.nome))];
 const coloriDisponibili = [...new Set(prodottiCategoria.flatMap((p) => p.colori.map((c) => c.nome)))];
+
+// PACCHETTO_AUDIT_SITO blocco C: description specifica per categoria, non
+// il default generico del sito. fatti/fatte si accorda a categoria.genere
+// per lo stesso motivo del testo "pronti/pronte" qui sotto (C-16 in
+// CORREZIONI.md — la stessa famiglia di bug, stavolta evitata da subito).
+const fattoA = categoria.genere === 'f' ? 'fatte' : 'fatti';
+const descrizioneCategoria = prodottiCategoria.length > 0
+  ? `I ${categoria.nome.toLowerCase()} Barbi Pelletteria: pelle conciata al vegetale, ${fattoA} a mano a Casoria.`
+  : `${categoria.nome} Barbi Pelletteria, in arrivo: pelle conciata al vegetale, ${fattoA} a mano a Casoria.`;
 ---
-<Layout title={categoria.nome}>
+<Layout title={categoria.nome} description={descrizioneCategoria}>
   <div class="contenitore">
     <section class="sec">
       <div class="sec-top">
@@ -24,7 +33,7 @@ const coloriDisponibili = [...new Set(prodottiCategoria.flatMap((p) => p.colori.
 
       {prodottiCategoria.length === 0 ? (
         <div class="categoria-vuota">
-          <p class="segnaposto">Non ancora online: {categoria.nome.toLowerCase()} arriveranno nei prossimi mesi, quando saranno pronti in laboratorio.</p>
+          <p class="segnaposto">Non ancora online: {categoria.nome.toLowerCase()} arriveranno nei prossimi mesi, quando {categoria.genere === 'f' ? 'saranno pronte' : 'saranno pronti'} in laboratorio.</p>
           <p><a class="pulsante pulsante-secondario" href="/portafogli/">Vedi i portafogli disponibili ora</a></p>
         </div>
       ) : (
@@ -66,6 +75,16 @@ const coloriDisponibili = [...new Set(prodottiCategoria.flatMap((p) => p.colori.
               </div>
             ))}
           </div>
+
+          {/* PACCHETTO_AUDIT_SITO punto B9: le altre categorie e il su
+              misura restano una riga di testo, non un livello di
+              navigazione — l'hub /prodotti/ è stato tolto. */}
+          {categoriaSlug === 'portafogli' && (
+            <p class="prossimamente">
+              Presto anche <a href="/borse/">borse</a> e <a href="/portachiavi/">portachiavi</a>.
+              Cerchi qualcosa su misura? <a href="/prodotto-personalizzato/">Chiedilo a Stefano</a>.
+            </p>
+          )}
         </>
       )}
     </section>
@@ -77,6 +96,9 @@ const coloriDisponibili = [...new Set(prodottiCategoria.flatMap((p) => p.colori.
 
   .categoria-vuota { text-align: center; }
   .categoria-vuota .segnaposto { display: block; margin-bottom: 26px; }
+
+  .prossimamente { text-align: center; margin: 48px 0 0; color: var(--ink3); font-size: 15px; }
+  .prossimamente a { color: var(--brass-testo); }
 
   /* PACCHETTO_INTERFACCIA punto 4: chiusi di default ovunque (desktop e
      mobile, non solo sotto una soglia di larghezza), dietro <details>/

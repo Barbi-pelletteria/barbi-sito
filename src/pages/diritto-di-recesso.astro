@@ -2,30 +2,94 @@
 import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 
-// Modulo di recesso raggiungibile in un clic (obbligatorio dal 19 giugno 2026):
-// apre un'email già pronta verso il laboratorio.
-const oggetto = encodeURIComponent('Comunicazione di recesso');
-const corpo = encodeURIComponent(
-  'Con la presente comunico il recesso dal contratto di acquisto dei seguenti articoli:\n\n' +
-    '- Prodotto:\n- Data dell’ordine:\n- Data di ricezione:\n\n' +
-    'Nome e cognome:\nIndirizzo:\nData:'
-);
-const mailtoRecesso = `mailto:${EMAIL_CONTATTO}?subject=${oggetto}&body=${corpo}`;
+// PACCHETTO_AUDIT_SITO punto A5: il modulo di recesso va riprodotto in
+// pagina, non solo raggiungibile via un mailto: che su molti telefoni non
+// apre nulla. Ricalca il modulo tipo di recesso (Allegato I, parte B della
+// direttiva 2011/83/UE, recepito nel Codice del Consumo) — testo standard,
+// non inventato. Invio reale via modulo Netlify (piano gratuito, la stessa
+// via usata per gli altri moduli del sito, vedi B6): resta funzionante
+// anche senza JavaScript, a differenza del mailto:.
 ---
-<Layout title="Diritto di recesso e resi">
+<Layout title="Diritto di recesso e resi" description="14 giorni per cambiare idea: come funziona il reso e il modulo di recesso da compilare online.">
   <div class="contenitore">
     <section class="pagina-testo">
       <h1>Diritto di recesso e resi</h1>
-      <p>Hai 14 giorni dalla consegna per cambiare idea, senza doverne spiegare il motivo. Scrivici a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a> e ti diciamo come procedere.</p>
+      <p>Hai 14 giorni dalla consegna per cambiare idea, senza doverne spiegare il motivo. Per i tempi di consegna vedi <a href="/spedizioni-e-resi/">Spedizioni e consegne</a>.</p>
       <p>Il costo della spedizione di ritorno è a tuo carico.</p>
-      <p>Il rimborso arriva entro 14 giorni dal rientro del portafoglio.</p>
+      <p>Il rimborso arriva entro 14 giorni dal rientro del portafoglio, integro e con l'imballo originale se possibile — l'aver provato il prodotto non fa perdere il diritto di recesso, ma il valore del bene si riduce se è stato usato oltre la semplice prova.</p>
       <p>Unica eccezione: i portafogli con le iniziali impresse sono realizzati su tua richiesta e non possono essere restituiti (art. 59, lettera c, del Codice del Consumo).</p>
+
+      <h2>Dove spedire il reso</h2>
+      <p>
+        Barbi Stefano<br />
+        Via Nazionale delle Puglie 98, 80026 Casoria (NA)
+      </p>
 
       <div class="riquadro">
         <h2>Modulo di recesso</h2>
-        <p>Puoi comunicare il recesso in un clic: si apre un’email già pronta da completare e inviare.</p>
-        <p><a class="pulsante" href={mailtoRecesso}>Compila il modulo di recesso</a></p>
+        <p>Compilalo e invialo direttamente da qui — è lo stesso modulo tipo previsto dalla normativa europea, in una versione da riempire online invece che a mano.</p>
+
+        <form
+          name="recesso"
+          method="POST"
+          action="/grazie/"
+          data-netlify="true"
+          netlify-honeypot="pp-azienda"
+          class="form-recesso"
+        >
+          <input type="hidden" name="form-name" value="recesso" />
+          <p class="form-recesso__nascosto"><label>Non compilare questo campo <input name="pp-azienda" /></label></p>
+
+          <label for="rec-prodotto">Prodotto</label>
+          <input type="text" id="rec-prodotto" name="prodotto" placeholder="Es. Sottile, blu" required />
+
+          <div class="form-recesso__riga">
+            <div>
+              <label for="rec-ordine">Data dell'ordine</label>
+              <input type="date" id="rec-ordine" name="data_ordine" />
+            </div>
+            <div>
+              <label for="rec-ricezione">Data di ricezione</label>
+              <input type="date" id="rec-ricezione" name="data_ricezione" />
+            </div>
+          </div>
+
+          <label for="rec-nome">Nome e cognome</label>
+          <input type="text" id="rec-nome" name="nome" autocomplete="name" required />
+
+          <label for="rec-indirizzo">Indirizzo</label>
+          <input type="text" id="rec-indirizzo" name="indirizzo" autocomplete="street-address" required />
+
+          <label for="rec-email">La tua email</label>
+          <input type="email" id="rec-email" name="email" autocomplete="email" required />
+
+          <p class="form-recesso__dichiarazione">Con l'invio di questo modulo comunico il recesso dal contratto di acquisto del prodotto sopra indicato.</p>
+
+          <button type="submit" class="pulsante">Invia la comunicazione di recesso</button>
+        </form>
+
+        <p class="segnaposto">In alternativa puoi scrivere a <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a> con gli stessi dati.</p>
       </div>
     </section>
   </div>
 </Layout>
+
+<style>
+  .form-recesso { display: flex; flex-direction: column; gap: 6px; margin-top: 22px; }
+  .form-recesso label {
+    font-family: var(--f-label); font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink3); margin: 18px 0 2px;
+  }
+  .form-recesso label:first-of-type { margin-top: 0; }
+  .form-recesso input {
+    width: 100%; padding: 13px 14px; border: 1px solid var(--line2);
+    background: var(--sunk); color: var(--ink); font-family: var(--f-text); font-size: 16.5px;
+  }
+  .form-recesso__riga { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 480px) { .form-recesso__riga { grid-template-columns: 1fr; } }
+  .form-recesso__dichiarazione { font-size: 14.5px; color: var(--ink3); margin: 20px 0 0; }
+  .form-recesso .pulsante { margin-top: 18px; align-self: flex-start; }
+  /* Campo anti-spam (honeypot): fuori schermo per una persona, visibile e
+     compilabile per i bot semplici — se arriva pieno, Netlify scarta l'invio. */
+  .form-recesso__nascosto { position: absolute; left: -9999px; }
+</style>

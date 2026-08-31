@@ -6,6 +6,19 @@
 [functions]
   node_bundler = "esbuild"
 
+# PACCHETTO_AUDIT_SITO punto B9: l'hub /prodotti/ è stato tolto (una
+# pagina-passaggio con 3 categorie su 4 vuote, su un catalogo di 2 prodotti
+# — il menu ora porta direttamente a /portafogli/). Redirect per non
+# lasciare un link morto a chi avesse già l'URL vecchio salvato.
+[[redirects]]
+  from = "/prodotti/"
+  to = "/portafogli/"
+  status = 301
+[[redirects]]
+  from = "/prodotti"
+  to = "/portafogli/"
+  status = 301
+
 # Sicurezza minima di base. Non sostituisce una revisione dedicata,
 # ma evita gli errori più comuni su un sito nuovo.
 [[headers]]
