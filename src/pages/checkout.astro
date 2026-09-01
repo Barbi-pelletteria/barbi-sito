@@ -99,7 +99,7 @@ import Layout from '../layouts/Layout.astro';
 
       const consensoMarketing = document.getElementById('consenso-marketing')?.checked || false;
 
-      const risposta = await fetch('/.netlify/functions/create-checkout-session', {
+      const risposta = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items, siteUrl: window.location.origin, consensoMarketing }),
@@ -115,13 +115,13 @@ import Layout from '../layouts/Layout.astro';
         const messaggioServer = dati && dati.error;
         throw new Error(
           messaggioServer ||
-            'Impossibile contattare la funzione di pagamento (probabile: il sito non gira ancora su Netlify, o mancano le chiavi Stripe di test).'
+            'Impossibile contattare la funzione di pagamento (probabile: il sito non gira ancora su Cloudflare Pages, o mancano le chiavi Stripe di test).'
         );
       }
 
       window.location.href = dati.url;
     } catch (err) {
-      errore.textContent = `Errore: ${err.message}. Controlla che le chiavi Stripe di test siano configurate su Netlify (vedi SETUP.md).`;
+      errore.textContent = `Errore: ${err.message}. Controlla che le chiavi Stripe di test siano configurate su Cloudflare Pages (vedi SETUP.md).`;
       errore.hidden = false;
       btnPaga.disabled = false;
       btnPaga.textContent = 'Procedi al pagamento';

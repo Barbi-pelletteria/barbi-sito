@@ -4,5 +4,7 @@ dist/
 .netlify/
 .env
 .env.local
+.dev.vars
+.wrangler/
 npm-debug.log*
 .DS_Store

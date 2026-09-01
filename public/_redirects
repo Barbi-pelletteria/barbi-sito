@@ -1,0 +1,6 @@
+# Equivalente Cloudflare Pages dei redirect in netlify.toml (PACCHETTO_AUDIT_SITO
+# punto B9): l'hub /prodotti/ è stato tolto, il menu porta direttamente a
+# /portafogli/. Redirect per non lasciare un link morto a chi avesse già
+# l'URL vecchio salvato.
+/prodotti/  /portafogli/  301
+/prodotti   /portafogli/  301

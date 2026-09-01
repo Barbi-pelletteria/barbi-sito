@@ -1,0 +1,6 @@
+# Equivalente Cloudflare Pages degli header in netlify.toml. Sicurezza minima
+# di base, non sostituisce una revisione dedicata.
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
