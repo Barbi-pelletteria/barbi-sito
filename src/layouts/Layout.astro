@@ -15,6 +15,19 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
 import Marchio from '../components/Marchio.astro';
 import { EMAIL_CONTATTO, VENDITA_ATTIVA } from '../data/prodotti.js';
 
+// Voce "Home" nel menu (richiesta diretta del Founder, 31/08/2026): oggi
+// si torna alla home solo cliccando il marchio, un'interazione che molti
+// utenti non scoprono da soli. Il marchio resta cliccabile (non si tocca),
+// "Home" si affianca come primo elemento, esplicito.
+// aria-current="page" sulla voce attiva: pattern nuovo, non esisteva prima
+// per nessuna voce del menu — introdotto qui per tutte, non solo per Home,
+// altrimenti "segnalata come le altre" non avrebbe un'altra voce da cui
+// prendere esempio. "/" confrontato per uguaglianza esatta (altrimenti
+// ogni pagina inizia per "/" ed è sempre "attiva"); le altre per prefisso,
+// così un'eventuale sotto-pagina futura resta coerente.
+const percorso = Astro.url.pathname;
+const eAttivo = (href) => (href === '/' ? percorso === '/' : percorso.startsWith(href));
+
 const titoloCompleto = `${title} · Barbi Pelletteria`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL(ogImage, Astro.site);
@@ -74,16 +87,17 @@ const ogImageURL = new URL(ogImage, Astro.site);
         <img src="/marchio-pelle-lettere.png" alt="Barbi" width="1010" height="280" />
       </a>
       <nav class="nav-right" aria-label="Menu principale">
-        <a href="/portafogli/" class="hideable">Prodotti</a>
-        <a href="/chi-siamo/" class="hideable">Il laboratorio</a>
-        <a href="/contatti/" class="hideable">Contatti</a>
+        <a href="/" class="hideable" aria-current={eAttivo('/') ? 'page' : undefined}>Home</a>
+        <a href="/portafogli/" class="hideable" aria-current={eAttivo('/portafogli/') ? 'page' : undefined}>Prodotti</a>
+        <a href="/chi-siamo/" class="hideable" aria-current={eAttivo('/chi-siamo/') ? 'page' : undefined}>Il laboratorio</a>
+        <a href="/contatti/" class="hideable" aria-current={eAttivo('/contatti/') ? 'page' : undefined}>Contatti</a>
         {/* PACCHETTO_AUDIT_SITO punto A2: niente contatore "(0)" finché non
             si può comprendere nulla — mostrarlo contraddice il resto del
             sito, che dice "vendita non ancora attiva". */}
         {VENDITA_ATTIVA ? (
-          <a href="/carrello/">Carrello (<span id="contatore-carrello">0</span>)</a>
+          <a href="/carrello/" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>Carrello (<span id="contatore-carrello">0</span>)</a>
         ) : (
-          <a href="/carrello/">Carrello</a>
+          <a href="/carrello/" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>Carrello</a>
         )}
         <button type="button" class="nav-burger" id="nav-burger" aria-expanded="false" aria-controls="nav-menu-mobile" aria-label="Apri il menu">
           <span></span><span></span><span></span>
@@ -91,9 +105,10 @@ const ogImageURL = new URL(ogImage, Astro.site);
       </nav>
     </div>
     <nav class="nav-menu-mobile" id="nav-menu-mobile" aria-label="Menu principale, mobile" hidden>
-      <a href="/portafogli/">Prodotti</a>
-      <a href="/chi-siamo/">Il laboratorio</a>
-      <a href="/contatti/">Contatti</a>
+      <a href="/" aria-current={eAttivo('/') ? 'page' : undefined}>Home</a>
+      <a href="/portafogli/" aria-current={eAttivo('/portafogli/') ? 'page' : undefined}>Prodotti</a>
+      <a href="/chi-siamo/" aria-current={eAttivo('/chi-siamo/') ? 'page' : undefined}>Il laboratorio</a>
+      <a href="/contatti/" aria-current={eAttivo('/contatti/') ? 'page' : undefined}>Contatti</a>
     </nav>
   </header>
 
@@ -332,6 +347,10 @@ const ogImageURL = new URL(ogImage, Astro.site);
       text-transform: uppercase; color: var(--raise); text-decoration: none; white-space: nowrap;
     }
     .nav a:hover { color: var(--brass); }
+    /* Voce attiva: stesso trattamento di :hover ma persistente, più il
+       peso del testo — un colore da solo non basta (non-color indicator),
+       serve anche a chi non distingue i due toni su un fondo scuro/testurizzato. */
+    .nav a[aria-current="page"] { color: var(--brass); font-weight: 600; }
 
     /* Tasto menu mobile (tre lineette): invisibile da computer, il menu
        a comparsa sotto sostituisce i link .hideable nascosti in basso. */
@@ -372,6 +391,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
       }
       .nav-menu-mobile a:last-child { border-bottom: 0; }
       .nav-menu-mobile a:hover, .nav-menu-mobile a:focus-visible { color: var(--brass-testo); }
+      .nav-menu-mobile a[aria-current="page"] { color: var(--brass-testo); font-weight: 600; }
     }
 
     /* ---- pastiglie colore (scheda + pagina prodotto) ---- */
