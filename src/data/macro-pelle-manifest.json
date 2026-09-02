@@ -1,0 +1,23 @@
+{
+  "blu": {
+    "swatch": "/pelle/blu-swatch.webp",
+    "macroWebp": "/pelle/blu-macro.webp",
+    "macroJpg": "/pelle/blu-macro.jpg",
+    "width": 1200,
+    "height": 1200
+  },
+  "bordeaux": {
+    "swatch": "/pelle/bordeaux-swatch.webp",
+    "macroWebp": "/pelle/bordeaux-macro.webp",
+    "macroJpg": "/pelle/bordeaux-macro.jpg",
+    "width": 1200,
+    "height": 1200
+  },
+  "marrone": {
+    "swatch": "/pelle/marrone-swatch.webp",
+    "macroWebp": "/pelle/marrone-macro.webp",
+    "macroJpg": "/pelle/marrone-macro.jpg",
+    "width": 1200,
+    "height": 1200
+  }
+}

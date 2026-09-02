@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import FotoSegnaposto from '../../components/FotoSegnaposto.astro';
 import ConfrontoSpessore from '../../components/ConfrontoSpessore.astro';
-import { immagineProdotto } from '../../data/immagini.js';
+import { galleriaProdotto } from '../../data/immagini.js';
 import {
   prodotti,
   curaProdotto,
@@ -23,9 +23,19 @@ const stockTotale = prodotto.colori.reduce((t, c) => t + c.stock, 0);
 const esauritoTutto = stockTotale === 0;
 const primoDisponibile = prodotto.colori.find((c) => c.stock > 0)?.slug || '';
 const coloreIniziale = prodotto.colori.find((c) => c.slug === primoDisponibile) || prodotto.colori[0];
-const fotoAttiva = immagineProdotto(prodotto.slug, coloreIniziale.slug);
 
-// Dati minimi che servono allo script lato client (stock per colore, prezzi).
+// Galleria completa per il colore iniziale (server-side, per il primo
+// caricamento) e per tutti gli altri colori (dentro datiClient, per lo
+// scambio via JS quando si cambia colore — punto 4 del pacchetto foto:
+// cambiando colore cambia l'intera galleria, non solo l'immagine
+// principale).
+const galleriaIniziale = galleriaProdotto(prodotto, coloreIniziale);
+const galleriaPerColore = Object.fromEntries(
+  prodotto.colori.map((c) => [c.slug, galleriaProdotto(prodotto, c)])
+);
+
+// Dati minimi che servono allo script lato client (stock per colore, prezzi,
+// galleria per colore).
 const datiClient = {
   slug: prodotto.slug,
   nome: prodotto.nome,
@@ -33,6 +43,7 @@ const datiClient = {
   inizialiCentesimi: INIZIALI_CENTESIMI,
   colori: prodotto.colori.map((c) => ({ slug: c.slug, nome: c.nome, stock: c.stock })),
   venditaAttiva: VENDITA_ATTIVA,
+  galleria: galleriaPerColore,
 };
 
 const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent(
@@ -69,8 +80,34 @@ const prodottoJsonLd = {
   <div class="contenitore">
     <div class="pdp">
       <div>
-        {fotoAttiva ? (
-          <img src={fotoAttiva} alt={`${prodotto.nome}, ${coloreIniziale.nome.toLowerCase()}`} />
+        {galleriaIniziale.length > 0 ? (
+          <div class="pdp-galleria" id="pdp-galleria">
+            <picture class="pdp-foto-principale">
+              <source id="pdp-foto-principale-webp" srcset={galleriaIniziale[0].webp} type="image/webp" />
+              <img
+                id="pdp-foto-principale-img"
+                src={galleriaIniziale[0].jpg}
+                alt={galleriaIniziale[0].alt}
+                width={galleriaIniziale[0].width}
+                height={galleriaIniziale[0].height}
+              />
+            </picture>
+            {galleriaIniziale.length > 1 && (
+              <div class="pdp-miniature" id="pdp-miniature" role="group" aria-label="Altre immagini del prodotto">
+                {galleriaIniziale.map((f, i) => (
+                  <button
+                    type="button"
+                    class:list={['pdp-miniatura', { on: i === 0 }]}
+                    data-index={i}
+                    aria-current={i === 0 ? 'true' : undefined}
+                    aria-label={f.alt}
+                  >
+                    <img src={f.webp} alt="" width="72" height="90" loading={i === 0 ? 'eager' : 'lazy'} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         ) : (
           <FotoSegnaposto id="foto-pdp" etichetta={`Foto — ${prodotto.nome}, ${coloreIniziale.nome.toLowerCase()}`} />
         )}
@@ -346,13 +383,72 @@ const prodottoJsonLd = {
     }
 
     // Sotto qui solo la vista: etichetta scorta accanto alle pastiglie,
-    // didascalia del segnaposto foto, anteprima iniziali. Non tocca stock,
-    // carrello o VENDITA_ATTIVA.
+    // didascalia del segnaposto foto, galleria immagini, anteprima iniziali.
+    // Non tocca stock, carrello o VENDITA_ATTIVA.
     const stockLabel = document.getElementById('stock-label');
-    const didascalia = document.querySelector('#foto-pdp b');
+    const didascalia = document.querySelector('#foto-pdp b'); // solo se niente foto — segnaposto
     const anteprima = document.getElementById('iniziali-anteprima');
     const anteprimaTesto = document.getElementById('iniziali-anteprima-testo');
     const anteprimaNota = document.getElementById('iniziali-anteprima-nota');
+
+    // Galleria (punto 4 del pacchetto foto): cambiare colore cambia
+    // l'immagine principale E l'intera striscia di miniature, non solo la
+    // prima. Le miniature si ricostruiscono da zero a ogni cambio colore
+    // invece di aggiornarne il src una per una: il numero di scatti può
+    // variare da un colore all'altro dello stesso prodotto finché non tutte
+    // le foto sono arrivate (oggi: completo/marrone ne ha una in meno,
+    // manca 03-portamonete) — vedi FOTO_SITO/LEGGIMI.md.
+    const fotoPrincipaleWebp = document.getElementById('pdp-foto-principale-webp');
+    const fotoPrincipaleImg = document.getElementById('pdp-foto-principale-img');
+    const miniature = document.getElementById('pdp-miniature');
+
+    function mostraScatto(scatto) {
+      if (!scatto || !fotoPrincipaleImg) return;
+      if (fotoPrincipaleWebp) fotoPrincipaleWebp.srcset = scatto.webp;
+      fotoPrincipaleImg.src = scatto.jpg;
+      fotoPrincipaleImg.alt = scatto.alt;
+      fotoPrincipaleImg.width = scatto.width;
+      fotoPrincipaleImg.height = scatto.height;
+    }
+
+    function aggiornaGalleria(coloreSlug) {
+      const scatti = prodotto.galleria?.[coloreSlug] || [];
+      mostraScatto(scatti[0]);
+      if (!miniature) return;
+      miniature.innerHTML = '';
+      scatti.forEach((s, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pdp-miniatura' + (i === 0 ? ' on' : '');
+        btn.dataset.index = String(i);
+        if (i === 0) btn.setAttribute('aria-current', 'true');
+        btn.setAttribute('aria-label', s.alt);
+        const img = document.createElement('img');
+        img.src = s.webp;
+        img.alt = '';
+        img.width = 72;
+        img.height = 90;
+        img.loading = i === 0 ? 'eager' : 'lazy';
+        btn.appendChild(img);
+        miniature.appendChild(btn);
+      });
+    }
+
+    // Delega sul contenitore: le miniature vengono ricreate a ogni cambio
+    // colore (sopra), un listener per bottone si perderebbe ogni volta.
+    miniature?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pdp-miniatura');
+      if (!btn || !miniature.contains(btn)) return;
+      const scelto = document.querySelector('input[name="colore"]:checked');
+      const scatti = (scelto && prodotto.galleria?.[scelto.value]) || [];
+      const indice = parseInt(btn.dataset.index || '0', 10);
+      mostraScatto(scatti[indice]);
+      miniature.querySelectorAll('.pdp-miniatura').forEach((b) => {
+        b.classList.toggle('on', b === btn);
+        if (b === btn) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
+      });
+    });
 
     // Soglia scorte basse: PACCHETTO_VETRINA punto 1 — 5 pezzi o meno,
     // sui numeri veri già in prodotti.js (nessuna soglia diversa altrove).
@@ -382,6 +478,7 @@ const prodottoJsonLd = {
       if (didascalia) {
         didascalia.textContent = `Foto — ${prodotto.nome}, ${c.nome.toLowerCase()}`;
       }
+      aggiornaGalleria(c.slug);
       if (anteprima) {
         anteprima.setAttribute('data-c', c.slug);
       }
@@ -413,6 +510,30 @@ const prodottoJsonLd = {
 <style>
   .pdp { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; padding: 70px 0; align-items: start; }
   @media (max-width: 800px) { .pdp { grid-template-columns: 1fr; gap: 32px; padding: 44px 0; } }
+
+  /* Galleria (PACCHETTO_FOTO_PRODOTTO_2026-09-02). width/height reali
+     dichiarati sull'<img> (non qui) evitano il salto di layout al
+     caricamento — variano leggermente scatto per scatto, quindi qui resta
+     solo il ridimensionamento proporzionale, non un aspect-ratio fisso. */
+  .pdp-foto-principale { display: block; border: 1px solid var(--line); background: var(--raise); }
+  .pdp-foto-principale img { display: block; width: 100%; height: auto; }
+
+  .pdp-miniature {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;
+    padding: 0; border: 0; list-style: none;
+  }
+  .pdp-miniatura {
+    display: block; width: 72px; height: 90px; padding: 0; margin: 0;
+    border: 1px solid var(--line2); background: var(--sunk); cursor: pointer;
+    flex: 0 0 auto; position: relative;
+  }
+  .pdp-miniatura img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* Stesso linguaggio dell'anello sugli swatch colore: bordo ottone sulla
+     miniatura attiva, non un cambio di dimensione (che sposterebbe le
+     altre miniature nella riga). */
+  .pdp-miniatura.on { border-color: var(--brass); border-width: 2px; }
+  .pdp-miniatura:hover:not(.on) { border-color: var(--brass-testo); }
+  .pdp-miniatura:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 
   .pdp h1 {
     font-size: clamp(30px, 4.4vw, 44px);

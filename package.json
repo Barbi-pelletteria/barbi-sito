@@ -11,5 +11,8 @@
   "dependencies": {
     "astro": "^7.2.4",
     "stripe": "^17.0.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.4"
   }
 }

@@ -1,9 +1,18 @@
 ---
+import { macroProdotto } from '../data/immagini.js';
+
 // "Come nasce un portafoglio": cinque passi numerati 01-05.
 // Testi verbatim dall'anteprima approvata.
 //
 // Il terzo passo dice che la cucitura è a macchina, e la rivendica. Non è una
 // svista: nasconderlo è ciò che fa sembrare un sito insincero.
+//
+// Macro della pelle marrone (PACCHETTO_MACRO_PELLE, richiesta diretta del
+// Founder) sul primo passo, "La pelle" — l'unico dei cinque il cui testo
+// parla proprio del materiale. Marrone per scelta esplicita, non per
+// disponibilità: le altre due macro (blu, bordeaux) sono comunque pronte,
+// usate nella galleria prodotto.
+const macroPelle = macroProdotto('marrone');
 const passi = [
   {
     titolo: 'La pelle',
@@ -34,11 +43,24 @@ const passi = [
       <p>Due o tre ore di lavoro. Ecco dove finiscono.</p>
     </div>
     <div class="steps">
-      {passi.map((p) => (
+      {passi.map((p, i) => (
         <div class="step">
           <div>
             <h3>{p.titolo}</h3>
             <p>{p.testo}</p>
+            {i === 0 && macroPelle && (
+              <picture>
+                <source srcset={macroPelle.webp} type="image/webp" />
+                <img
+                  class="step__macro"
+                  src={macroPelle.jpg}
+                  alt="Macrofotografia della pelle marrone conciata al vegetale, dettaglio della grana"
+                  width={macroPelle.width}
+                  height={macroPelle.height}
+                  loading="lazy"
+                />
+              </picture>
+            )}
           </div>
         </div>
       ))}
@@ -91,5 +113,9 @@ const passi = [
   .step > div::before { right: 9px; }
   .step h3 { margin: 0 0 6px; }
   .step p { margin: 0; color: var(--ink2); font-size: 17.5px; line-height: 1.6; }
+  /* Macro pelle: un dettaglio a corredo del testo, non un'illustrazione a
+     tutta larghezza — resta piccola e allineata a sinistra, dentro lo
+     stesso riquadro a cucitura del passo "La pelle". */
+  .step__macro { display: block; width: 132px; height: 132px; margin-top: 16px; object-fit: cover; border: 1px solid var(--line2); }
   @media (max-width: 560px) { .step { gap: 16px; padding: 24px 20px; } }
 </style>

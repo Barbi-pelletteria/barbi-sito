@@ -16,18 +16,18 @@ export const EMAIL_CONTATTO = 'info.barbipelletteria@gmail.com';
 export const INIZIALI_CENTESIMI = 1000;
 
 // Macro della pelle vera per ogni colore, usata sugli swatch al posto
-// della tinta piatta (PACCHETTO_INTERFACCIA_2026-08-30 punto 1). Unica
-// fonte per colore (non per prodotto: lo stesso blu è lo stesso blu su
-// Sottile e Completo). Oggi tutti null — NESSUNA macro esiste ancora, e
-// non se ne genera o cerca una sostitutiva (divieto 22/26): finché resta
-// null quel colore mostra la tinta piatta di sempre (--blu/--bordeaux/
-// --marrone in Layout.astro), invariata. Basta valorizzare il campo con
-// il percorso del file vero (es. '/pelle/blu.jpg') quando la foto arriva:
-// nessun'altra modifica di codice serve.
+// della tinta piatta (PACCHETTO_INTERFACCIA_2026-08-30 punto 1, foto
+// arrivate il 02/09/2026 — PACCHETTO_MACRO_PELLE_2026-08-30). Unica fonte
+// per colore (non per prodotto: lo stesso blu è lo stesso blu su Sottile
+// e Completo). Versione piccola (160px, pensata per un cerchio da 44px
+// anche a devicePixelRatio alto) — la versione grande, per la galleria
+// prodotto e "Come nasce un portafoglio", sta in macro-pelle-manifest.json
+// (vedi immagini.js). Generate da scripts/ottimizza-macro-pelle.mjs, non
+// scritte a mano: rilanciare quello script per aggiornarle.
 export const MACRO_PELLE = {
-  blu: null,
-  bordeaux: null,
-  marrone: null,
+  blu: '/pelle/blu-swatch.webp',
+  bordeaux: '/pelle/bordeaux-swatch.webp',
+  marrone: '/pelle/marrone-swatch.webp',
 };
 
 // Tre categorie. Portachiavi e borse sono reali (il racconto lo dice già:
@@ -78,7 +78,6 @@ export const prodotti = [
     // (e sbagliare) una frase libera.
     tascheCarte: 8,
     portamonete: false,
-    immagine: '/prodotti/placeholder.svg',
     descrizione: [
       'Otto tasche per le carte, lo spazio per i documenti e per le banconote, e nient’altro. Chiuso è alto 8,5 cm e spesso poco più di mezzo centimetro: sta nella tasca interna di una giacca senza deformarla, e in quella dei pantaloni senza farsi sentire.',
       'Stefano lo descrive così: «un portafoglio ridimensionato per lo stile di vita odierno». Meno contante, più carte, meno ingombro.',
@@ -110,7 +109,6 @@ export const prodotti = [
     prezzoCentesimi: 5500,
     tascheCarte: 5,
     portamonete: true,
-    immagine: '/prodotti/placeholder.svg',
     descrizione: [
       'Cinque tasche per le carte, lo spazio per documenti e banconote, e il portamonete. È il portafoglio classico: quello che serve quando in tasca finisce di tutto, spiccioli compresi.',
       'Stefano lo chiama «il classico per l’uso di tutti i giorni». Un millimetro più spesso del Sottile, cinque grammi in più, e in cambio non lascia fuori niente.',

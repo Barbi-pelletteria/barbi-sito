@@ -1,6 +1,6 @@
 ---
 import { formatEuro, MACRO_PELLE, VENDITA_ATTIVA } from '../data/prodotti.js';
-import { immagineProdotto, coloreVetrina } from '../data/immagini.js';
+import { copertinaProdotto, coloreVetrina } from '../data/immagini.js';
 import FotoSegnaposto from './FotoSegnaposto.astro';
 
 const { prodotto } = Astro.props;
@@ -11,7 +11,7 @@ const preferito = prodotto.colori.find(
   (c) => c.slug === coloreVetrina[prodotto.slug] && c.stock > 0
 );
 const coloreAttivo = preferito || prodotto.colori.find((c) => c.stock > 0) || prodotto.colori[0];
-const fotoAttiva = immagineProdotto(prodotto.slug, coloreAttivo.slug);
+const fotoAttiva = copertinaProdotto(prodotto, coloreAttivo);
 const fotoId = `foto-${prodotto.slug}`;
 
 // I tre dati in vista sotto le pastiglie (testo verbatim dall'anteprima).
@@ -30,6 +30,14 @@ function speclineDaSpecifiche(p) {
 }
 const specline = SPECLINE[prodotto.slug] || speclineDaSpecifiche(prodotto);
 
+// Copertina di ogni colore, per lo scambio foto al click su una pastiglia
+// (punto 4 del pacchetto: cambiando colore cambia l'immagine). Un solo
+// oggetto per prodotto, passato allo script via data-foto: niente richieste
+// di rete in più, sono già URL — solo quale mostrare cambia.
+const fotoPerColore = Object.fromEntries(
+  prodotto.colori.map((c) => [c.slug, copertinaProdotto(prodotto, c)])
+);
+
 // PACCHETTO_AUDIT_SITO punto A2: a vendita spenta un numero di "disponibili"
 // contraddice "disponibile a breve" scritto due righe sotto — resta solo il
 // nome del colore, il numero torna quando VENDITA_ATTIVA sarà vero.
@@ -39,7 +47,10 @@ const etichettaScorta = (c) =>
 <div class="scheda">
   <a href={url} class="scheda__foto" aria-hidden="true" tabindex="-1">
     {fotoAttiva ? (
-      <img src={fotoAttiva} alt="" loading="lazy" />
+      <picture id={fotoId}>
+        <source srcset={fotoAttiva.webp} type="image/webp" />
+        <img src={fotoAttiva.jpg} alt={fotoAttiva.alt} width={fotoAttiva.width} height={fotoAttiva.height} loading="lazy" />
+      </picture>
     ) : (
       <FotoSegnaposto id={fotoId} etichetta={`Foto — ${prodotto.nome}, ${coloreAttivo.nome.toLowerCase()}`} />
     )}
@@ -57,6 +68,7 @@ const etichettaScorta = (c) =>
     data-scorte={JSON.stringify(
       Object.fromEntries(prodotto.colori.map((c) => [c.slug, etichettaScorta(c)]))
     )}
+    data-foto={JSON.stringify(fotoPerColore)}
   >
     {prodotto.colori.map((c) => (
       <button
@@ -99,8 +111,14 @@ const etichettaScorta = (c) =>
   document.querySelectorAll('.swatches[data-foto-target]').forEach((gruppo) => {
     const nomeProdotto = gruppo.getAttribute('data-nome-prodotto') || '';
     const scorte = JSON.parse(gruppo.getAttribute('data-scorte') || '{}');
+    const fotoPerColore = JSON.parse(gruppo.getAttribute('data-foto') || '{}');
     const foto = document.getElementById(gruppo.getAttribute('data-foto-target') || '');
     const didascalia = foto?.querySelector('b');
+    // Presenti solo quando fotoAttiva esisteva in build (<picture>, non il
+    // segnaposto): sorgenteWebp e immagine restano null nell'altro caso, i
+    // controlli sotto li saltano senza errori.
+    const sorgenteWebp = foto?.querySelector('source[type="image/webp"]');
+    const immagine = foto?.querySelector('img');
     const etichetta = gruppo.querySelector('.sw-label');
 
     gruppo.querySelectorAll('.sw').forEach((sw) => {
@@ -113,6 +131,15 @@ const etichettaScorta = (c) =>
         sw.classList.add('on');
         sw.setAttribute('aria-pressed', 'true');
         const slug = sw.getAttribute('data-c') || '';
+
+        const nuovaFoto = fotoPerColore[slug];
+        if (nuovaFoto && immagine) {
+          if (sorgenteWebp) sorgenteWebp.srcset = nuovaFoto.webp;
+          immagine.src = nuovaFoto.jpg;
+          immagine.alt = nuovaFoto.alt;
+          immagine.width = nuovaFoto.width;
+          immagine.height = nuovaFoto.height;
+        }
         if (didascalia) {
           didascalia.textContent = `Foto — ${nomeProdotto}, ${(sw.getAttribute('data-nome') || '').toLowerCase()}`;
         }

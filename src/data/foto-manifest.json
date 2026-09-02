@@ -1,0 +1,148 @@
+{
+  "completo": {
+    "blu": [
+      {
+        "id": "01-chiuso",
+        "width": 1179,
+        "height": 1559
+      },
+      {
+        "id": "02-aperto",
+        "width": 1086,
+        "height": 1448
+      },
+      {
+        "id": "03-portamonete",
+        "width": 1179,
+        "height": 1562
+      },
+      {
+        "id": "04-dettaglio-tasche",
+        "width": 1179,
+        "height": 1572
+      },
+      {
+        "id": "05-dettaglio-bordo",
+        "width": 1179,
+        "height": 1567
+      }
+    ],
+    "bordeaux": [
+      {
+        "id": "01-chiuso",
+        "width": 1179,
+        "height": 1557
+      },
+      {
+        "id": "02-aperto",
+        "width": 1179,
+        "height": 1554
+      },
+      {
+        "id": "03-portamonete",
+        "width": 1179,
+        "height": 1564
+      },
+      {
+        "id": "04-dettaglio-tasche",
+        "width": 1179,
+        "height": 1564
+      },
+      {
+        "id": "05-dettaglio-bordo",
+        "width": 1179,
+        "height": 1556
+      }
+    ],
+    "marrone": [
+      {
+        "id": "01-chiuso",
+        "width": 1179,
+        "height": 1539
+      },
+      {
+        "id": "02-aperto",
+        "width": 1179,
+        "height": 1440
+      },
+      {
+        "id": "04-dettaglio-tasche",
+        "width": 1179,
+        "height": 1541
+      },
+      {
+        "id": "05-dettaglio-bordo",
+        "width": 1179,
+        "height": 1569
+      }
+    ]
+  },
+  "sottile": {
+    "blu": [
+      {
+        "id": "01-chiuso",
+        "width": 1179,
+        "height": 1559
+      },
+      {
+        "id": "02-aperto",
+        "width": 1179,
+        "height": 1557
+      },
+      {
+        "id": "04-dettaglio-tasche",
+        "width": 1179,
+        "height": 1572
+      },
+      {
+        "id": "05-dettaglio-bordo",
+        "width": 1179,
+        "height": 1567
+      }
+    ],
+    "bordeaux": [
+      {
+        "id": "01-chiuso",
+        "width": 1179,
+        "height": 1557
+      },
+      {
+        "id": "02-aperto",
+        "width": 1179,
+        "height": 1564
+      },
+      {
+        "id": "04-dettaglio-tasche",
+        "width": 1179,
+        "height": 1564
+      },
+      {
+        "id": "05-dettaglio-bordo",
+        "width": 1179,
+        "height": 1556
+      }
+    ],
+    "marrone": [
+      {
+        "id": "01-chiuso",
+        "width": 1179,
+        "height": 1539
+      },
+      {
+        "id": "02-aperto",
+        "width": 1179,
+        "height": 1550
+      },
+      {
+        "id": "04-dettaglio-tasche",
+        "width": 1179,
+        "height": 1541
+      },
+      {
+        "id": "05-dettaglio-bordo",
+        "width": 1179,
+        "height": 1569
+      }
+    ]
+  }
+}
