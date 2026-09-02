@@ -64,9 +64,11 @@ const ogImageURL = new URL(ogImage, Astro.site);
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={ogImageURL} />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Archivo:wght@500;600&display=swap" rel="stylesheet" />
+  <!-- Font self-hostati (31/08→02/09/2026): prima Google Fonts, un CDN
+       esterno che riceve l'IP del visitatore prima di qualunque consenso —
+       lo stesso problema GDPR di GA4, ma senza nemmeno un banner a
+       coprirlo. I file .woff2 sono in public/fonts/, dichiarati sotto in
+       @font-face (vedi <style>). Nessun preconnect esterno più necessario. -->
 
   <!--
     GA4 NON viene caricato qui: parte solo dopo il consenso esplicito dato
@@ -220,6 +222,59 @@ const ogImageURL = new URL(ogImage, Astro.site);
 
   <style is:global>
     /* ─────────────────────────────────────────────────────────────────
+       Font self-hostati da public/fonts/ (prima Google Fonts CDN).
+       Stessi tre pesi/stili già in uso, verificati uno per uno nel
+       codice prima di scaricare — non un peso in più.
+       Sottoinsieme "latin" soltanto: gli unici caratteri che il sito usa
+       sono lettere accentate italiane (à, è, é, ì, ò, ù — già dentro
+       Latin-1, non serve "latin-ext") e punteggiatura tipografica
+       (', —, … — dentro lo stesso intervallo Unicode del sottoinsieme
+       "latin" per questi font). Cirillico, vietnamita, simboli, math:
+       mai referenziati da nessuna pagina, non scaricati.
+       Scoperta non richiesta ma verificata (hash SHA-256 dei file,
+       non solo l'URL): Google serve OGGI lo stesso identico file per
+       Archivo 500/600, per Fraunces 400/700 normale e per Lora 400/500
+       normale — stesso identico peso visivo per pesi nominalmente
+       diversi. Replicato fedelmente qui (stesso file, due dichiarazioni
+       @font-face) invece di "corretto": il vincolo era rendering
+       identico a prima, non migliore. */
+    @font-face {
+      font-family: "Fraunces";
+      font-style: normal;
+      font-weight: 400 700;
+      font-display: swap;
+      src: url("/fonts/fraunces-400-700.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Fraunces";
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+      src: url("/fonts/fraunces-400italic.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Lora";
+      font-style: normal;
+      font-weight: 400 500;
+      font-display: swap;
+      src: url("/fonts/lora-400-500.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Lora";
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+      src: url("/fonts/lora-400italic.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Archivo";
+      font-style: normal;
+      font-weight: 500 600;
+      font-display: swap;
+      src: url("/fonts/archivo-500-600.woff2") format("woff2");
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
        Tema unico, chiaro e caldo. È la scelta di un marchio, non una
        preferenza di sistema: niente @media (prefers-color-scheme),
        niente [data-theme]. Stesso asse cromatico di prima (crema/ottone),
@@ -346,6 +401,20 @@ const ogImageURL = new URL(ogImage, Astro.site);
       font-family: var(--f-label); font-size: 12.5px; font-weight: 500; letter-spacing: .05em;
       text-transform: uppercase; color: var(--raise); text-decoration: none; white-space: nowrap;
     }
+    /* Area cliccabile delle voci di menu: 21px di altezza reale (misurata)
+       prima di questa riga, sotto la soglia AA di WCAG 2.2 (24×24px).
+       Corretta a >=32px solo con padding verticale, non toccando
+       font-size: essendo figlie dirette di un contenitore flex
+       (.nav-right), le <a> qui sono "blockificate" per specifica CSS — il
+       padding verticale si applica davvero alla loro box, non è il caso
+       (diverso) di un elemento inline isolato dove il padding verticale
+       non tocca l'altezza di riga. Selettore ristretto a `.nav-right a`,
+       non il più ampio `.nav a`: quest'ultimo prende anche `.nav-marchio`
+       (il logo), dove il padding avrebbe allargato la barra intera da
+       74px a 90px — misurato, non solo temuto, prima di restringere il
+       selettore. L'altezza della barra non cambia: il logo (46px) resta
+       comunque l'elemento più alto della riga. */
+    .nav-right a { padding: 8px 0; }
     .nav a:hover { color: var(--brass); }
     /* Voce attiva: stesso trattamento di :hover ma persistente, più il
        peso del testo — un colore da solo non basta (non-color indicator),
