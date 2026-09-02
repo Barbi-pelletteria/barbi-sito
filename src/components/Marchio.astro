@@ -25,6 +25,12 @@ const Tag = href ? 'a' : 'span';
     color: inherit;
   }
   .marchio__filetto { display: block; height: 1px; background: var(--brass); opacity: .55; }
+  /* Colore indiretto via custom property, non var(--brass-testo) diretto:
+     un fondo scuro (il footer su pelle) deve poter cambiare il colore del
+     marchio senza duplicare questo componente né litigare con la
+     specificità di uno scope Astro diverso — la custom property eredita
+     attraverso il DOM a prescindere dal componente, un selettore normale
+     no. Il fallback lascia invariato ogni uso su fondo chiaro. */
   .marchio__nome {
     display: block;
     font-family: var(--f-display);
@@ -32,7 +38,7 @@ const Tag = href ? 'a' : 'span';
     font-size: 27px;
     letter-spacing: .26em;
     text-indent: .26em;
-    color: var(--brass-testo);
+    color: var(--marchio-colore-nome, var(--brass-testo));
     padding: 7px 0 6px;
     white-space: nowrap;
   }
@@ -45,7 +51,7 @@ const Tag = href ? 'a' : 'span';
     letter-spacing: .28em;
     text-indent: .28em;
     text-transform: uppercase;
-    color: var(--ink3);
+    color: var(--marchio-colore-sub, var(--ink3));
     padding-top: 6px;
     white-space: nowrap;
   }
@@ -54,5 +60,9 @@ const Tag = href ? 'a' : 'span';
   @media (max-width: 680px) {
     .marchio--normale .marchio__nome { font-size: 21px; }
     .marchio--normale .marchio__sub { font-size: 7.5px; letter-spacing: .2em; text-indent: .2em; }
+    /* Piè di pagina compatto su mobile (richiesta diretta): la fascia di
+       pelle non deve diventare altissima. */
+    .marchio--piede .marchio__nome { font-size: 22px; padding: 5px 0 4px; }
+    .marchio--piede .marchio__sub { font-size: 7.5px; letter-spacing: .2em; text-indent: .2em; padding-top: 4px; }
   }
 </style>

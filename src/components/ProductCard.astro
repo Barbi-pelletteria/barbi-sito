@@ -93,7 +93,27 @@ const etichettaScorta = (c) =>
 
 <style>
   .scheda { display: block; color: inherit; }
-  .scheda__foto { display: block; text-decoration: none; }
+  /* Riquadro a proporzioni fisse (Founder, 02/09/2026): senza, l'immagine
+     rendeva alla sua dimensione intrinseca e una scheda arrivava a occupare
+     quasi tutto lo schermo. object-fit:cover riempie senza mai deformare —
+     ritaglia, non stira. overflow:hidden perché object-fit da solo non
+     taglia il layout, solo il contenuto visivo. */
+  .scheda__foto {
+    display: block; text-decoration: none;
+    aspect-ratio: 4 / 5; overflow: hidden; background: var(--sunk);
+  }
+  /* > * prende <picture> e il segnaposto, ma <picture> è solo un
+     selettore di sorgente: non costringe l'<img> dentro, che va vincolato
+     a parte, altrimenti rende alla sua dimensione intrinseca (attributi
+     width/height) invece che alla cornice. */
+  .scheda__foto > * { display: block; width: 100%; height: 100%; }
+  .scheda__foto img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  @media (max-width: 680px) {
+    /* Limite in vh, non solo aspect-ratio: su schermi molto stretti e alti
+       4/5 da solo può comunque superare metà schermo. object-fit:cover
+       ritaglia l'eccedenza, l'immagine non si deforma. */
+    .scheda__foto { max-height: 55vh; }
+  }
 
   .p-name { font-size: 31px; margin: 8px 0 0; line-height: 1.1; }
   .p-name a { text-decoration: none; color: inherit; }

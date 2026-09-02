@@ -12,7 +12,6 @@ export interface Props {
 }
 const { title, description, ogImage = '/marchio-pelle.jpg' } = Astro.props;
 const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
-import Marchio from '../components/Marchio.astro';
 import { EMAIL_CONTATTO, VENDITA_ATTIVA } from '../data/prodotti.js';
 
 // Voce "Home" nel menu (richiesta diretta del Founder, 31/08/2026): oggi
@@ -119,7 +118,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
   </main>
 
   <footer class="site-footer">
-    <Marchio size="piede" />
+    <img class="footer-marchio" src="/marchio-pelle-lettere.png" alt="Barbi" width="1010" height="280" loading="lazy" />
     <nav class="flinks" aria-label="Informazioni e supporto">
       <a href="/faq/">Domande frequenti</a>
       <a href="/termini-e-condizioni/">Informazioni legali</a>
@@ -501,18 +500,63 @@ const ogImageURL = new URL(ogImage, Astro.site);
       text-transform: uppercase; color: var(--ink3); margin-left: 8px;
     }
 
-    /* ---- pulsanti ---- */
+    /* ---- pulsanti, fondo di pelle vera (D-015 rivista il 02/09/2026) ----
+       Stessa immagine del footer (public/pelle/pelle-tile.{jpg,webp}),
+       ripetuta a piastrelle piccole invece di stirata — un solo file già
+       caricato dal footer su ogni pagina, zero peso aggiunto qui. Velo
+       scuro quasi opaco sopra: l'obiezione originale a D-015 era il
+       contrasto variabile pixel per pixel, qui risolto misurando il
+       pixel PIÙ CHIARO di tutto il ritaglio dopo il velo, non un punto a
+       caso (vedi resoconto). background-color dichiarato: leggibile
+       anche se l'immagine non carica.
+       Cucitura vera (public/pelle/cucitura-marrone.{jpg,webp}), stesso
+       file del footer: riga incassata 8px sotto il bordo superiore, mai
+       sul filo del margine. Sopra il velo (primo layer, altrimenti
+       sparirebbe sotto), leggibile perché il file è già ritagliato stretto
+       sul filo — vedi resoconto per angolo/passo/dimensione misurati. */
     .buy, .pulsante {
       display: inline-block;
       font-family: var(--f-label); font-size: 12.5px; font-weight: 600;
       letter-spacing: .16em; text-transform: uppercase;
-      background: var(--brass); color: var(--ink);
+      color: var(--raise);
+      background-color: #170f0b;
+      background-image:
+        url('/pelle/cucitura-marrone.jpg'),
+        linear-gradient(rgba(15, 10, 7, .88), rgba(15, 10, 7, .88)),
+        url('/pelle/pelle-tile.jpg');
+      background-size: auto 10px, cover, 70px 70px;
+      background-position: center 8px, center, top left;
+      background-repeat: repeat-x, no-repeat, repeat;
       border: 1px solid var(--brass); padding: 17px 26px;
       text-decoration: none; text-align: center; cursor: pointer;
     }
-    .buy:hover, .pulsante:hover { filter: brightness(1.08); }
+    @supports (background-image: url('data:image/webp;base64,UklGR')) {
+      .buy, .pulsante {
+        background-image:
+          url('/pelle/cucitura-marrone.webp'),
+          linear-gradient(rgba(15, 10, 7, .88), rgba(15, 10, 7, .88)),
+          url('/pelle/pelle-tile.webp');
+      }
+    }
+    .buy:hover, .pulsante:hover { filter: brightness(1.15); }
     .buy:disabled, .pulsante:disabled, .pulsante[aria-disabled="true"] { opacity: .45; cursor: not-allowed; filter: none; }
     .buy.soon, .pulsante-secondario { background: transparent; color: var(--brass-testo); }
+
+    /* Eccezione deliberata, non dimenticata: i tre pulsanti che portano
+       all'incasso (D-015 rivista, condizione ferma) restano sul fondo
+       pieno di sempre. Non per un problema di contrasto — la pelle qui
+       misura 12,29-14,21:1, più del brass pieno (~7:1) — ma perché su
+       QUESTO sito l'ottone pieno è già il linguaggio visivo consolidato
+       per "azione primaria" (swatch attivo, voce di menu attiva, CTA):
+       cambiarlo proprio sul controllo più critico rischia di indebolirne
+       il riconoscimento, non il contrasto. Valutazione motivata nel
+       resoconto, non una misura che fallisce — il Founder può ribaltarla. */
+    #btn-aggiungi, #btn-vai-checkout, #btn-paga {
+      color: var(--ink);
+      background-color: var(--brass);
+      background-image: none;
+    }
+    #btn-aggiungi:hover, #btn-vai-checkout:hover, #btn-paga:hover { filter: brightness(1.08); }
 
     /* ---- prezzo, ricorre su scheda e pagina prodotto ---- */
     .p-price { font-family: var(--f-display); font-size: 23px; margin-top: 12px; font-variant-numeric: tabular-nums; }
@@ -558,19 +602,67 @@ const ogImageURL = new URL(ogImage, Astro.site);
     }
     .salta-contenuto:focus { left: 12px; top: 12px; }
 
-    /* ---- piè di pagina ---- */
-    .site-footer { border-top: 1px solid var(--line2); padding: 52px 22px 70px; text-align: center; margin-top: 20px; }
+    /* ---- piè di pagina, su fondo di pelle vera (richiesta diretta del
+       Founder) ----
+       Un quadrato piccolo tagliato dalla macro marrone, RIPETUTO accostato
+       a se stesso (background-repeat, non background-size:cover) — non
+       una singola foto stirata a coprire tutta la fascia: stirare un
+       ritaglio macro su una fascia larga la fa sembrare zoomata in modo
+       innaturale (visto e corretto). Niente mirror/simmetria: i quadrati
+       si vedono come quadrati distinti, come richiesto.
+       Il contrasto è costruito, non sperato: un velo scuro quasi opaco
+       sopra il ritaglio porta il fondo a una luminosità pressoché
+       costante, a prescindere da dove cade la venatura più chiara della
+       pelle — misurato sul pixel più chiaro di TUTTO il ritaglio, non un
+       punto a caso (vedi resoconto). background-color dichiarato: se
+       l'immagine non carica, il fondo resta scuro e il testo chiaro
+       resta leggibile lo stesso. Niente background-attachment:fixed —
+       scatta e consuma batteria sui telefoni. webp con fallback jpg via
+       @supports, non <picture>: qui è un background-image CSS.
+       Cucitura vera in cima, 10px sotto il bordo: stessa foto del
+       portafoglio (public/pelle/cucitura-marrone.{jpg,webp}), ruotata e
+       tagliata su un numero intero di punti perché si ripeta senza
+       giunture — vedi resoconto per i valori misurati. */
+    .site-footer {
+      border-top: 1px solid var(--brass);
+      padding: 44px 22px 52px;
+      text-align: center;
+      margin-top: 20px;
+      background-color: #171009;
+      background-image:
+        url('/pelle/cucitura-marrone.jpg'),
+        linear-gradient(rgba(15, 10, 7, .88), rgba(15, 10, 7, .88)),
+        url('/pelle/pelle-tile.jpg');
+      background-size: auto 12px, cover, 140px 140px;
+      background-position: center 10px, center, top left;
+      background-repeat: repeat-x, no-repeat, repeat;
+    }
+    @supports (background-image: url('data:image/webp;base64,UklGR')) {
+      .site-footer {
+        background-image:
+          url('/pelle/cucitura-marrone.webp'),
+          linear-gradient(rgba(15, 10, 7, .88), rgba(15, 10, 7, .88)),
+          url('/pelle/pelle-tile.webp');
+      }
+    }
+    .footer-marchio { height: 44px; width: auto; margin: 0 auto; }
     .flinks {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 26px; margin-top: 32px;
       font-family: var(--f-label); font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
     }
-    .flinks a { color: var(--ink2); text-decoration: none; }
+    .flinks a { color: var(--raise); text-decoration: none; }
     .flinks a:hover { color: var(--brass); }
     .fine {
       margin: 28px 0 0; font-family: var(--f-label); font-size: 10.5px;
-      letter-spacing: .05em; color: var(--ink3); line-height: 1.9;
+      letter-spacing: .05em; color: var(--raise); line-height: 1.9;
     }
-    .fine a { color: var(--ink3); }
+    .fine a { color: var(--raise); }
+    @media (max-width: 680px) {
+      .site-footer { padding: 36px 20px 40px; }
+      .footer-marchio { height: 36px; }
+      .flinks { margin-top: 24px; gap: 10px 20px; }
+      .fine { margin-top: 20px; }
+    }
 
     /* ---- banner cookie ---- */
     .cookie-banner {
