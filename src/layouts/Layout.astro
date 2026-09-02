@@ -12,6 +12,16 @@ export interface Props {
 }
 const { title, description, ogImage = '/marchio-pelle.jpg' } = Astro.props;
 const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+// DIAGNOSTICA TEMPORANEA (da togliere dopo aver letto il log del prossimo
+// deploy Cloudflare — vedi RESOCONTO_BANNER_GA4_2026-09-02.md e il log
+// gemello in astro.config.mjs). Stampa una riga per pagina generata: se qui
+// dice "NON DEFINITA" mentre astro.config.mjs dice "definita", il problema
+// è specificamente nel passaggio da process.env a import.meta.env dentro
+// Vite/Astro, non nell'ambiente di Cloudflare. Nessun valore stampato.
+console.log(
+  `[DIAG Layout.astro ${Astro.url.pathname}] import.meta.env.PUBLIC_GA_MEASUREMENT_ID:`,
+  gaId === undefined ? 'NON DEFINITA' : gaId === '' ? 'STRINGA VUOTA' : `definita, lunghezza ${gaId.length}`
+);
 import Marchio from '../components/Marchio.astro';
 import { EMAIL_CONTATTO, VENDITA_ATTIVA } from '../data/prodotti.js';
 
