@@ -501,19 +501,16 @@ const ogImageURL = new URL(ogImage, Astro.site);
       text-transform: uppercase; color: var(--ink3); margin-left: 8px;
     }
 
-    /* ---- pulsanti, texture "portachiavi" (deroga esplicita a C-11,
-       stesso trattamento di D-015: immagine non fotografica, autorizzata
-       in chat dopo essere stato avvisato del conflitto — vedi D-018 in
-       DECISIONI.md). Immagine unica, non a piastrelle: ha già una
-       cucitura disegnata su tutti e quattro i lati, ripeterla creerebbe
-       più cuciture affiancate. cover, non contain: i pulsanti reali sono
-       molto più larghi che alti, contain lasciava vuoto ai lati e il
-       testo usciva dal riquadro (visto e corretto, vedi resoconto) — cover
-       riempie sempre, restano visibili le cuciture verticali ai due lati.
-       Stesso velo scuro già in uso altrove per il contrasto testo/sfondo
-       — vedi resoconto per i valori misurati dopo il cambio.
-       background-color dichiarato: leggibile anche se l'immagine non
-       carica. */
+    /* ---- pulsanti, foto vera di pelle cucita (D-018 chiusa: la texture
+       "portachiavi", non fotografica, è sostituita da uno scatto reale —
+       vedi DECISIONI.md). Sfondo della foto già nello stesso beige del
+       sito (#f2eae0 = --ground, verificato pixel per pixel), margine di
+       ritaglio non critico per lo stesso motivo. cover, non contain, per
+       lo stesso limite già preso con la versione precedente: i pulsanti
+       reali sono più larghi che alti, contain lascia vuoti ai lati.
+       Stesso velo scuro invariato — vedi resoconto per i valori di
+       contrasto misurati dopo il cambio. background-color dichiarato:
+       leggibile anche se l'immagine non carica. */
     .buy, .pulsante {
       display: inline-block;
       font-family: var(--f-label); font-size: 12.5px; font-weight: 600;
@@ -522,7 +519,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
       background-color: #170f0b;
       background-image:
         linear-gradient(rgba(15, 10, 7, .88), rgba(15, 10, 7, .88)),
-        url('/pelle/texture-pulsante-portachiavi.jpg');
+        url('/pelle/texture-pulsante-reale.jpg');
       background-size: cover, cover;
       background-position: center, center;
       background-repeat: no-repeat, no-repeat;
@@ -533,7 +530,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
       .buy, .pulsante {
         background-image:
           linear-gradient(rgba(15, 10, 7, .88), rgba(15, 10, 7, .88)),
-          url('/pelle/texture-pulsante-portachiavi.webp');
+          url('/pelle/texture-pulsante-reale.webp');
       }
     }
     .buy:hover, .pulsante:hover { filter: brightness(1.15); }
