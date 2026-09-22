@@ -34,7 +34,12 @@ const paginaErrore = (messaggio) =>
   <p><a class="pulsante" href="/">Torna alla home</a></p>
 </body>
 </html>`,
-    { status: 502, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+    // Status 200, non un codice d'errore: Cloudflare intercetta le risposte
+    // 5xx dei Worker e le sostituisce con una propria pagina generica
+    // ("error code: 502"), cancellando questo messaggio — verificato dal
+    // vivo il 22/09/2026. 200 garantisce che il browser mostri davvero
+    // questo contenuto, non quello di Cloudflare.
+    { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
   );
 
 // Testo dell'email per ciascun modulo: stessi nomi di campo dei rispettivi
