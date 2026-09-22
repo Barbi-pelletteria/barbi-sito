@@ -1,9 +1,5 @@
 // Cloudflare Pages Function: crea una Stripe Checkout Session in modalità
 // TEST e restituisce l'URL a cui reindirizzare il browser del cliente.
-// Equivalente a netlify/functions/create-checkout-session.js (tenuta al suo
-// posto finché questa migrazione non è confermata) — stessa logica, sintassi
-// diversa perché qui gira su Cloudflare Workers (Request/Response del Fetch
-// standard, env al posto di process.env), non su Node.
 // La chiave segreta Stripe vive SOLO nelle variabili d'ambiente del progetto
 // Cloudflare Pages, mai nel codice.
 

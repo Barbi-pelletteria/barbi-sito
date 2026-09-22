@@ -3,7 +3,7 @@
 // Ogni riga è identificata da slug + colore + iniziali: lo stesso modello in
 // due colori (o con/senza iniziali) sono due righe distinte.
 // Nota: questo NON è "browser storage in un artifact di conversazione" —
-// è codice di un sito vero che gira su Netlify, il pattern è quello standard
+// è codice di un sito vero (Cloudflare Pages), il pattern è quello standard
 // per un carrello su sito statico senza backend proprio.
 
 const CHIAVE = 'barbi_cart_v2';

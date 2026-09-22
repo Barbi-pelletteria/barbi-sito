@@ -1,12 +1,14 @@
 # SETUP — stato dei servizi collegati e cosa resta da fare
 
-Aggiornato il 22/09/2026 (`RESOCONTO_AUDIT_SERVIZI_2026-09-22.md`, `D-025`).
+Aggiornato il 22/09/2026 (`D-025`, `D-026`, pulizia documentazione `F-35`).
 Questo file descriveva Netlify come piattaforma di hosting: da `D-016`/`D-017`
 (01/09/2026) il sito gira su **Cloudflare Pages**, non più su Netlify — le
-sezioni sotto sono state riscritte di conseguenza. Quello che resta vero in
-tutti i casi: i gesti che richiedono un account nuovo o una verifica via
-email sono cose che solo un umano del team può fare — nessuna sessione AI
-può farlo al posto vostro.
+sezioni sotto sono state riscritte di conseguenza, e ogni riferimento a
+Netlify rimasto nel resto del repository è stato ripulito nello stesso giro
+(vedi `RESOCONTO_F35_PULIZIA_DOCUMENTAZIONE_2026-09-22.md`). Quello che resta
+vero in tutti i casi: i gesti che richiedono un account nuovo o una verifica
+via email sono cose che solo un umano del team può fare — nessuna sessione
+AI può farlo al posto vostro.
 
 ---
 
@@ -113,13 +115,17 @@ interamente da Brevo (nessun token o database costruito per questo, coerente
 con "niente database" già scelto per il resto del sito): serve un modello
 email dedicato.
 
-**Modello di conferma creato**: Brevo → Transazionale → Email → Modelli →
-Crea modello → Email → Crea da zero → Editor semplice. Mittente
-`moduli@barbipelletteria.it` (stesso di B6bis), contiene un link con
-destinazione `{{ params.DOIurl }}` (tag esatto richiesto dall'API di
-Brevo per i flussi di iscrizione esterni — **diverso** dal tag `{{
-doubleoptin }}` usato invece per i moduli creati direttamente dentro
-Brevo). **Modello ID #1**, stato "Attiva".
+**Modello di conferma**: **non** un modello creato a mano in Transazionale →
+Modelli (primo tentativo, scartato — Brevo lo rifiuta con *"An active DOI
+template does not exist"*: un modello così sembra identico a un modello
+double opt-in ma non lo è, Brevo li distingue internamente). Il modello
+double opt-in vero si ottiene **solo** dalla procedura guidata Contatti →
+Moduli di iscrizione → Crea modulo → Pagina intera/integrato → passo
+"Conferma" → Email di conferma doppia → Seleziona un modello → "Modello
+predefinito di conferma a doppio opt-in" (il modulo generato da lì non si
+usa sul sito, resta il nostro in HTML proprio — serve solo a ottenere il
+modello). **Modello ID #2**, stato "Attiva", mittente
+`moduli@barbipelletteria.it`.
 
 Dopo la conferma, Brevo reindirizza a `/newsletter-confermata/` (pagina
 dedicata del sito).
