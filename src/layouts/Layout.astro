@@ -162,18 +162,23 @@ const ogImageURL = new URL(ogImage, Astro.site);
           <p class="footer-news__titolo">Resta aggiornato</p>
           <p class="footer-news__testo">Nuovi colori, nuovi pezzi, e quando riparte la vendita online.</p>
           <!--
-            Modulo visivamente completo ma NON collegato a nessun servizio:
-            onsubmit="return false" impedisce l'invio, stesso pattern già
-            usato in #form-acquisto (pagina prodotto). Nessuna chiamata a un
-            provider esterno di proposito — quale servizio usare (e il
-            consenso GDPR che richiede, separato da quello Analytics già
-            in uso) è una decisione del Founder col QG, non tecnica silenziosa.
-            Vedi resoconto.
+            Iscrizione a lista Brevo con double opt-in (D-026, chiude F-33):
+            functions/api/iscrivi-newsletter.js. Non è un invio email come i
+            moduli di contatto (invia-modulo.js) — qui il submit è
+            intercettato via fetch (vedi script più sotto), niente
+            navigazione a una pagina a sé, il modulo stesso mostra l'esito.
           -->
-          <form class="footer-news__form" onsubmit="return false" aria-label="Iscrizione alla newsletter">
+          <form class="footer-news__form" aria-label="Iscrizione alla newsletter">
             <label for="footer-news-email" class="sr-only">Email</label>
-            <input type="email" id="footer-news-email" name="email" placeholder="La tua email" autocomplete="email" />
+            <input type="email" id="footer-news-email" name="email" placeholder="La tua email" autocomplete="email" required />
             <button type="submit" class="pulsante pulsante--piccolo">Iscriviti</button>
+            <p class="footer-news__nascosto"><label>Non compilare questo campo <input name="nl-azienda" /></label></p>
+            <label class="footer-news__consenso">
+              <input type="checkbox" name="consenso" required />
+              <span>Accetto di ricevere email promozionali da Barbi Pelletteria (novità, nuovi colori, riapertura della vendita).</span>
+            </label>
+            <p class="footer-news__consenso-nota"><a href="/privacy/">Leggi come trattiamo i tuoi dati</a>.</p>
+            <p class="footer-news__messaggio" role="status" hidden></p>
           </form>
         </div>
       </div>
@@ -186,14 +191,13 @@ const ogImageURL = new URL(ogImage, Astro.site);
 
   <!--
     Banner iscrizione (2026-09-22, richiesta diretta): stesso modulo
-    statico del footer sopra, non un secondo modulo diverso — riusa le
-    stesse classi .footer-news__* (stessi colori/dimensioni già
-    verificati) e lo stesso submit finto (onsubmit="return false",
-    nessun servizio email collegato: stessa nota già valida per il
-    modulo del footer, non risolta qui). Si apre da solo all'apertura
-    del sito, si ricorda la chiusura con localStorage (stessa tecnica
-    già usata per il consenso cookie sotto) così non si ripresenta a
-    ogni pagina per chi l'ha già chiuso una volta.
+    del footer sopra, non un secondo modulo diverso — riusa le stesse
+    classi .footer-news__* (stessi colori/dimensioni già verificati) e
+    lo stesso invio reale via functions/api/iscrivi-newsletter.js
+    (D-026, vedi script più sotto). Si apre da solo all'apertura del
+    sito, si ricorda la chiusura con localStorage (stessa tecnica già
+    usata per il consenso cookie sotto) così non si ripresenta a ogni
+    pagina per chi l'ha già chiuso una volta.
   -->
   <div id="banner-newsletter" class="banner-newsletter" role="dialog" aria-modal="true" aria-label="Iscrizione alla newsletter" hidden>
     <div class="banner-newsletter__pannello">
@@ -202,10 +206,17 @@ const ogImageURL = new URL(ogImage, Astro.site);
       </button>
       <p class="footer-news__titolo">Resta aggiornato</p>
       <p class="footer-news__testo">Nuovi colori, nuovi pezzi, e quando riparte la vendita online.</p>
-      <form class="footer-news__form" id="banner-newsletter-form" onsubmit="return false" aria-label="Iscrizione alla newsletter">
+      <form class="footer-news__form" id="banner-newsletter-form" aria-label="Iscrizione alla newsletter">
         <label for="banner-newsletter-email" class="sr-only">Email</label>
-        <input type="email" id="banner-newsletter-email" name="email" placeholder="La tua email" autocomplete="email" />
+        <input type="email" id="banner-newsletter-email" name="email" placeholder="La tua email" autocomplete="email" required />
         <button type="submit" class="pulsante pulsante--piccolo">Iscriviti</button>
+        <p class="footer-news__nascosto"><label>Non compilare questo campo <input name="nl-azienda" /></label></p>
+        <label class="footer-news__consenso">
+          <input type="checkbox" name="consenso" required />
+          <span>Accetto di ricevere email promozionali da Barbi Pelletteria (novità, nuovi colori, riapertura della vendita).</span>
+        </label>
+        <p class="footer-news__consenso-nota"><a href="/privacy/">Leggi come trattiamo i tuoi dati</a>.</p>
+        <p class="footer-news__messaggio" role="status" hidden></p>
       </form>
     </div>
   </div>
@@ -299,13 +310,63 @@ const ogImageURL = new URL(ogImage, Astro.site);
     }
 
     document.getElementById('banner-newsletter-chiudi')?.addEventListener('click', chiudiBannerNewsletter);
-    document.getElementById('banner-newsletter-form')?.addEventListener('submit', chiudiBannerNewsletter);
+    // Niente più chiusura automatica al submit (D-026): con l'iscrizione
+    // vera serve un secondo per rispondere, e in caso di errore il banner
+    // deve restare aperto per mostrarlo — vedi lo script dedicato più sotto.
     bannerNewsletter?.addEventListener('click', (e) => {
       if (e.target === bannerNewsletter) chiudiBannerNewsletter();
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && bannerNewsletter && !bannerNewsletter.hidden) chiudiBannerNewsletter();
     });
+  </script>
+
+  <script define:vars={{ emailContatto: EMAIL_CONTATTO }}>
+    // Iscrizione newsletter (D-026, chiude F-33): un solo gestore per i due
+    // moduli (footer e banner), selezionati insieme via la classe condivisa
+    // .footer-news__form — non duplicato. Il submit è intercettato (fetch
+    // verso functions/api/iscrivi-newsletter.js), niente navigazione: sono
+    // widget dentro la pagina, non pagine a sé come invia-modulo.js.
+    // L'iscrizione è double opt-in (Brevo manda una mail di conferma): il
+    // messaggio di successo qui dice di controllare la posta, non "fatto".
+    function gestisciIscrizioneNewsletter(form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const messaggio = form.querySelector('.footer-news__messaggio');
+        const bottone = form.querySelector('button[type="submit"]');
+        const datiForm = new FormData(form);
+
+        if (bottone) bottone.disabled = true;
+        if (messaggio) messaggio.hidden = true;
+
+        let esito;
+        try {
+          const risposta = await fetch('/api/iscrivi-newsletter', { method: 'POST', body: datiForm });
+          esito = await risposta.json();
+        } catch {
+          esito = { ok: false, errore: `Errore di connessione. Riprova, o scrivi a ${emailContatto}.` };
+        }
+
+        if (esito.ok) {
+          form.querySelectorAll('input, .footer-news__consenso, .footer-news__consenso-nota').forEach((el) => {
+            el.hidden = true;
+          });
+          if (bottone) bottone.hidden = true;
+          if (messaggio) {
+            messaggio.textContent = "Controlla la tua email: c'è un link da cliccare per confermare l'iscrizione.";
+            messaggio.hidden = false;
+          }
+        } else {
+          if (bottone) bottone.disabled = false;
+          if (messaggio) {
+            messaggio.textContent = esito.errore || `Iscrizione non riuscita. Riprova, o scrivi a ${emailContatto}.`;
+            messaggio.hidden = false;
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('.footer-news__form').forEach(gestisciIscrizioneNewsletter);
   </script>
 
   <script>
@@ -879,6 +940,30 @@ const ogImageURL = new URL(ogImage, Astro.site);
        troppo vicino alla soglia 4.5:1 per restarci apposta. */
     .footer-news__form input::placeholder { color: rgba(251, 246, 236, .62); }
     .footer-news__form input:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+    /* Campo anti-spam (honeypot, D-026): fuori schermo per una persona,
+       visibile e compilabile per i bot semplici — se arriva pieno,
+       iscrivi-newsletter.js scarta l'invio senza dirlo al bot. Stesso
+       principio già in uso per i moduli di invia-modulo.js. */
+    .footer-news__nascosto { position: absolute; left: -9999px; }
+    /* width:100% dentro un contenitore flex-wrap forza la riga a sé,
+       sotto il campo email + pulsante invece che affiancata. */
+    .footer-news__consenso {
+      display: flex; align-items: flex-start; gap: 8px; width: 100%;
+      margin-top: 10px; font-size: 12.5px; line-height: 1.4;
+      color: rgba(251, 246, 236, .78); cursor: pointer;
+    }
+    .footer-news__consenso input[type="checkbox"] {
+      flex: 0 0 auto; margin-top: 2px; width: 15px; height: 15px;
+      accent-color: var(--brass);
+    }
+    .footer-news__consenso-nota {
+      width: 100%; margin: 4px 0 0; font-size: 11.5px;
+      color: rgba(251, 246, 236, .62);
+    }
+    .footer-news__messaggio {
+      width: 100%; margin: 10px 0 0; font-size: 13px; line-height: 1.4;
+      color: rgba(251, 246, 236, .92);
+    }
     .fine {
       text-align: center;
       margin: 0; font-family: var(--f-label); font-size: 10.5px;
@@ -955,7 +1040,10 @@ const ogImageURL = new URL(ogImage, Astro.site);
       box-shadow: 0 20px 60px rgba(15, 10, 7, .4);
     }
     .banner-newsletter__pannello .footer-news__titolo,
-    .banner-newsletter__pannello .footer-news__testo { text-align: left; }
+    .banner-newsletter__pannello .footer-news__testo,
+    .banner-newsletter__pannello .footer-news__consenso,
+    .banner-newsletter__pannello .footer-news__consenso-nota,
+    .banner-newsletter__pannello .footer-news__messaggio { text-align: left; }
     .banner-newsletter__chiudi {
       position: absolute; top: 12px; right: 12px;
       width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;

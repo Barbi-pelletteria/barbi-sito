@@ -67,42 +67,68 @@ Cloudflare, dominio ancora ad Aruba (`D-016`).
 
 ---
 
-## B6 — Brevo: invio email dei moduli contatto/reso/su misura — **DA FARE**
+## B6 — Brevo: invio email dei moduli contatto/reso/su misura — **FATTO, verificato dal vivo**
 
 `D-025` (22/09/2026): i 4 moduli del sito (`/contatti/` — due moduli,
 `/diritto-di-recesso/`, `/prodotto-personalizzato/`) sono passati da un
 meccanismo Netlify ormai inerte su Cloudflare a una funzione dedicata
-(`functions/api/invia-modulo.js`) che spedisce l'email via **Brevo** — lo
-stesso servizio scelto in `D-010` per le email post-acquisto (mai
-implementato finora: cercato in tutto il codice, nessuna traccia — questo è
-di fatto il primo collegamento reale a Brevo di questo progetto, non un
-riuso di qualcosa di già collaudato).
+(`functions/api/invia-modulo.js`) che spedisce l'email via **Brevo**. Account
+creato, mittente `moduli@barbipelletteria.it` verificato con dominio
+autenticato (SPF/DKIM/DMARC — vedi B6bis), `BREVO_API_KEY` configurata su
+Cloudflare Pages. Invio reale testato su tutti e 4 i moduli, confermato
+arrivo in posta in arrivo (non spam) dopo l'autenticazione del dominio.
+Nessuna azione necessaria.
 
-Il codice è pronto ma **non può funzionare finché questi due gesti umani non
-sono fatti** — stessa natura dei passi B2/B4 sopra:
+Per referenza, se in futuro servisse rigenerare la chiave: **Developers →
+API Keys** su Brevo → **Genera una nuova chiave** → su Cloudflare Pages:
+progetto `barbi-sito` → **Settings → Environment variables** →
+`BREVO_API_KEY` → **Save** → nuovo deploy perché si applichi (le variabili
+d'ambiente non sono retroattive).
 
-1. **app.brevo.com/account/register** → registrati con l'email del team
-   (stessa usata per Stripe/GA4, per ritrovarli facilmente). Piano gratuito:
-   300 email/giorno, ben sopra il volume reale di 4 moduli. Non serve carta
-   di credito.
-2. **Verifica il mittente**: Impostazioni → Mittenti e IP → Aggiungi un
-   mittente → `info.barbipelletteria@gmail.com` (lo stesso indirizzo già
-   usato ovunque sul sito, `EMAIL_CONTATTO` in `src/data/prodotti.js`) →
-   arriva un'email di conferma a quella casella, clicca il link. **Senza
-   questo passaggio Brevo rifiuta di spedire.**
-3. **Developers → API Keys** (o "Chiavi API" a seconda della lingua) →
-   **Genera una nuova chiave API** → copiala.
-4. Su Cloudflare Pages: progetto `barbi-sito` → **Settings → Environment
-   variables** → aggiungi `BREVO_API_KEY` = la chiave appena copiata →
-   **Save** → **Deployments → ⋯ → Retry deployment** (o un nuovo push)
-   perché la variabile si applichi.
+## B6bis — Dominio autenticato su Brevo (SPF/DKIM/DMARC) — **FATTO**
 
-**FATTO QUANDO:** dopo il passo 4, un invio di prova da una qualsiasi delle
-3 pagine con modulo arriva davvero nella casella
-`info.barbipelletteria@gmail.com` (non solo che compaia la pagina
-"Ricevuto"). Se non arriva, il modulo stesso mostra a video il motivo
-(chiave mancante, mittente non verificato, o altro errore Brevo) invece di
-fallire in silenzio come succedeva con l'attributo Netlify.
+Stesso giorno di B6: dominio `barbipelletteria.it` autenticato su Brevo
+(Mittenti, dominio, IP → Domini → Aggiungi dominio → Manuale → record
+copiati e incollati su Cloudflare DNS). 4 record aggiunti: 1 TXT di verifica
+(`@`), 2 CNAME DKIM (`brevo1._domainkey`, `brevo2._domainkey` — **proxy
+status "DNS only", non "Proxied"**, altrimenti Brevo non verifica), 1 TXT
+DMARC (`_dmarc`). Propagazione quasi istantanea su Cloudflare. Mittente
+`moduli@barbipelletteria.it` aggiunto sotto "Mittenti" e verificato subito
+(l'autenticazione del dominio da sola non basta, serve anche registrare
+l'indirizzo specifico lì).
+
+## B7 — Brevo: newsletter (footer + banner) — **FATTO, verificato dal vivo**
+
+`D-026` (22/09/2026, chiude F-33): l'iscrizione newsletter passa da un
+modulo finto (`onsubmit="return false"`) a un'iscrizione reale alla lista
+Brevo **"Newsletter sito" (ID #3)**, via
+`functions/api/iscrivi-newsletter.js` — endpoint **diverso** da quello dei
+moduli di contatto (B6): qui si usa l'API Contacts di Brevo
+(`doubleOptinConfirmation`), non l'API email.
+
+**Double opt-in obbligatorio** (vincolo GDPR non negoziabile, D-026):
+l'iscritto riceve prima un'email con un link di conferma — entra in lista
+solo cliccandolo, non subito dopo aver lasciato l'indirizzo. Gestito
+interamente da Brevo (nessun token o database costruito per questo, coerente
+con "niente database" già scelto per il resto del sito): serve un modello
+email dedicato.
+
+**Modello di conferma creato**: Brevo → Transazionale → Email → Modelli →
+Crea modello → Email → Crea da zero → Editor semplice. Mittente
+`moduli@barbipelletteria.it` (stesso di B6bis), contiene un link con
+destinazione `{{ params.DOIurl }}` (tag esatto richiesto dall'API di
+Brevo per i flussi di iscrizione esterni — **diverso** dal tag `{{
+doubleoptin }}` usato invece per i moduli creati direttamente dentro
+Brevo). **Modello ID #1**, stato "Attiva".
+
+Dopo la conferma, Brevo reindirizza a `/newsletter-confermata/` (pagina
+dedicata del sito).
+
+Per referenza, se in futuro servisse ricreare lista o modello: gli ID sono
+hardcoded in `functions/api/iscrivi-newsletter.js`
+(`LISTA_NEWSLETTER_ID`, `TEMPLATE_CONFERMA_ID`) — non variabili
+d'ambiente, non sono segreti, solo identificativi numerici da aggiornare lì
+se cambiano.
 
 ---
 

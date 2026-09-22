@@ -1,0 +1,23 @@
+---
+// Destinazione del link di conferma nell'email double opt-in di Brevo
+// (D-026): Brevo reindirizza qui solo DOPO che il contatto ha cliccato,
+// cioè il vero momento in cui l'iscrizione diventa reale. Stesso stile
+// di grazie.astro (moduli contatto/reso/su misura, D-025), pagina diversa
+// perché la newsletter non è un invio email, è un'iscrizione a lista.
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Iscrizione confermata" description="La tua iscrizione alla newsletter di Barbi Pelletteria è confermata.">
+  <div class="contenitore">
+    <section class="pagina-stretta">
+      <h1>Iscrizione confermata</h1>
+      <p>Sei dentro. Ti scriviamo quando ci sono novità: nuovi colori, nuovi pezzi, e quando riparte la vendita online.</p>
+      <p><a class="pulsante" href="/">Torna alla home</a></p>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .pagina-stretta { max-width: 660px; margin: 0 auto; padding: 100px 0; text-align: center; }
+  .pagina-stretta h1 { font-size: clamp(30px, 4.4vw, 44px); }
+  .pagina-stretta p { color: var(--ink2); margin: 0 0 28px; }
+</style>
