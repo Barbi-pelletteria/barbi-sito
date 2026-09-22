@@ -6,9 +6,10 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
 // pagina, non solo raggiungibile via un mailto: che su molti telefoni non
 // apre nulla. Ricalca il modulo tipo di recesso (Allegato I, parte B della
 // direttiva 2011/83/UE, recepito nel Codice del Consumo) — testo standard,
-// non inventato. Invio reale via modulo Netlify (piano gratuito, la stessa
-// via usata per gli altri moduli del sito, vedi B6): resta funzionante
-// anche senza JavaScript, a differenza del mailto:.
+// non inventato. Invio via functions/api/invia-modulo.js (Cloudflare
+// Pages Function + Brevo, D-025, stessa via degli altri moduli del sito,
+// vedi B6): resta funzionante anche senza JavaScript, a differenza del
+// mailto:.
 ---
 <Layout title="Diritto di recesso e resi" description="14 giorni per cambiare idea: come funziona il reso e il modulo di recesso da compilare online.">
   <div class="contenitore">
@@ -32,9 +33,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
         <form
           name="recesso"
           method="POST"
-          action="/grazie/"
-          data-netlify="true"
-          netlify-honeypot="pp-azienda"
+          action="/api/invia-modulo"
           class="form-recesso"
         >
           <input type="hidden" name="form-name" value="recesso" />
@@ -90,6 +89,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
   .form-recesso__dichiarazione { font-size: 14.5px; color: var(--ink3); margin: 20px 0 0; }
   .form-recesso .pulsante { margin-top: 18px; align-self: flex-start; }
   /* Campo anti-spam (honeypot): fuori schermo per una persona, visibile e
-     compilabile per i bot semplici — se arriva pieno, Netlify scarta l'invio. */
+     compilabile per i bot semplici — se arriva pieno, invia-modulo.js scarta
+     l'invio senza dirlo al bot. */
   .form-recesso__nascosto { position: absolute; left: -9999px; }
 </style>

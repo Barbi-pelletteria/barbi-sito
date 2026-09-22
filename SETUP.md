@@ -1,106 +1,133 @@
-# SETUP — collegare Netlify, Stripe (test) e GA4
+# SETUP — stato dei servizi collegati e cosa resta da fare
 
-Il codice è già pronto e collaudato in locale. Questi sono i 3 gesti che solo un umano del
-team può fare (serve un'email vera e cliccare un link di verifica che arriva in una casella
-di posta — nessuna sessione AI può farlo al posto vostro). Circa 5 minuti a testa.
-
-**Usa la stessa email del team per tutti e 3**, così restano facili da ritrovare. Qualunque
-email va bene: questo passo non decide la proprietà definitiva degli account (quella
-resta una domanda aperta, `APERTE.md` N-02) — per ora sono account di test/gratuiti,
-serve solo farli esistere.
-
----
-
-## B1 — Netlify (hosting, piano Free)
-
-1. Vai su **netlify.com** → "Sign up" → registrati con l'email del team scelta (va bene
-   anche via Google/GitHub).
-2. Non serve nessuna carta di credito: il piano Free è quello attivo di default.
-3. Per il deploy automatico serve un repository Git. Se questo progetto non è già su
-   GitHub:
-   - crea un repository vuoto su **github.com/new** (es. `barbi-pelletteria-sito`, privato)
-   - nel terminale, dentro questa cartella (il repository locale esiste già, sul branch `main`):
-     ```
-     git remote add origin <URL del repository appena creato>
-     git push -u origin main
-     ```
-4. Su Netlify: **"Add new site" → "Import an existing project"** → collega GitHub →
-   seleziona il repository. Netlify legge da solo `netlify.toml` (comando di build
-   `npm run build`, cartella pubblicata `dist`) — non serve configurare nulla a mano.
-5. A deploy finito, annota l'URL assegnato (tipo `nome-a-caso.netlify.app`).
-
-**FATTO QUANDO:** l'URL Netlify è raggiungibile da browser e mostra il sito (anche senza
-le chiavi Stripe/GA4 — quelle servono solo per i passi successivi).
+Aggiornato il 22/09/2026 (`RESOCONTO_AUDIT_SERVIZI_2026-09-22.md`, `D-025`).
+Questo file descriveva Netlify come piattaforma di hosting: da `D-016`/`D-017`
+(01/09/2026) il sito gira su **Cloudflare Pages**, non più su Netlify — le
+sezioni sotto sono state riscritte di conseguenza. Quello che resta vero in
+tutti i casi: i gesti che richiedono un account nuovo o una verifica via
+email sono cose che solo un umano del team può fare — nessuna sessione AI
+può farlo al posto vostro.
 
 ---
 
-## B2 — Stripe, modalità TEST
+## B1 — Hosting: Cloudflare Pages — **FATTO**
 
-1. Vai su **dashboard.stripe.com/register** → registrati con la stessa email usata sopra.
-2. In alto a destra controlla che **"Test mode"** sia attivo (di norma lo è già per un
-   account nuovo). Non inserire dati bancari, non cliccare su "Activate payments"/account live.
-3. Vai su **Developers → API keys** e copia:
-   - **Publishable key** (`pk_test_...`)
-   - **Secret key** (`sk_test_...` — clicca "Reveal test key" per vederla)
-4. Salvale in un posto sicuro e ritrovabile dal team (es. password manager condiviso).
-   **Non incollarle in chiaro in chat, in un resoconto, o committarle su Git.**
+Il sito gira su Cloudflare Pages dal 01/09/2026 (`D-016`/`D-017`). Dominio
+`barbipelletteria.it` collegato, TLS attivo, deploy automatico a ogni push
+su `main`. Nessuna azione necessaria.
 
-**FATTO QUANDO:** hai le due chiavi di test salvate. Servono al passo successivo.
+Verifica rapida che sia sempre così: `https://barbipelletteria.it/` deve
+rispondere (qualunque comando `curl` o browser va bene).
 
 ---
 
-## Collegare le chiavi Stripe a Netlify
+## B2 — Stripe, modalità TEST — **FATTO, verificato dal vivo**
 
-1. Sul sito del progetto in Netlify: **Site configuration → Environment variables → Add a variable**.
-2. Aggiungi (obbligatoria solo la prima: il sito usa Stripe Checkout ospitato da Stripe,
-   che non ha bisogno della publishable key lato client):
-   - `STRIPE_SECRET_KEY` = la Secret key di test (`sk_test_...`) — **obbligatoria**
-   - `PUBLIC_STRIPE_PUBLISHABLE_KEY` = la Publishable key di test — utile da avere pronta,
-     non ancora usata dal codice
-3. **Deploys → Trigger deploy → Clear cache and deploy site** (le variabili d'ambiente si
-   applicano solo dopo un nuovo deploy, non retroattivamente).
+Le chiavi di test sono già configurate su Cloudflare Pages e funzionano —
+verificato il 22/09/2026 con una richiesta diagnostica reale contro
+`/api/create-checkout-session` (nessun pagamento vero creato). Nessuna
+azione necessaria finché si resta in modalità test.
+
+Per referenza, se in futuro servisse rigenerare le chiavi:
+
+1. **dashboard.stripe.com** → verifica in alto a destra che **"Test mode"**
+   sia attivo.
+2. **Developers → API keys** → **Secret key** (`sk_test_...`, "Reveal test
+   key").
+3. Su Cloudflare Pages: progetto `barbi-sito` → **Settings → Environment
+   variables** → `STRIPE_SECRET_KEY` = la nuova chiave → **Save** (poi serve
+   un nuovo deploy perché la modifica si applichi, le variabili d'ambiente
+   non sono retroattive sui deploy già fatti).
+
+**Passaggio a Stripe Live**: non si esegue mai di impulso — segue solo
+`D-014` (`PACCHETTO_GO_LIVE...`), un ordine scritto apposta perché è il
+passaggio in cui un errore costa denaro vero.
 
 ---
 
-## B4 — Google Analytics 4
+## B4 — Google Analytics 4 — **FATTO, verificato dal vivo**
 
-1. Vai su **analytics.google.com** con l'account Google del team.
-2. **Amministrazione → Crea proprietà** → nome "Barbi Pelletteria", fuso orario Italia,
-   valuta EUR.
-3. Nel flusso di dati scegli **Web**, inserisci l'URL Netlify del sito (dal passo B1).
-4. Copia l'**ID misurazione** (formato `G-XXXXXXXXXX`).
-5. Su Netlify: **Environment variables** → aggiungi `PUBLIC_GA_MEASUREMENT_ID` = quel valore.
-6. **Trigger deploy** di nuovo.
+`PUBLIC_GA_MEASUREMENT_ID` è configurato su Cloudflare Pages e il tag
+carica correttamente sul sito live (verificato il 22/09/2026). Nessuna
+azione necessaria.
 
-**FATTO QUANDO:** la variabile è impostata e il sito è stato ridistribuito dopo averla aggiunta.
+Se il banner del consenso cookie non compare in un browser: è normale, non
+un guasto — significa che quel browser ha già una scelta salvata da una
+visita precedente (`localStorage`, chiave `barbi_cookie_consent_v1`). Per
+rivederlo: cancellare i dati del sito da quel browser, o aprire una
+finestra anonima.
+
+---
+
+## B5 — Dominio — **FATTO**
+
+`barbipelletteria.it` è registrato e collegato, non è più un passo futuro.
+Registrazione su Domenico come persona fisica (`D-012`), DNS gestito da
+Cloudflare, dominio ancora ad Aruba (`D-016`).
+
+---
+
+## B6 — Brevo: invio email dei moduli contatto/reso/su misura — **DA FARE**
+
+`D-025` (22/09/2026): i 4 moduli del sito (`/contatti/` — due moduli,
+`/diritto-di-recesso/`, `/prodotto-personalizzato/`) sono passati da un
+meccanismo Netlify ormai inerte su Cloudflare a una funzione dedicata
+(`functions/api/invia-modulo.js`) che spedisce l'email via **Brevo** — lo
+stesso servizio scelto in `D-010` per le email post-acquisto (mai
+implementato finora: cercato in tutto il codice, nessuna traccia — questo è
+di fatto il primo collegamento reale a Brevo di questo progetto, non un
+riuso di qualcosa di già collaudato).
+
+Il codice è pronto ma **non può funzionare finché questi due gesti umani non
+sono fatti** — stessa natura dei passi B2/B4 sopra:
+
+1. **app.brevo.com/account/register** → registrati con l'email del team
+   (stessa usata per Stripe/GA4, per ritrovarli facilmente). Piano gratuito:
+   300 email/giorno, ben sopra il volume reale di 4 moduli. Non serve carta
+   di credito.
+2. **Verifica il mittente**: Impostazioni → Mittenti e IP → Aggiungi un
+   mittente → `info.barbipelletteria@gmail.com` (lo stesso indirizzo già
+   usato ovunque sul sito, `EMAIL_CONTATTO` in `src/data/prodotti.js`) →
+   arriva un'email di conferma a quella casella, clicca il link. **Senza
+   questo passaggio Brevo rifiuta di spedire.**
+3. **Developers → API Keys** (o "Chiavi API" a seconda della lingua) →
+   **Genera una nuova chiave API** → copiala.
+4. Su Cloudflare Pages: progetto `barbi-sito` → **Settings → Environment
+   variables** → aggiungi `BREVO_API_KEY` = la chiave appena copiata →
+   **Save** → **Deployments → ⋯ → Retry deployment** (o un nuovo push)
+   perché la variabile si applichi.
+
+**FATTO QUANDO:** dopo il passo 4, un invio di prova da una qualsiasi delle
+3 pagine con modulo arriva davvero nella casella
+`info.barbipelletteria@gmail.com` (non solo che compaia la pagina
+"Ricevuto"). Se non arriva, il modulo stesso mostra a video il motivo
+(chiave mancante, mittente non verificato, o altro errore Brevo) invece di
+fallire in silenzio come succedeva con l'attributo Netlify.
 
 ---
 
 ## Verifica finale end-to-end (chiude B3 punto 5 + B4)
 
-Con Netlify, Stripe e GA4 collegati, un solo giro convalida tutto:
+Con Stripe e GA4 collegati, un solo giro convalida tutto:
 
-1. Apri l'URL Netlify del sito.
-2. Vai su una pagina prodotto (es. `/prodotto/prodotto-placeholder/`) → in GA4,
-   **Rapporti → Realtime**, deve comparire `view_item`.
+1. Apri `https://barbipelletteria.it/`.
+2. Vai su una pagina prodotto → in GA4, **Rapporti → Realtime**, deve
+   comparire `view_item`.
 3. Clicca "Aggiungi al carrello" → deve comparire `add_to_cart`.
-4. Vai al carrello → "Vai al pagamento" → nella pagina checkout deve comparire
-   `begin_checkout`, poi clicca "Procedi al pagamento".
-5. Nella pagina Stripe che si apre: carta **4242 4242 4242 4242**, qualunque data
-   futura, qualunque CVC, qualunque CAP.
-6. Deve arrivare alla pagina "Grazie, ordine ricevuto" e in GA4 Realtime deve comparire
-   `purchase`.
+4. Vai al carrello → "Vai al pagamento" → nella pagina checkout deve
+   comparire `begin_checkout`, poi clicca "Procedi al pagamento".
+5. Nella pagina Stripe che si apre: carta **4242 4242 4242 4242**,
+   qualunque data futura, qualunque CVC, qualunque CAP.
+6. Deve arrivare alla pagina "Grazie, ordine ricevuto" e in GA4 Realtime
+   deve comparire `purchase`.
 
-Se tutti e 5 gli eventi (`page_view` automatico + questi 4) si accendono durante questo
-percorso, B3 e B4 sono FATTO per intero — segnalalo al QG così può registrarlo in `STATO.md`.
+Se tutti e 5 gli eventi (`page_view` automatico + questi 4) si accendono
+durante questo percorso, questo punto è FATTO per intero — segnalalo al QG
+così può registrarlo in `STATO.md`.
 
-Se qualcosa si ferma, annota **a che passo esatto** e il messaggio di errore: nel checkout
-c'è già un messaggio a schermo che distingue "manca la chiave Stripe" da altri problemi.
-
----
-
-## Dominio (B5) — promemoria
-
-Non si acquista nulla ora (`APERTE.md` N-04, budget non ancora noto). Il resoconto
-principale ha già la disponibilità verificata. Quando il budget esiste, si punta da
-Netlify: **Domain management → Add a domain**.
+Se qualcosa si ferma, annota **a che passo esatto** e il messaggio di
+errore: nel checkout c'è già un messaggio a schermo che distingue "manca la
+chiave Stripe" da altri problemi. Nota: questo percorso richiede
+`VENDITA_ATTIVA = true` per essere eseguibile per intero — con il flag a
+`false` (stato attuale) i passi 3-6 non sono raggiungibili dall'interfaccia,
+è un test da eseguire quando si accende la vendita (`D-014`), non prima.

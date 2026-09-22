@@ -1,11 +1,12 @@
 ---
 // Richiesta di un pezzo su misura, aggiunta il 27/08/2026 su richiesta
 // diretta del Founder. Dal 30/08/2026 (PACCHETTO_AUDIT_SITO punto B6) usa
-// un modulo Netlify reale invece di un mailto: — il compositore di email
-// non apre nulla su molti telefoni e su chi usa la webmail, e la richiesta
-// si perdeva senza che nessuno lo sapesse. I moduli Netlify sono inclusi
-// nel piano gratuito (100 invii/mese): niente database, risposte raccolte
-// nel pannello Netlify e inoltrate via email.
+// un modulo reale invece di un mailto: — il compositore di email non apre
+// nulla su molti telefoni e su chi usa la webmail, e la richiesta si
+// perdeva senza che nessuno lo sapesse. Invio via
+// functions/api/invia-modulo.js (Cloudflare Pages Function + Brevo,
+// D-025): niente database, email diretta a Stefano con risposta
+// impostata sull'indirizzo del cliente.
 import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
@@ -18,9 +19,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       <form
         name="su-misura"
         method="POST"
-        action="/grazie/"
-        data-netlify="true"
-        netlify-honeypot="pp-azienda"
+        action="/api/invia-modulo"
         class="form-personalizzato"
       >
         <input type="hidden" name="form-name" value="su-misura" />

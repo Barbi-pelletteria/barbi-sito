@@ -1,3 +1,13 @@
+# Da D-016/D-017 l'hosting attivo è Cloudflare Pages, non Netlify — questo
+# file non guida più nessun deploy reale. Tenuto solo come rete di
+# sicurezza dormiente (D-016), a parità di redirect/header/funzione con la
+# configurazione Cloudflare attiva:
+#   - redirect e header: duplicati in public/_redirects e public/_headers
+#     (formato nativo Cloudflare Pages)
+#   - funzione Stripe: equivalente attivo in functions/api/create-checkout-session.js
+#   - moduli contatto/reso/su misura: NON hanno equivalente Netlify aggiornato
+#     più recente di data-netlify (rimosso dai form, D-025) — se questo file
+#     tornasse mai attivo, quei moduli andrebbero ricollegati a mano.
 [build]
   command = "npm run build"
   publish = "dist"

@@ -1,11 +1,13 @@
 ---
-// PACCHETTO_AUDIT_SITO punto B6: due moduli Netlify reali al posto del
-// solo mailto: — "avvisami alla riapertura" (l'home ci punta con
-// /contatti/#avvisami) e un contatto generale. Stesso meccanismo del
-// modulo di recesso (diritto-di-recesso.astro) e della richiesta su
-// misura (prodotto-personalizzato.astro): piano gratuito Netlify, niente
-// database. Il numero WhatsApp menzionato nel pacchetto non è stato
-// aggiunto — serve la conferma di Stefano, non è nei dati del progetto.
+// PACCHETTO_AUDIT_SITO punto B6: due moduli reali al posto del solo
+// mailto: — "avvisami alla riapertura" (l'home ci punta con
+// /contatti/#avvisami) e un contatto generale. Invio via
+// functions/api/invia-modulo.js (Cloudflare Pages Function + Brevo,
+// D-025) — stesso meccanismo del modulo di recesso
+// (diritto-di-recesso.astro) e della richiesta su misura
+// (prodotto-personalizzato.astro). Il numero WhatsApp menzionato nel
+// pacchetto non è stato aggiunto — serve la conferma di Stefano, non è
+// nei dati del progetto.
 import Layout from '../layouts/Layout.astro';
 import { EMAIL_CONTATTO } from '../data/prodotti.js';
 ---
@@ -23,9 +25,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
         <form
           name="avvisami"
           method="POST"
-          action="/grazie/"
-          data-netlify="true"
-          netlify-honeypot="av-azienda"
+          action="/api/invia-modulo"
           class="form-contatto"
         >
           <input type="hidden" name="form-name" value="avvisami" />
@@ -42,9 +42,7 @@ import { EMAIL_CONTATTO } from '../data/prodotti.js';
       <form
         name="contatto"
         method="POST"
-        action="/grazie/"
-        data-netlify="true"
-        netlify-honeypot="ct-azienda"
+        action="/api/invia-modulo"
         class="form-contatto"
       >
         <input type="hidden" name="form-name" value="contatto" />
