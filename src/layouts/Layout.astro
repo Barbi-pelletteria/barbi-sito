@@ -257,7 +257,10 @@ const ogImageURL = new URL(ogImage, Astro.site);
     // — non deve ripresentarsi a ogni pagina). Chiusura con la X, Esc o
     // clic fuori dal pannello: stesso pattern già usato per il menu
     // mobile (PACCHETTO_INTERFACCIA punto 3), non inventato qui.
+    // Ritardo di 5s prima di aprirsi (richiesta esplicita, "non voglio che
+    // esca proprio subito"): prima appariva al caricamento della pagina.
     const BANNER_NEWSLETTER_KEY = 'barbi:newsletter-banner-chiuso';
+    const BANNER_NEWSLETTER_RITARDO_MS = 5000;
     const bannerNewsletter = document.getElementById('banner-newsletter');
 
     function chiudiBannerNewsletter() {
@@ -278,8 +281,20 @@ const ogImageURL = new URL(ogImage, Astro.site);
         /* ignora */
       }
       if (!giaChiuso) {
-        bannerNewsletter.hidden = false;
-        bannerNewsletter.querySelector('input')?.focus();
+        setTimeout(() => {
+          // Ricontrollato al momento di aprirsi, non solo al caricamento:
+          // se nel frattempo (nei 5s) l'ha già chiuso o è tornato sui suoi
+          // passi, non deve comunque comparire.
+          let chiusoNelFrattempo = false;
+          try {
+            chiusoNelFrattempo = window.localStorage.getItem(BANNER_NEWSLETTER_KEY) === '1';
+          } catch {
+            /* ignora */
+          }
+          if (chiusoNelFrattempo) return;
+          bannerNewsletter.hidden = false;
+          bannerNewsletter.querySelector('input')?.focus();
+        }, BANNER_NEWSLETTER_RITARDO_MS);
       }
     }
 
@@ -928,18 +943,16 @@ const ogImageURL = new URL(ogImage, Astro.site);
     /* stessa causa del bug banner cookie/menu mobile: serve sempre questa
        regola più specifica, altrimenti [hidden] non vince su display:flex. */
     .banner-newsletter[hidden] { display: none; }
+    /* 2026-09-22: "non mi piace lo sfondo con la pelle, fallo di un colore
+       unico" — tinta piena (--ink, lo stesso scuro già usato altrove per
+       pannelli/toast), non più la foto+velo del footer. */
     .banner-newsletter__pannello {
       position: relative;
       width: 100%; max-width: 420px;
       padding: 40px 32px;
       border-radius: 4px;
       background-color: var(--ink);
-      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
-      background-size: cover; background-position: center;
       box-shadow: 0 20px 60px rgba(15, 10, 7, .4);
-    }
-    @supports (background-image: url('data:image/webp;base64,UklGR')) {
-      .banner-newsletter__pannello { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
     }
     .banner-newsletter__pannello .footer-news__titolo,
     .banner-newsletter__pannello .footer-news__testo { text-align: left; }
