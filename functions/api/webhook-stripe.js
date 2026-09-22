@@ -105,7 +105,10 @@ export async function onRequestPost({ request, env }) {
         // attributi personalizzati sul pannello Brevo prima di poterli
         // usare in un modello (vedi SETUP.md).
         contact_properties: {
-          FIRSTNAME: primoNome,
+          // NOME, non FIRSTNAME: questo account Brevo usa gli attributi
+          // standard in italiano (verificato su Contatti → Impostazioni →
+          // Attributi contatto).
+          NOME: primoNome,
           ORDINE_RIEPILOGO: formattaRiepilogo(righe),
           ORDINE_TOTALE: formatEuro(session.amount_total || 0),
           ORDINE_ID: session.id,
