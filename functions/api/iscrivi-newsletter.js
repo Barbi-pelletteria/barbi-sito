@@ -92,7 +92,7 @@ export async function onRequestPost({ request, env }) {
       const testoErrore = await risposta.text();
       return rispostaJson({
         ok: false,
-        errore: `Brevo ha rifiutato l'iscrizione (${risposta.status}). Scrivi a ${EMAIL_CONTATTO} se il problema continua.`,
+        errore: `Brevo ha rifiutato l'iscrizione (${risposta.status}): ${testoErrore}`,
       });
     }
   } catch (err) {
