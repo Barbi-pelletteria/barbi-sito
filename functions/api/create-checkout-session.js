@@ -83,6 +83,21 @@ export async function onRequestPost({ request, env }) {
       0
     );
 
+    // Riepilogo compatto per le email post-acquisto (D-028 punto 2,
+    // webhook-stripe.js): il webhook non ha altro modo di sapere
+    // cosa è stato comprato — i line_items di Stripe contengono solo il
+    // testo leggibile già costruito sopra, non i campi separati
+    // (colore/iniziali) di cui l'email ha bisogno per un riepilogo
+    // proprio. Chiavi corte per restare ben dentro al limite di 500
+    // caratteri per valore di metadata imposto da Stripe.
+    const riepilogoOrdine = items.map((it) => ({
+      n: it.nome || it.slug,
+      c: it.colore || '',
+      i: it.iniziali || '',
+      p: unitAmount(it),
+      q: it.quantita,
+    }));
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -95,7 +110,10 @@ export async function onRequestPost({ request, env }) {
       // registrato qui, non in un database che non esiste — Stefano lo vede
       // nel dettaglio dell'ordine su Stripe. Le email sugli ordini non
       // dipendono da questo: quelle sono transazionali, non marketing.
-      metadata: { consenso_marketing: consensoMarketing ? 'si' : 'no' },
+      metadata: {
+        consenso_marketing: consensoMarketing ? 'si' : 'no',
+        riepilogo_ordine: JSON.stringify(riepilogoOrdine),
+      },
       success_url: `${origin}/conferma-ordine?session_id={CHECKOUT_SESSION_ID}&value=${(totaleCentesimi / 100).toFixed(2)}&currency=EUR`,
       cancel_url: `${origin}/carrello`,
     });
