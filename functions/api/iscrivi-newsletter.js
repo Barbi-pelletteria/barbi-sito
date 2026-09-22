@@ -22,11 +22,17 @@
 // chiamata API non lo specifica, non serve duplicarlo qui.
 const EMAIL_CONTATTO = 'info.barbipelletteria@gmail.com';
 
-// Lista "Newsletter sito" (#3) e modello email di conferma (#1), creati su
-// Brevo il 22/09/2026. Non sono segreti, solo identificativi numerici: se
-// cambiano, si aggiornano qui, stesso trattamento di EMAIL_MITTENTE sopra.
+// Lista "Newsletter sito" (#3), creata su Brevo il 22/09/2026. Il modello
+// email di conferma è il #2, "Modello predefinito di conferma a doppio
+// opt-in" — generato dalla procedura guidata Contatti → Moduli, l'unico
+// modo per ottenere un modello davvero di tipo DOI: un modello creato a
+// mano in Transazionale → Modelli (tentativo iniziale, poi scartato)
+// sembra identico ma l'API lo rifiuta ("An active DOI template does not
+// exist") perché Brevo distingue i due tipi internamente, non solo per
+// contenuto. Non sono segreti, solo identificativi numerici: se cambiano,
+// si aggiornano qui, stesso trattamento di EMAIL_MITTENTE sopra.
 const LISTA_NEWSLETTER_ID = 3;
-const TEMPLATE_CONFERMA_ID = 1;
+const TEMPLATE_CONFERMA_ID = 2;
 
 const CAMPO_HONEYPOT = 'nl-azienda';
 
