@@ -24,6 +24,11 @@
   <section class="sec">
     <h1 class="story-title">Chi è Stefano?</h1>
 
+    <picture class="story-foto story-foto--principale">
+      <source srcset="/laboratorio-taglio-pelle.webp" type="image/webp" />
+      <img src="/laboratorio-taglio-pelle.jpg" alt="Stefano Barbi traccia il taglio su un rotolo di pelle nera nel suo laboratorio, con le fustelle di metallo appoggiate sul tavolo da lavoro" width="1179" height="1557" loading="lazy" />
+    </picture>
+
     <div class="narrow story">
       <h3>1992</h3>
       <p class="first">Stefano Barbi ha diciassette anni quando comincia a lavorare la pelle. Non è una scelta di carriera. In Campania, allora, la pelletteria è un mestiere che si impara stando accanto a chi lo sa già fare: si guarda, si prova, si sbaglia, si ricomincia. Le prime cose che gli riescono bene sono quelle che nessuno vede — un bordo dritto, una piega che non si apre.</p>
@@ -33,6 +38,11 @@
       <h3>Gli anni per gli altri</h3>
       <p>Per gran parte della sua vita professionale Stefano ha fatto portafogli, borse e cinture che portavano il nome di qualcun altro. Marchi più conosciuti del suo. È il modo in cui funziona davvero la pelletteria italiana: dietro molte etichette famose ci sono laboratori piccoli e mani che nessuno nomina.</p>
       <p>Sono anche gli anni in cui si impara la parte lunga del mestiere. Quanto tirare un filo. Quando una pelle è pronta e quando no. Perché due pezzi tagliati dallo stesso pellame, a distanza di dieci centimetri, non invecchiano allo stesso modo.</p>
+
+      <picture class="story-foto story-foto--dettaglio">
+        <source srcset="/laboratorio-fustelle.webp" type="image/webp" />
+        <img src="/laboratorio-fustelle.jpg" alt="Fustelle di metallo per il taglio della pelle, etichettate a mano una per una, appoggiate sul tavolo da lavoro del laboratorio" width="1179" height="1562" loading="lazy" />
+      </picture>
 
       <h3>2023 · Il proprio nome</h3>
       <p>Poi Stefano ha deciso di mettere il proprio nome sui pezzi che fa. Ha aperto la sua attività e il suo laboratorio, in Campania, e ha ricominciato da capo: senza un marchio noto alle spalle, senza vetrine, senza catalogo. Con il figlio Jacopo che passa a dare una mano quando serve.</p>
@@ -69,6 +79,15 @@
     max-width: 660px;
     margin: 0 auto 36px;
   }
+
+  /* Due foto vere del laboratorio (22/09/2026), per "dare un tocco di vita"
+     a una pagina che prima era solo testo. Stesso trattamento piatto già
+     usato altrove (border-radius, niente ombra) — .storia-home__foto in
+     home, non un nuovo stile inventato qui. */
+  .story-foto { display: block; border-radius: 4px; overflow: hidden; }
+  .story-foto img { display: block; width: 100%; height: auto; }
+  .story-foto--principale { max-width: 420px; margin: 0 auto 48px; }
+  .story-foto--dettaglio { max-width: 280px; margin: 40px auto; }
 
   /* Gli occhielli dei capitoli sono etichette in ottone, non titoli Bodoni. */
   .story h3 {
