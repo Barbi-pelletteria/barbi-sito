@@ -61,6 +61,11 @@ const prodottoJsonLd = {
   '@type': 'Product',
   name: prodotto.nome,
   description: prodotto.sommario,
+  // D-028 punto 3: campo image, mancante finora. Stessa foto di copertina
+  // del colore iniziale già mostrata in pagina (galleriaIniziale[0]), non
+  // una nuova — new URL gestisce da sé lo slash iniziale del percorso,
+  // stesso pattern già usato per ogImageURL in Layout.astro.
+  image: new URL(galleriaIniziale[0]?.jpg || '/marchio-pelle.jpg', Astro.site).href,
   brand: { '@type': 'Brand', name: 'Barbi Pelletteria' },
   offers: {
     '@type': 'Offer',
@@ -73,7 +78,11 @@ const prodottoJsonLd = {
   },
 };
 ---
-<Layout title={prodotto.nome} description={`${prodotto.nome}: ${prodotto.sommario} ${formatEuro(prodotto.prezzoCentesimi)}, spedizione inclusa.`}>
+<Layout
+  title={prodotto.nome}
+  description={`${prodotto.nome}: ${prodotto.sommario} ${formatEuro(prodotto.prezzoCentesimi)}, spedizione inclusa.`}
+  ogImage={galleriaIniziale[0]?.jpg}
+>
   <Fragment slot="structured-data">
     <script type="application/ld+json" set:html={JSON.stringify(prodottoJsonLd)} />
   </Fragment>

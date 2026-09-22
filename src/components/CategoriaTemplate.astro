@@ -6,6 +6,7 @@
 import Layout from '../layouts/Layout.astro';
 import ProductCard from './ProductCard.astro';
 import { categorie, getProdottiByCategoria } from '../data/prodotti.js';
+import { copertinaProdotto } from '../data/immagini.js';
 
 const { categoriaSlug } = Astro.props;
 const categoria = categorie.find((c) => c.slug === categoriaSlug);
@@ -22,8 +23,15 @@ const fattoA = categoria.genere === 'f' ? 'fatte' : 'fatti';
 const descrizioneCategoria = prodottiCategoria.length > 0
   ? `I ${categoria.nome.toLowerCase()} Barbi Pelletteria: pelle conciata al vegetale, ${fattoA} a mano a Casoria.`
   : `${categoria.nome} Barbi Pelletteria, in arrivo: pelle conciata al vegetale, ${fattoA} a mano a Casoria.`;
+
+// D-028 punto 3: og:image con una foto prodotto reale invece del default
+// generico, quando la categoria ne ha almeno uno — il primo prodotto,
+// primo colore, stessa scelta "non è per un motivo di prodotto" già usata
+// per l'hero in home. Categorie ancora vuote (3 su 4) restano sul default.
+const primoProdotto = prodottiCategoria[0];
+const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.colori[0]) : null;
 ---
-<Layout title={categoria.nome} description={descrizioneCategoria}>
+<Layout title={categoria.nome} description={descrizioneCategoria} ogImage={fotoOg?.jpg}>
   <div class="contenitore">
     <section class="sec">
       <div class="sec-top">

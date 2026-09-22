@@ -15,8 +15,34 @@ import { copertinaProdotto } from '../data/immagini.js';
 const completo = prodotti.find((p) => p.slug === 'completo');
 const coloreHero = completo.colori.find((c) => c.slug === 'marrone');
 const fotoHero = copertinaProdotto(completo, coloreHero);
+
+// D-028 punto 3: Organization solo qui (home), non su ogni pagina — è il
+// sito nel suo complesso a essere descritto, non serve ripetere lo stesso
+// blocco identico su tutte le pagine. Indirizzo reale da DATI_REALI, stesso
+// usato in Termini e Privacy (C-10). Logo: il wordmark "BARBI" già in
+// public/ dai tempi del logo a immagine (prima del componente Marchio) —
+// qui serve solo come immagine per i motori di ricerca, non è mostrato
+// nella pagina: nessun nuovo asset creato per questo.
+const organizzazioneJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Barbi Pelletteria',
+  url: Astro.site,
+  logo: `${Astro.site}marchio-pelle-lettere.png`,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Via Nazionale delle Puglie 98',
+    postalCode: '80026',
+    addressLocality: 'Casoria',
+    addressRegion: 'NA',
+    addressCountry: 'IT',
+  },
+};
 ---
 <Layout title="Home" description="Portafogli in pelle conciata al vegetale, fatti a mano a Casoria da Stefano Barbi dal 1992. Spedizione gratuita in tutta Italia, reso 14 giorni, garanzia 24 mesi.">
+  <Fragment slot="structured-data">
+    <script type="application/ld+json" set:html={JSON.stringify(organizzazioneJsonLd)} />
+  </Fragment>
   <!--
     Redesign 15/09/2026: nuova impaginazione ispirata al riferimento "Stitch
     & Hide" scelto dal Founder — struttura e stile copiati, contenuti al
