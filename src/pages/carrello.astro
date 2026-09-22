@@ -50,6 +50,7 @@ import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
 <script>
   import { getCart, updateQuantita, removeFromCart, lineKey } from '../scripts/cart.js';
   import { getProdottoBySlug, getColore, formatEuro, INIZIALI_CENTESIMI } from '../data/prodotti.js';
+  import { copertinaProdotto } from '../data/immagini.js';
 
   function prezzoRiga(prodotto, riga) {
     return prodotto.prezzoCentesimi + (riga.iniziali ? INIZIALI_CENTESIMI : 0);
@@ -105,11 +106,27 @@ import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
         riga.iniziali ? `iniziali: ${riga.iniziali}` : null,
       ].filter(Boolean).join(' · ');
 
+      // Stessa copertina (01-chiuso) usata in vetrina/scheda prodotto per
+      // questo modello+colore — non una foto nuova, la stessa fonte già
+      // verificata (immagini.js).
+      const copertina = colore ? copertinaProdotto(prodotto, colore) : null;
+      const fotoHtml = copertina
+        ? `<picture class="riga-foto">
+             <source srcset="${copertina.webp}" type="image/webp" />
+             <img src="${copertina.jpg}" alt="${copertina.alt}" width="${copertina.width}" height="${copertina.height}" loading="lazy" />
+           </picture>`
+        : '<span class="riga-foto riga-foto--assente" aria-hidden="true"></span>';
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <span class="riga-nome">${prodotto.nome}</span><br>
-          <span class="riga-dettaglio">${dettaglio}</span>
+          <div class="riga-prodotto">
+            ${fotoHtml}
+            <div>
+              <span class="riga-nome">${prodotto.nome}</span><br>
+              <span class="riga-dettaglio">${dettaglio}</span>
+            </div>
+          </div>
         </td>
         <td>${formatEuro(unit)}</td>
         <td>
@@ -172,6 +189,13 @@ import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
     font-family: var(--f-label); font-size: 10px; letter-spacing: .12em;
     text-transform: uppercase; color: var(--ink3);
   }
+  .riga-prodotto { display: flex; align-items: center; gap: 16px; }
+  .riga-foto {
+    display: block; flex: 0 0 auto; width: 56px; height: 70px;
+    border-radius: 3px; overflow: hidden; background: var(--sunk);
+  }
+  .riga-foto img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .riga-foto--assente { border: 1px dashed var(--line2); }
 
   .input-quantita {
     width: 4.5rem; padding: 10px; border: 1px solid var(--line2);
