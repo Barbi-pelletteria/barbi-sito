@@ -140,6 +140,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
             <Marchio size="piede" />
           </div>
           <p class="footer-col__desc">Portafogli in pelle conciata al vegetale, fatti a mano dal 1992.</p>
+          <a href="https://www.instagram.com/barbi_pelletteria/" class="footer-col__social" target="_blank" rel="noopener noreferrer">Instagram</a>
         </div>
         <nav class="footer-col" aria-label="Navigazione">
           <p class="footer-col__titolo">Il sito</p>
@@ -909,6 +910,10 @@ const ogImageURL = new URL(ogImage, Astro.site);
     }
     .footer-badge-riga { display: flex; align-items: center; gap: 12px; }
     .footer-col__desc { color: rgba(251, 246, 236, .72); font-size: 14px; line-height: 1.6; margin: 16px 0 0; max-width: 32ch; }
+    /* Eredita colore/hover/font da ".footer-col a" sopra — stesso trattamento
+       degli altri link del footer, nessuno stile nuovo inventato per
+       "sembrare" un social link. */
+    .footer-col__social { display: inline-block; margin-top: 14px; }
     .footer-col__titolo {
       font-family: var(--f-label); font-size: 10.5px; font-weight: 600; letter-spacing: .16em;
       /* .5 misurava 4,88:1 — passa ma con margine sottile per un testo
