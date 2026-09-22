@@ -12,6 +12,12 @@
 // importare da src/ non è un percorso testato.
 const EMAIL_DESTINATARIO = 'info.barbipelletteria@gmail.com';
 
+// Mittente sul dominio autenticato (SPF/DKIM/DMARC verificati su Brevo il
+// 22/09/2026) invece del Gmail: migliora la recapitabilità, non richiede una
+// casella reale — nessuno deve mai scrivere qui, "rispondi" nell'email va
+// sempre al cliente (vedi replyTo sotto), mai a questo indirizzo.
+const EMAIL_MITTENTE = 'moduli@barbipelletteria.it';
+
 const paginaErrore = (messaggio) =>
   new Response(
     `<!doctype html>
@@ -125,7 +131,7 @@ export async function onRequestPost({ request, env }) {
         Accept: 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'Sito Barbi Pelletteria', email: EMAIL_DESTINATARIO },
+        sender: { name: 'Sito Barbi Pelletteria', email: EMAIL_MITTENTE },
         to: [{ email: EMAIL_DESTINATARIO, name: 'Stefano Barbi' }],
         replyTo: { email: emailMittente },
         subject: modulo.oggetto(dati),
