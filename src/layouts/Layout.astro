@@ -694,10 +694,15 @@ const ogImageURL = new URL(ogImage, Astro.site);
     }
     .nav-right a:hover::after,
     .nav-right a[aria-current="page"]::after { transform: scaleX(1); }
-    .nav a:hover { color: var(--brass); }
-    /* Voce attiva: stessa sottolineatura permanente + peso del testo — un
-       colore/una riga da soli non bastano (non-color indicator). */
-    .nav a[aria-current="page"] { color: var(--brass); font-weight: 600; }
+    /* D-027: il testo del link non cambia colore in hover/stato attivo —
+       restava --raise anche prima ma un --brass esplicito qui lo
+       sovrascriveva, e --brass su certe zone della foto di pelle misurava
+       2,59–4,17:1, sotto la soglia 4,5:1 per il testo. La sottolineatura
+       sotto (.nav-right a::after, resta --brass: è un elemento decorativo,
+       non testo, soglia diversa — WCAG 1.4.11, non 1.4.3) più il
+       font-weight restano il segnale non-color della voce attiva. */
+    .nav a:hover { color: var(--raise); }
+    .nav a[aria-current="page"] { color: var(--raise); font-weight: 600; }
     .nav-carrello { padding: 8px 0; }
 
     /* Tasto menu mobile (tre lineette): invisibile da computer, il menu
