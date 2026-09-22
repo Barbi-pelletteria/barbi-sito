@@ -1,0 +1,120 @@
+---
+// Griglia prodotti del redesign 15/09/2026 (riferimento "Stitch & Hide"):
+// due bottoni per scheda invece del click-through unico di ProductCard.astro.
+//
+// Componente a sé, non una modifica di ProductCard: quel componente è
+// condiviso con le pagine categoria (CategoriaTemplate.astro), che questo
+// redesign non tocca — cambiargli la struttura avrebbe spostato anche le
+// pagine categoria senza che nessuno lo avesse chiesto. Stessa fonte dati
+// (prodotti.js, immagini.js), zero duplicazione della logica di lettura.
+import { formatEuro, VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
+import { copertinaProdotto, coloreVetrina } from '../data/immagini.js';
+
+const { prodotti } = Astro.props;
+const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent('Disponibilità portafogli Barbi')}`;
+---
+<div class="vetrina">
+  {prodotti.map((p) => {
+    const preferito = p.colori.find((c) => c.slug === coloreVetrina[p.slug] && c.stock > 0);
+    const coloreAttivo = preferito || p.colori.find((c) => c.stock > 0) || p.colori[0];
+    const foto = copertinaProdotto(p, coloreAttivo);
+    const url = `/prodotto/${p.slug}/`;
+    return (
+      <article class="v-scheda">
+        <a href={url} class:list={['v-scheda__foto', `v-scheda__foto--${p.slug}`]} tabindex="-1" aria-hidden="true">
+          {foto && (
+            <picture>
+              <source srcset={foto.webp} type="image/webp" />
+              <img src={foto.jpg} alt={foto.alt} width={foto.width} height={foto.height} loading="lazy" />
+            </picture>
+          )}
+        </a>
+        <p class="p-kick">{p.occhiello}</p>
+        <h3 class="v-scheda__nome"><a href={url}>{p.nome}</a></h3>
+        <div class="p-price">{formatEuro(p.prezzoCentesimi)}</div>
+        <p class="v-scheda__desc">{p.sommario}</p>
+        <div class="v-scheda__bottoni">
+          {/*
+            Primario/secondario invertiti rispetto al primo giro (D-019):
+            qui "Aggiungi al carrello" è .pulsante primario (texture pelle),
+            "Vedi dettagli" è --secondario — così vuole la rifinitura del
+            15/09, punto 3+6. NOTA PER CHI RIPRENDE QUESTO FILE: questo è
+            in tensione con D-015 rivista (i pulsanti di incasso restano
+            sempre sul fondo pieno d'ottone, "l'elemento più evidente della
+            pagina") — qui non lo è più, è testurizzato come tutti gli
+            altri .pulsante primari. Con VENDITA_ATTIVA=false oggi questo
+            bottone non è mai raggiungibile (mostra "Disponibile a breve"),
+            quindi la differenza non si vede ancora dal vivo — segnalato nel
+            resoconto, da confermare col Founder prima che la vendita si
+            accenda, non deciso qui in autonomia una seconda volta.
+          */}
+          <a href={url} class="pulsante pulsante-secondario">Vedi dettagli</a>
+          {VENDITA_ATTIVA ? (
+            <button type="button" class="pulsante" data-slug={p.slug} data-colore={coloreAttivo.slug}>
+              Aggiungi al carrello
+            </button>
+          ) : (
+            <a href={mailtoDisponibile} class="pulsante pulsante-secondario" aria-disabled="true">Disponibile a breve</a>
+          )}
+        </div>
+      </article>
+    );
+  })}
+</div>
+
+<style>
+  .vetrina { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  @media (max-width: 740px) { .vetrina { grid-template-columns: 1fr; gap: 48px; } }
+
+  /* Cornice sottile + ombra minima a riposo, leggermente più marcata
+     all'hover (le card "si sollevano appena", non saltano — richiesta
+     esplicita). Lo zoom è SOLO sulla foto (scale 1.03, 300ms), mai su
+     tutta la scheda: overflow:hidden sul riquadro foto la contiene. */
+  /* display:flex + colonna (non il default a blocco): i due riassunti
+     prodotto hanno lunghezze diverse (una riga vs due), senza questo i
+     bottoni finivano ad altezze diverse fra le due schede — misurato
+     22px di scarto, non solo "sembrava storto". margin-top:auto sui
+     bottoni li ancora in fondo alla scheda, qualunque sia la lunghezza
+     del testo sopra: le due schede hanno già la stessa altezza totale
+     (la griglia le pareggia), qui si allinea cosa succede DENTRO. */
+  .v-scheda {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--sunk); border-radius: 4px; padding: 14px 14px 20px;
+    box-shadow: 0 1px 4px rgba(33, 27, 23, .05);
+    transition: box-shadow 220ms ease;
+  }
+  .v-scheda:hover { box-shadow: 0 6px 18px rgba(33, 27, 23, .10); }
+
+  /* Stesso riquadro a proporzioni fisse già corretto per ProductCard.astro
+     il 03/09/2026 (l'immagine rendeva alla sua dimensione intrinseca) —
+     qui riscritto perché questa è una scheda diversa, non un import
+     condiviso: se in futuro serve, vale la pena estrarlo in una classe
+     globale invece di duplicarlo una terza volta. */
+  .v-scheda__foto {
+    display: block; text-decoration: none;
+    aspect-ratio: 4 / 5; overflow: hidden; background: var(--sunk);
+    border-radius: 2px;
+  }
+  .v-scheda__foto picture, .v-scheda__foto img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    transition: transform 300ms ease;
+  }
+  .v-scheda:hover .v-scheda__foto img { transform: scale(1.03); }
+  /* Le due foto di copertina non sono state scattate alla stessa distanza
+     dal soggetto (misurato, non a occhio: il portafoglio blu riempie il
+     71,1%×47,2% del proprio scatto, il marrone il 77,4%×50,6% — circa
+     l'8% più piccolo, non un'illusione della griglia). Zoom correttivo
+     solo sulla scheda più piccola, non tocca il file originale — se in
+     futuro arrivano scatti nuovi con la stessa inquadratura, questa
+     regola va tolta, non lasciata "tanto non si vede più". */
+  .v-scheda__foto--sottile img { transform: scale(1.08); }
+  .v-scheda:hover .v-scheda__foto--sottile img { transform: scale(1.112); }
+
+  .v-scheda__nome { font-size: 27px; font-weight: 500; margin: 12px 0 0; line-height: 1.1; }
+  .v-scheda__nome a { text-decoration: none; color: inherit; }
+  .v-scheda__nome a:hover { color: var(--brass); }
+  .v-scheda__desc { color: var(--ink2); font-size: 15px; line-height: 1.5; margin: 10px 0 0; }
+
+  .v-scheda__bottoni { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; padding-top: 20px; }
+  .v-scheda__bottoni .pulsante { text-align: center; }
+</style>

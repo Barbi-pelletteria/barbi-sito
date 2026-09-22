@@ -24,7 +24,7 @@ const Tag = href ? 'a' : 'span';
     text-decoration: none;
     color: inherit;
   }
-  .marchio__filetto { display: block; height: 1px; background: var(--brass); opacity: .55; }
+  .marchio__filetto { display: block; height: 1px; background: var(--marchio-colore-filetto, var(--brass)); opacity: .55; }
   /* Colore indiretto via custom property, non var(--brass-testo) diretto:
      un fondo scuro (il footer su pelle) deve poter cambiare il colore del
      marchio senza duplicare questo componente né litigare con la
@@ -64,5 +64,43 @@ const Tag = href ? 'a' : 'span';
        pelle non deve diventare altissima. */
     .marchio--piede .marchio__nome { font-size: 22px; padding: 5px 0 4px; }
     .marchio--piede .marchio__sub { font-size: 7.5px; letter-spacing: .2em; text-indent: .2em; padding-top: 4px; }
+  }
+
+  /* Variante "cartellino" (redesign 15/09/2026): non un simbolo nuovo, lo
+     stesso nome incorniciato — ma incorniciato da un riquadro a bordi
+     stondati invece che dai due filetti, come l'etichetta di pelle cucita
+     al bordo di un pezzo vero. Bordo tratteggiato = cucitura finta, stessa
+     idea già usata in Citazione.astro (lì con repeating-linear-gradient,
+     qui più semplice perché il bordo corre sui quattro lati). I due
+     pallini agli angoli sopra sono lo stesso dettaglio "ribattino" di
+     Citazione.astro, non inventato qui da zero. */
+  .marchio--cartellino {
+    position: relative;
+    background: var(--marrone);
+    border-radius: 7px;
+    border: 1px dashed rgba(251, 246, 236, .45);
+    padding: 9px 20px 8px;
+    line-height: 1;
+  }
+  .marchio--cartellino .marchio__filetto { display: none; }
+  .marchio--cartellino .marchio__nome {
+    padding: 0; font-size: 19px; letter-spacing: .22em; text-indent: .22em;
+    color: var(--raise);
+  }
+  .marchio--cartellino .marchio__sub {
+    padding-top: 4px; font-size: 7px; letter-spacing: .24em; text-indent: .24em;
+    color: rgba(251, 246, 236, .72);
+  }
+  .marchio--cartellino::before,
+  .marchio--cartellino::after {
+    content: ''; position: absolute; top: 6px; width: 3px; height: 3px;
+    border-radius: 50%; background: rgba(251, 246, 236, .5);
+  }
+  .marchio--cartellino::before { left: 6px; }
+  .marchio--cartellino::after { right: 6px; }
+  @media (max-width: 680px) {
+    .marchio--cartellino { padding: 7px 15px 6px; }
+    .marchio--cartellino .marchio__nome { font-size: 16px; }
+    .marchio--cartellino .marchio__sub { font-size: 6.5px; }
   }
 </style>

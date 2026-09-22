@@ -115,7 +115,7 @@ import Layout from '../layouts/Layout.astro';
         const messaggioServer = dati && dati.error;
         throw new Error(
           messaggioServer ||
-            'Impossibile contattare la funzione di pagamento (probabile: il sito non gira ancora su Cloudflare Pages, o mancano le chiavi Stripe di test).'
+            'Impossibile contattare la funzione di pagamento (causa probabile: il sito non gira ancora su Cloudflare Pages, o mancano le chiavi Stripe di test).'
         );
       }
 

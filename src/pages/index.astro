@@ -1,24 +1,60 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ProductCard from '../components/ProductCard.astro';
-import Citazione from '../components/Citazione.astro';
+import VetrinaProdotti from '../components/VetrinaProdotti.astro';
+import StoriaHome from '../components/StoriaHome.astro';
 import ComeNasce from '../components/ComeNasce.astro';
-import ConfrontoSpessore from '../components/ConfrontoSpessore.astro';
 import { prodotti, VENDITA_ATTIVA } from '../data/prodotti.js';
+import { copertinaProdotto } from '../data/immagini.js';
+
+// Redesign 15/09/2026 (riferimento "Stitch & Hide"): foto grande nell'hero.
+// Marrone — colore di riferimento del sito (cuciture, pulsanti, macro) —
+// confermato con l'utente durante la pianificazione. La foto 01-chiuso è la
+// stessa per Sottile e Completo dello stesso colore (FOTO_SITO/LEGGIMI.md):
+// prendo "completo" solo perché è il primo che la trova, non per un motivo
+// di prodotto.
+const completo = prodotti.find((p) => p.slug === 'completo');
+const coloreHero = completo.colori.find((c) => c.slug === 'marrone');
+const fotoHero = copertinaProdotto(completo, coloreHero);
 ---
 <Layout title="Home" description="Portafogli in pelle conciata al vegetale, fatti a mano a Casoria da Stefano Barbi dal 1992. Spedizione gratuita in tutta Italia, reso 14 giorni, garanzia 24 mesi.">
-  <!-- 2 · titolo grande centrato, una parola in corsivo ottone -->
-  <div class="contenitore">
-    <section class="hero">
+  <!--
+    Redesign 15/09/2026: nuova impaginazione ispirata al riferimento "Stitch
+    & Hide" scelto dal Founder — struttura e stile copiati, contenuti al
+    100% reali Barbi (RESOCONTO_REDESIGN_HOME_2026-09-15.md per il dettaglio
+    di ogni scelta e ogni scostamento dal brief, verificato prima di
+    scrivere codice). "Come nasce un portafoglio" e il confronto spessori
+    restano, richiesta esplicita di non far sparire contenuto già approvato
+    non citato nel brief — solo Citazione.astro non compare più qui: il
+    nuovo blocco "La nostra storia" fa lo stesso lavoro (teaser + link a
+    /chi-siamo/), tenerli entrambi avrebbe ripetuto lo stesso invito due
+    volte di seguito. Il componente resta nel codice, non cancellato.
+  -->
+
+  <!-- 1 · hero full-bleed, foto prodotto reale a piena larghezza.
+       2026-09-22: foto sostituita su richiesta diretta del Founder
+       ("utilizza questa come sfondo della home al posto di quella che
+       già ci sta") — non il file di galleria condiviso
+       (prodotti/completo-marrone/01-chiuso.*, ancora usato da pagina
+       prodotto/carrello), un asset dedicato solo per questo hero.
+       Segnalato prima di applicarla: dimensioni/formato (820×1024, PNG)
+       coincidevano col pattern di ogni immagine generata da AI arrivata
+       in questa sessione, diverso dalle foto prodotto reali (1179×1539,
+       JPEG) — il Founder ha confermato esplicitamente che è una foto
+       vera ("è vera usala"), non deciso da soli. alt riusa la
+       descrizione reale già scritta per la foto di galleria dello
+       stesso prodotto/colore, ancora accurata. -->
+  <section class="hero-nuovo">
+    <picture class="hero-nuovo__foto">
+      <source srcset="/hero-portafoglio-marrone.webp" type="image/webp" />
+      <img src="/hero-portafoglio-marrone.jpg" alt={fotoHero.alt} width="820" height="1024" />
+    </picture>
+    <div class="hero-nuovo__testo">
       <p class="eyebrow">Laboratorio di pelletteria</p>
       <h1>La qualità che si sente in <em>ogni pezzo</em></h1>
       <p class="lede">Pelle conciata al vegetale, rifinita a mano bordo per bordo: la qualità si riconosce al tatto.</p>
-      <a class="pulsante hero-cta" href="/portafogli/">Scopri i prodotti</a>
-    </section>
-  </div>
-
-  <!-- 3 · fascia foto 16:9 a tutta larghezza -->
-  <div class="hero-frame"><span>Foto — un portafoglio nella luce del laboratorio</span></div>
+      <a class="pulsante pulsante--grande" href="/portafogli/">Scopri i prodotti</a>
+    </div>
+  </section>
 
   <!--
     PACCHETTO_AUDIT_SITO punto A2: a vendita spenta queste quattro non sono
@@ -33,34 +69,27 @@ import { prodotti, VENDITA_ATTIVA } from '../data/prodotti.js';
     <div>Garanzia 2 anni</div>
   </div>
 
-  <!-- 5 · i due prodotti -->
+  <!-- 2 · griglia prodotti, due bottoni per scheda -->
   <div class="contenitore">
-    <section class="sec">
+    <section class="sec sec--vetrina">
       <div class="sec-top">
+        {/* "I più venduti": il Founder ha confermato la scelta esplicitamente
+            dopo essere stato avvisato che con VENDITA_ATTIVA=false non
+            esistono ancora vendite reali da cui derivarla — non decisa da
+            soli, richiesta ribadita dopo il segnale. */}
+        <p class="eyebrow">I più venduti</p>
         <h2>Due modelli, <em>fatti a mano</em></h2>
-        <p>Quello che c’è davvero in laboratorio oggi. Non un catalogo: un banco di lavoro.</p>
+        <p>Il catalogo si allarga presto: altri tre modelli in arrivo.</p>
       </div>
 
-      <div class="grid2">
-        {prodotti.map((p) => <ProductCard prodotto={p} />)}
-      </div>
-
-      <ConfrontoSpessore prodotti={prodotti} />
+      <VetrinaProdotti prodotti={prodotti} />
     </section>
   </div>
 
-  <!--
-    Rifinitura 27/08/2026: il racconto lungo in sei capitoli è stato tolto
-    da qui — resta solo su /chi-siamo/ (PACCHETTO_RIFINITURA, punto 3). La
-    home si chiude con la citazione breve (che ora porta un link a
-    /chi-siamo/) e con "Come nasce un portafoglio", che resta perché è
-    visivo e breve, non un secondo racconto da leggere.
-  -->
+  <!-- 3 · la nostra storia -->
+  <StoriaHome />
 
-  <!-- 6 · la citazione di Stefano, con link alla storia -->
-  <Citazione />
-
-  <!-- 7 · come nasce un portafoglio -->
+  <!-- 4 · come nasce un portafoglio (contenuto esistente, tenuto) -->
   <ComeNasce />
 
   <!--
@@ -86,33 +115,104 @@ import { prodotti, VENDITA_ATTIVA } from '../data/prodotti.js';
 </Layout>
 
 <style>
-  .hero { padding: 74px 0 0; text-align: center; }
-  /*
-    Rifinitura 27/08/2026: chi apre il sito vuole comprare — un tasto grande
-    verso il catalogo entra nel primo schermo, senza aspettare lo scroll
-    fino alle due schede prodotto più in basso.
-  */
-  .hero-cta { margin-top: 40px; font-size: 13.5px; padding: 19px 34px; }
+  /* ---- hero nuovo: full-bleed, foto reale a piena larghezza, contenuto
+     in basso a sinistra (rifinitura 15/09/2026, D-019 pixel-perfect) ----
+     Sostituisce sia il vecchio .hero (solo testo) sia .hero-frame, che
+     era già un segnaposto senza foto vera — non si rompe niente di
+     funzionante, si riempie un vuoto che c'era da prima di questo
+     redesign. <img> vero (non CSS background-image): stesso effetto
+     visivo, ma l'alt text resta letto da uno screen reader — una foto che
+     TUTTI gli utenti vedenti vedono per prima cosa non può sparire per chi
+     non vede, solo perché tecnicamente "è lo sfondo". */
+  /* 2026-09-22: "non mi piacciono le barre nere laterali, fai tutto
+     bianco come lo sfondo". Primo tentativo: foto ancorata a destra
+     dentro lo stesso riquadro pieno del testo, contando che lo spazio
+     vuoto di "contain" cadesse sempre a sinistra — vero alle larghezze
+     larghe, ma misurato (non solo guardato) che intorno ai 1000px
+     l'altezza minima (640px) smette di restringersi insieme alla
+     larghezza, la foto resta larga quasi uguale e il testo, nel
+     frattempo, arriva più vicino al bordo destro: si sovrapponevano di
+     119px. Non era un problema di numeri da ritoccare, era la struttura
+     sbagliata (un riquadro solo, due contenuti posizionati sopra).
+     Due colonne vere (flex) invece: testo e foto non possono più
+     sovrapporsi a nessuna larghezza, non serve calcolare dove cade il
+     vuoto — sono due spazi separati. */
+  .hero-nuovo {
+    display: flex; align-items: stretch;
+    min-height: 640px; height: 90vh;
+    background-color: #FFFFFF;
+  }
+  .hero-nuovo__foto {
+    flex: 1 1 55%; min-width: 0; position: relative; display: block;
+  }
+  .hero-nuovo__foto img {
+    width: 100%; height: 100%;
+    object-fit: contain; object-position: center;
+    display: block;
+  }
+  .hero-nuovo__testo {
+    flex: 1 1 45%; min-width: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    text-align: left;
+    padding: 48px 48px;
+  }
+  /* Testo scuro su bianco, non più chiaro su foto: il velo scuro
+     (gradiente pensato apposta per portare il testo sopra la foto a
+     contrasto) non serve più — il testo oggi vive sempre nella fascia
+     bianca a sinistra, mai sopra la foto, e un velo scuro lì sopra
+     avrebbe sporcato il bianco richiesto. --brass-testo invece di
+     --brass per l'eyebrow: --brass da solo è tarato per un fondo scuro
+     (~2:1, ok solo per bordi/decorazioni), su bianco serve la variante
+     scura pensata per il testo, stessa da usare in tutto il sito. */
+  .hero-nuovo__testo .eyebrow { color: var(--brass-testo); letter-spacing: .15em; }
+  .hero-nuovo__testo h1 {
+    text-align: left; max-width: 16ch; color: var(--ink);
+    /* line-height 1.08 (era il valore) tagliava i discendenti (g, p, ecc.)
+       sulla seconda riga: line-clamp+overflow:hidden fissa l'altezza del
+       box esattamente a due righe. Primo tentativo a 1.16: sembrava
+       giusto guardando lo screenshot, ma misurato clonando l'elemento
+       senza clamp (stessa larghezza, stesso testo) l'altezza naturale
+       restava 152px contro i 148px del box — 4px di "g" ancora tagliati,
+       non visibili a colpo d'occhio ma reali. 1.24 dà 158,7px di box
+       contro i 152px richiesti, margine vero non al pelo — riverificato
+       con lo stesso confronto dopo il cambio, non solo guardato.
+       5vw era tarato per il testo su tutta la larghezza della foto
+       (il vecchio riquadro unico) — nelle due colonne il testo ha solo
+       il 45% circa della larghezza, lo stesso 5vw diventava troppo
+       grande per la sua colonna a molte larghezze intermedie e "ogni
+       pezzo" spariva dietro i tre puntini del line-clamp. 3vw è tarato
+       sulla colonna vera, non sulla viewport intera. line-clamp a 3
+       (non più 2) come rete di sicurezza aggiuntiva: alle larghezze
+       larghe il testo occupa comunque solo 2 righe (non cambia nulla
+       lì), ma se una colonna stretta lo spingesse a una terza riga,
+       quella riga resta visibile invece di sparire troncata. */
+    font-size: clamp(1.8rem, 3vw, 3.75rem); line-height: 1.24; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .hero-nuovo__testo .lede {
+    text-align: left; margin: 18px 0 0; max-width: 42ch;
+  }
+  .hero-nuovo__testo .pulsante { margin-top: 34px; }
 
-  .hero-frame {
-    margin-top: 52px;
-    aspect-ratio: 16 / 9;
-    position: relative;
-    background:
-      radial-gradient(120% 90% at 50% 42%, rgba(var(--brass-rgb), .10), transparent 62%),
-      var(--sunk);
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    text-align: center;
+  @media (max-width: 780px) {
+    /* Due colonne affiancate non hanno senso stretto in verticale su
+       telefono: si impilano — foto sopra (stesso ordine del DOM), testo
+       sotto. flex-direction:column basta, l'ordine resta quello scritto
+       in origine, non va invertito. */
+    .hero-nuovo { flex-direction: column; height: auto; min-height: 0; }
+    .hero-nuovo__foto { flex: 0 0 auto; height: 48vh; min-height: 340px; }
+    .hero-nuovo__testo { flex: 0 0 auto; padding: 32px 20px 40px; }
+    .hero-nuovo__testo h1 { max-width: none; }
   }
-  .hero-frame span {
-    font-family: var(--f-label); font-size: 10.5px; font-weight: 600;
-    letter-spacing: .2em; text-transform: uppercase; color: var(--ink2);
-  }
+
+  /* Padding generoso solo qui (rifinitura 15/09/2026): .sec di base è
+     78px 0, condiviso da pagina prodotto/categoria — cambiarlo lì avrebbe
+     toccato pagine fuori dal perimetro di questa rifinitura. Scope Astro
+     (questo file) invece di una nuova classe globale: la specificità dello
+     scope vince senza toccare .sec altrove. */
+  .sec--vetrina { padding: 96px 0; }
+  @media (max-width: 680px) { .sec--vetrina { padding: 56px 0; } }
+  .sec--vetrina .sec-top .eyebrow { display: block; }
 
   .strip-etichetta {
     text-align: center; margin: 40px 0 0;

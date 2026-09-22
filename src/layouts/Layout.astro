@@ -83,28 +83,35 @@ const ogImageURL = new URL(ogImage, Astro.site);
 <body>
   <a class="salta-contenuto" href="#contenuto">Vai al contenuto</a>
 
-  <header class="nav">
+  <header class="nav" id="nav-header">
     <div class="nav-in">
       <a href="/" class="nav-marchio" aria-label="Barbi Pelletteria, dal 1992">
-        <img src="/marchio-pelle-lettere.png" alt="Barbi" width="1010" height="280" />
+        <Marchio size="normale" />
       </a>
+      {/* Nav CENTRATA (richiesta esplicita) — non più allineata a destra:
+          grid a tre colonne (1fr auto 1fr) invece di flex+margin-left:auto,
+          perché logo e carrello hanno larghezze diverse fra loro — con un
+          flex centrato "a occhio" la voce centrale non sarebbe stata
+          davvero in mezzo alla barra, solo in mezzo allo spazio residuo. */}
       <nav class="nav-right" aria-label="Menu principale">
         <a href="/" class="hideable" aria-current={eAttivo('/') ? 'page' : undefined}>Home</a>
         <a href="/portafogli/" class="hideable" aria-current={eAttivo('/portafogli/') ? 'page' : undefined}>Prodotti</a>
         <a href="/chi-siamo/" class="hideable" aria-current={eAttivo('/chi-siamo/') ? 'page' : undefined}>Il laboratorio</a>
         <a href="/contatti/" class="hideable" aria-current={eAttivo('/contatti/') ? 'page' : undefined}>Contatti</a>
+      </nav>
+      <div class="nav-servizio">
         {/* PACCHETTO_AUDIT_SITO punto A2: niente contatore "(0)" finché non
             si può comprendere nulla — mostrarlo contraddice il resto del
             sito, che dice "vendita non ancora attiva". */}
         {VENDITA_ATTIVA ? (
-          <a href="/carrello/" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>Carrello (<span id="contatore-carrello">0</span>)</a>
+          <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>Carrello (<span id="contatore-carrello">0</span>)</a>
         ) : (
-          <a href="/carrello/" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>Carrello</a>
+          <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>Carrello</a>
         )}
         <button type="button" class="nav-burger" id="nav-burger" aria-expanded="false" aria-controls="nav-menu-mobile" aria-label="Apri il menu">
           <span></span><span></span><span></span>
         </button>
-      </nav>
+      </div>
     </div>
     <nav class="nav-menu-mobile" id="nav-menu-mobile" aria-label="Menu principale, mobile" hidden>
       <a href="/" aria-current={eAttivo('/') ? 'page' : undefined}>Home</a>
@@ -119,21 +126,89 @@ const ogImageURL = new URL(ogImage, Astro.site);
   </main>
 
   <footer class="site-footer">
-    <Marchio size="piede" />
-    <nav class="flinks" aria-label="Informazioni e supporto">
-      <a href="/faq/">Domande frequenti</a>
-      <a href="/termini-e-condizioni/">Informazioni legali</a>
-      <a href="/spedizioni-e-resi/">Spedizioni</a>
-      <a href="/diritto-di-recesso/">Recesso e resi</a>
-      <a href="/termini-e-condizioni/#garanzia">Garanzia</a>
-      <a href="/termini-e-condizioni/#pagamenti-e-prezzi">Pagamenti</a>
-      <a href="/privacy/">Privacy e cookie</a>
-    </nav>
-    <p class="fine">
-      Barbi Stefano<br />
-      Partita IVA 10311791213 · REA NA-1097798 · <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>
-    </p>
+    <div class="footer-in">
+      <!--
+        Quattro colonne (rifinitura 15/09/2026, punto 5): logo+riga
+        descrittiva, nav reale, link legali reali, newsletter. La riga
+        descrittiva è presa dalla description della pagina (stessa frase
+        già scritta e verificata per i meta tag), non un nuovo testo
+        inventato per l'occasione.
+      -->
+      <div class="footer-grid">
+        <div class="footer-col footer-col--marchio">
+          <div class="footer-badge-riga">
+            <Marchio size="piede" />
+          </div>
+          <p class="footer-col__desc">Portafogli in pelle conciata al vegetale, fatti a mano dal 1992.</p>
+        </div>
+        <nav class="footer-col" aria-label="Navigazione">
+          <p class="footer-col__titolo">Il sito</p>
+          <a href="/">Home</a>
+          <a href="/portafogli/">Prodotti</a>
+          <a href="/chi-siamo/">Il laboratorio</a>
+          <a href="/contatti/">Contatti</a>
+        </nav>
+        <nav class="footer-col" aria-label="Informazioni e supporto">
+          <p class="footer-col__titolo">Informazioni</p>
+          <a href="/faq/">Domande frequenti</a>
+          <a href="/termini-e-condizioni/">Informazioni legali</a>
+          <a href="/spedizioni-e-resi/">Spedizioni</a>
+          <a href="/diritto-di-recesso/">Recesso e resi</a>
+          <a href="/termini-e-condizioni/#garanzia">Garanzia</a>
+          <a href="/termini-e-condizioni/#pagamenti-e-prezzi">Pagamenti</a>
+          <a href="/privacy/">Privacy e cookie</a>
+        </nav>
+        <div class="footer-col footer-news">
+          <p class="footer-news__titolo">Resta aggiornato</p>
+          <p class="footer-news__testo">Nuovi colori, nuovi pezzi, e quando riparte la vendita online.</p>
+          <!--
+            Modulo visivamente completo ma NON collegato a nessun servizio:
+            onsubmit="return false" impedisce l'invio, stesso pattern già
+            usato in #form-acquisto (pagina prodotto). Nessuna chiamata a un
+            provider esterno di proposito — quale servizio usare (e il
+            consenso GDPR che richiede, separato da quello Analytics già
+            in uso) è una decisione del Founder col QG, non tecnica silenziosa.
+            Vedi resoconto.
+          -->
+          <form class="footer-news__form" onsubmit="return false" aria-label="Iscrizione alla newsletter">
+            <label for="footer-news-email" class="sr-only">Email</label>
+            <input type="email" id="footer-news-email" name="email" placeholder="La tua email" autocomplete="email" />
+            <button type="submit" class="pulsante pulsante--piccolo">Iscriviti</button>
+          </form>
+        </div>
+      </div>
+      <p class="fine">
+        Barbi Stefano<br />
+        Partita IVA 10311791213 · REA NA-1097798 · <a href={`mailto:${EMAIL_CONTATTO}`}>{EMAIL_CONTATTO}</a>
+      </p>
+    </div>
   </footer>
+
+  <!--
+    Banner iscrizione (2026-09-22, richiesta diretta): stesso modulo
+    statico del footer sopra, non un secondo modulo diverso — riusa le
+    stesse classi .footer-news__* (stessi colori/dimensioni già
+    verificati) e lo stesso submit finto (onsubmit="return false",
+    nessun servizio email collegato: stessa nota già valida per il
+    modulo del footer, non risolta qui). Si apre da solo all'apertura
+    del sito, si ricorda la chiusura con localStorage (stessa tecnica
+    già usata per il consenso cookie sotto) così non si ripresenta a
+    ogni pagina per chi l'ha già chiuso una volta.
+  -->
+  <div id="banner-newsletter" class="banner-newsletter" role="dialog" aria-modal="true" aria-label="Iscrizione alla newsletter" hidden>
+    <div class="banner-newsletter__pannello">
+      <button type="button" class="banner-newsletter__chiudi" id="banner-newsletter-chiudi" aria-label="Chiudi">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <p class="footer-news__titolo">Resta aggiornato</p>
+      <p class="footer-news__testo">Nuovi colori, nuovi pezzi, e quando riparte la vendita online.</p>
+      <form class="footer-news__form" id="banner-newsletter-form" onsubmit="return false" aria-label="Iscrizione alla newsletter">
+        <label for="banner-newsletter-email" class="sr-only">Email</label>
+        <input type="email" id="banner-newsletter-email" name="email" placeholder="La tua email" autocomplete="email" />
+        <button type="submit" class="pulsante pulsante--piccolo">Iscriviti</button>
+      </form>
+    </div>
+  </div>
 
   {gaId && (
     <div id="cookie-banner" class="cookie-banner" role="dialog" aria-live="polite" aria-label="Informativa cookie" data-ga-id={gaId} hidden>
@@ -174,6 +249,62 @@ const ogImageURL = new URL(ogImage, Astro.site);
         banner.hidden = true;
       });
     }
+  </script>
+
+  <script>
+    // Banner iscrizione: si apre da solo se non è già stato chiuso in
+    // precedenza (localStorage, stessa tecnica del consenso cookie sopra
+    // — non deve ripresentarsi a ogni pagina). Chiusura con la X, Esc o
+    // clic fuori dal pannello: stesso pattern già usato per il menu
+    // mobile (PACCHETTO_INTERFACCIA punto 3), non inventato qui.
+    const BANNER_NEWSLETTER_KEY = 'barbi:newsletter-banner-chiuso';
+    const bannerNewsletter = document.getElementById('banner-newsletter');
+
+    function chiudiBannerNewsletter() {
+      if (!bannerNewsletter) return;
+      bannerNewsletter.hidden = true;
+      try {
+        window.localStorage.setItem(BANNER_NEWSLETTER_KEY, '1');
+      } catch {
+        /* ignora */
+      }
+    }
+
+    if (bannerNewsletter) {
+      let giaChiuso = false;
+      try {
+        giaChiuso = window.localStorage.getItem(BANNER_NEWSLETTER_KEY) === '1';
+      } catch {
+        /* ignora */
+      }
+      if (!giaChiuso) {
+        bannerNewsletter.hidden = false;
+        bannerNewsletter.querySelector('input')?.focus();
+      }
+    }
+
+    document.getElementById('banner-newsletter-chiudi')?.addEventListener('click', chiudiBannerNewsletter);
+    document.getElementById('banner-newsletter-form')?.addEventListener('submit', chiudiBannerNewsletter);
+    bannerNewsletter?.addEventListener('click', (e) => {
+      if (e.target === bannerNewsletter) chiudiBannerNewsletter();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && bannerNewsletter && !bannerNewsletter.hidden) chiudiBannerNewsletter();
+    });
+  </script>
+
+  <script>
+    // Ombra sticky (rifinitura 15/09/2026): la barra è sempre in cima
+    // (position:sticky), l'ombra si aggiunge solo dopo 8px di scroll — è lei
+    // a dire "mi sono staccato dal contenuto", non deve esserci sempre.
+    // passive:true perché non chiama mai preventDefault: evita che il
+    // browser aspetti inutilmente prima di processare lo scroll.
+    const header = document.getElementById('nav-header');
+    function aggiornaOmbraHeader() {
+      header?.classList.toggle('nav--scrolled', window.scrollY > 8);
+    }
+    aggiornaOmbraHeader();
+    window.addEventListener('scroll', aggiornaOmbraHeader, { passive: true });
   </script>
 
   <script>
@@ -329,9 +460,18 @@ const ogImageURL = new URL(ogImage, Astro.site);
     }
 
     * { box-sizing: border-box; }
+    /* 2026-09-22: provato lo sfondo coccodrillo su tutto il sito, il
+       Founder ha preferito tornare a un fondo bianco classico ("no
+       proviamo semplicemente un fondo bianco classico") — bianco pieno
+       #FFFFFF, non var(--ground) (il crema consueto del sito): chiesto
+       esplicitamente "bianco", un colore diverso, non un ritorno silenzioso
+       al valore precedente. --ground resta invariata per tutto il resto
+       che la usa già (pulsante secondario, pannello menu mobile, ecc.) —
+       qui si tocca solo lo sfondo pagina, non il token condiviso. Gli
+       asset coccodrillo restano su disco, non cancellati. */
     body {
       margin: 0;
-      background: var(--ground);
+      background: #FFFFFF;
       color: var(--ink);
       font-family: var(--f-text);
       font-size: 19px;
@@ -375,51 +515,113 @@ const ogImageURL = new URL(ogImage, Astro.site);
       color: var(--brass-testo); margin: 0 0 22px;
     }
 
-    /* ---- testata ---- */
-    /* Sfondo in pelle vera (foto), su richiesta diretta del Founder — deroga
-       esplicita a C-11 (CORREZIONI.md), registrata in DECISIONI.md. Non un
-       colore piatto: marchio-pelle-texture.jpg è un ritaglio della stessa
-       foto (zona senza scritta), specchiato una volta per ripetersi senza
-       taglio netto (repeat-x), così tutta la barra è coperta dalla stessa
-       texture, non solo la zona del logo. #16110E (colore medio della pelle,
-       campionato via canvas) resta sotto come sfondo di riserva mentre la
-       texture carica. Testo e tasto menu passano da --ink2/--ink a un
-       chiaro per il nuovo fondo scuro — contrasto verificato, non a occhio. */
+    /* ---- testata (rifinitura 15/09/2026, D-019 pixel-perfect) ----
+       Torna a --ground: la foto di pelle scura (D-015 originale, deroga a
+       C-11) è SUPERATA da questa scelta, non affiancata — il riferimento
+       vuole un header chiaro e "flottante" che si stacca dal contenuto con
+       un'ombra allo scroll, non una fascia scura fissa. marchio-pelle-texture.jpg
+       resta sul disco, non cancellato (stesso trattamento già riservato agli
+       altri asset superati). Sticky con ombra aggiunta via classe .nav--scrolled
+       (script sotto, soglia 8px) invece che sempre presente: è l'ombra che deve
+       segnalare "mi sono staccato dal contenuto", non esistere sempre uguale. */
+    /* 2026-09-22: torna alla testata di sempre — foto di pelle vera come
+       sfondo (D-015 originale, deroga a C-11) invece del fondo chiaro
+       piatto introdotto dal redesign del 15/09. Foto sostituita lo
+       stesso giorno (seconda richiesta): non più marchio-pelle-texture.jpg
+       (repeat-x, texture piccola), ma una foto vera più grande fornita
+       dal Founder (Claude outputs/foto-pelle-reale/, verificata non
+       ripetuta/sintetica — autocorrelazione senza picchi secondari,
+       stesso controllo già usato per distinguere D-018 da D-019),
+       cover invece di repeat: è una foto con un soggetto (la piega
+       centrale), non una texture pensata per ripetersi. #16110E resta
+       come sfondo di riserva mentre la foto carica. Sticky + ombra allo
+       scroll (rifinitura 15/09) restano: comportamento indipendente dal
+       colore della barra, non era oggetto della richiesta. */
     .nav {
+      position: sticky; top: 0; z-index: 40;
       background-color: #16110E;
-      background-image: url('/marchio-pelle-texture.jpg');
-      background-repeat: repeat-x;
-      background-position: left top;
-      background-size: auto 100%;
+      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
+      background-size: cover;
+      /* Stessa foto del footer ma un'inquadratura diversa (15% 55%,
+         verso sinistra): il footer mostra il nodo centrale, qui si vede
+         una piega diversa — altrimenti le due barre, entrambe ritagliate
+         "center" dalla stessa immagine, sarebbero praticamente identiche. */
+      background-position: 15% 55%;
       border-bottom: 1px solid var(--brass);
+      transition: box-shadow 180ms ease;
     }
-    .nav-in { max-width: 1120px; margin: 0 auto; padding: 14px 22px; display: flex; align-items: center; gap: 28px; }
-    .nav-marchio { display: block; }
-    .nav-marchio img { display: block; height: 46px; width: auto; }
-    .nav-right { margin-left: auto; display: flex; gap: 24px; align-items: center; }
+    @supports (background-image: url('data:image/webp;base64,UklGR')) {
+      .nav { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
+    }
+    .nav.nav--scrolled { box-shadow: 0 2px 12px rgba(33, 27, 23, .08); }
+    /* Grid a tre colonne, non flex: logo e servizio (carrello) hanno
+       larghezze diverse, un flex "centrato a occhio" con margin-left:auto
+       non mette davvero la nav in mezzo alla BARRA, solo in mezzo allo
+       spazio che resta — 1fr auto 1fr centra sempre la colonna di mezzo
+       sull'intera larghezza, qualunque sia la larghezza dei lati. */
+    .nav-in {
+      max-width: 1120px; margin: 0 auto; padding: 14px 22px;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 28px;
+      min-height: 56px;
+    }
+    @media (min-width: 681px) { .nav-in { min-height: 62px; } }
+    /* 2026-09-22: il marchio in testata torna al componente Marchio (nome +
+       filetti + dicitura), come nel footer — non più l'immagine
+       marchio-pelle-lettere*.png, richiesta esplicita dopo aver visto il
+       footer ("mi piace il logo così, lo voglio sia nel footer che
+       nell'header"). Bianco pieno anche sui filetti (prima erano sempre
+       --brass, mai passati per una custom property: aggiunta
+       --marchio-colore-filetto in Marchio.astro apposta, un solo punto
+       dove viene usato oggi oltre al footer, nessun rischio di cambiare
+       colore altrove per sbaglio). */
+    .nav-marchio {
+      display: flex; align-items: center; gap: 12px; text-decoration: none; justify-self: start;
+      --marchio-colore-nome: #FFFFFF;
+      --marchio-colore-filetto: #FFFFFF;
+      /* Dimenticata nel primo giro: senza, .marchio__sub eredita il suo
+         fallback pensato per fondo chiaro (--ink3, bruno scuro) — su
+         pelle scura sarebbe stato quasi invisibile. Stesso valore già
+         verificato nel footer, non un nuovo colore inventato qui. */
+      --marchio-colore-sub: rgba(251, 246, 236, .72);
+    }
+    /* Badge decorativo, non un simbolo nuovo: un riquadro di colore con la
+       stessa cucitura tratteggiata del resto del sito, vuoto — l'identità
+       la porta il nome accanto, non un'icona inventata (vincolo fermo dal
+       primo brief, mai caduto). ~40px per non superare la nav accanto,
+       misurato dopo. */
+    .header-badge {
+      display: block; width: 40px; height: 40px; flex: 0 0 auto;
+      background: var(--marrone);
+      border: 1px dashed rgba(251, 246, 236, .45);
+      border-radius: 6px;
+      box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .1);
+    }
+    .nav-right { grid-column: 2; justify-self: center; display: flex; gap: 28px; align-items: center; }
+    .nav-servizio { grid-column: 3; justify-self: end; display: flex; gap: 18px; align-items: center; }
     .nav a {
       font-family: var(--f-label); font-size: 12.5px; font-weight: 500; letter-spacing: .05em;
       text-transform: uppercase; color: var(--raise); text-decoration: none; white-space: nowrap;
     }
-    /* Area cliccabile delle voci di menu: 21px di altezza reale (misurata)
-       prima di questa riga, sotto la soglia AA di WCAG 2.2 (24×24px).
-       Corretta a >=32px solo con padding verticale, non toccando
-       font-size: essendo figlie dirette di un contenitore flex
-       (.nav-right), le <a> qui sono "blockificate" per specifica CSS — il
-       padding verticale si applica davvero alla loro box, non è il caso
-       (diverso) di un elemento inline isolato dove il padding verticale
-       non tocca l'altezza di riga. Selettore ristretto a `.nav-right a`,
-       non il più ampio `.nav a`: quest'ultimo prende anche `.nav-marchio`
-       (il logo), dove il padding avrebbe allargato la barra intera da
-       74px a 90px — misurato, non solo temuto, prima di restringere il
-       selettore. L'altezza della barra non cambia: il logo (46px) resta
-       comunque l'elemento più alto della riga. */
-    .nav-right a { padding: 8px 0; }
+    /* Sottolineatura che si espande da sinistra invece del bottone cucito:
+       i bottoni cuciti restano riservati alle call-to-action (richiesta
+       esplicita), altrimenti perdono forza distintiva. scaleX invece di
+       width: anima la GPU, non il layout — nessun reflow ad ogni hover.
+       Solo .nav-right (le voci editoriali): il carrello, in .nav-servizio,
+       resta un link di servizio — hover di colore, niente riga in crescita. */
+    .nav-right a { position: relative; padding: 8px 0; }
+    .nav-right a::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: 4px;
+      height: 1.5px; background: var(--brass);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 180ms ease;
+    }
+    .nav-right a:hover::after,
+    .nav-right a[aria-current="page"]::after { transform: scaleX(1); }
     .nav a:hover { color: var(--brass); }
-    /* Voce attiva: stesso trattamento di :hover ma persistente, più il
-       peso del testo — un colore da solo non basta (non-color indicator),
-       serve anche a chi non distingue i due toni su un fondo scuro/testurizzato. */
+    /* Voce attiva: stessa sottolineatura permanente + peso del testo — un
+       colore/una riga da soli non bastano (non-color indicator). */
     .nav a[aria-current="page"] { color: var(--brass); font-weight: 600; }
+    .nav-carrello { padding: 8px 0; }
 
     /* Tasto menu mobile (tre lineette): invisibile da computer, il menu
        a comparsa sotto sostituisce i link .hideable nascosti in basso. */
@@ -438,25 +640,29 @@ const ogImageURL = new URL(ogImage, Astro.site);
 
     @media (max-width: 680px) {
       .nav a.hideable { display: none; }
-      .nav-in { gap: 14px; padding: 12px 22px; }
-      .nav-marchio img { height: 36px; }
+      .nav-in { gap: 10px; padding: 10px 20px; min-height: 64px; }
+      .header-badge { width: 32px; height: 32px; }
       .nav-burger { display: flex; }
+      /* "A schermo intero" (richiesta esplicita): non più un pannello che
+         si apre sotto la barra in flusso normale, un overlay fisso che
+         copre tutto sotto l'header. inset dinamico sull'altezza reale della
+         barra (64px qui) così non lascia né buchi né sovrapposizioni se
+         l'altezza dell'header cambia in futuro. */
       .nav-menu-mobile {
         display: flex; flex-direction: column;
-        border-top: 1px solid var(--line);
-        background: var(--raise);
+        position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+        background: var(--ground);
+        overflow-y: auto;
       }
       /* stessa causa del bug banner cookie (C-13): serve sempre questa
          regola più specifica, altrimenti [hidden] non vince su display:flex. */
       .nav-menu-mobile[hidden] { display: none; }
-      /* PACCHETTO_INTERFACCIA punto 3, causa reale trovata: .nav a
-         (globale, sopra) imposta color:var(--raise) per l'header scuro —
-         qui si eredita su un pannello che invece ha sfondo --raise chiaro,
-         testo su testo, contrasto 1:1 (misurato). Serve un colore scuro
-         esplicito, non ereditato. */
+      /* Voci grandi, facili da toccare (richiesta esplicita, min 48px di
+         area tocco reale — qui 22px di padding verticale + il testo danno
+         più margine di quel minimo, non il minimo esatto). */
       .nav-menu-mobile a {
-        padding: 16px 22px; border-bottom: 1px solid var(--line);
-        color: var(--ink);
+        padding: 22px 24px; border-bottom: 1px solid var(--line);
+        color: var(--ink); font-size: 15px; letter-spacing: .04em;
       }
       .nav-menu-mobile a:last-child { border-bottom: 0; }
       .nav-menu-mobile a:hover, .nav-menu-mobile a:focus-visible { color: var(--brass-testo); }
@@ -501,57 +707,48 @@ const ogImageURL = new URL(ogImage, Astro.site);
       text-transform: uppercase; color: var(--ink3); margin-left: 8px;
     }
 
-    /* ---- pulsanti, foto vera di pelle cucita (D-018 chiusa: la texture
-       "portachiavi", non fotografica, è sostituita da uno scatto reale —
-       vedi DECISIONI.md). Sfondo della foto già nello stesso beige del
-       sito (#f2eae0 = --ground, verificato pixel per pixel), margine di
-       ritaglio non critico per lo stesso motivo. cover, non contain, per
-       lo stesso limite già preso con la versione precedente: i pulsanti
-       reali sono più larghi che alti, contain lascia vuoti ai lati.
-       Stesso velo scuro invariato — vedi resoconto per i valori di
-       contrasto misurati dopo il cambio. background-color dichiarato:
-       leggibile anche se l'immagine non carica. */
+    /* ---- pulsanti, un solo sorgente di verità ----
+       2026-09-22: il Founder ha chiuso l'intera linea di sperimentazione
+       "texture di pelle sui pulsanti" (D-018→D-023) — "non mi piace,
+       torniamo ai pulsanti classici, togliamo questi pulsanti". Tornano
+       a tinta piena: ottone per l'azione primaria (stesso linguaggio
+       visivo già consolidato per swatch attivo/voce di menu attiva,
+       D-015 rivista — ora esteso a TUTTI i pulsanti primari, non solo a
+       quelli di incasso: un solo trattamento, non due da distinguere),
+       bordo tratteggiato su fondo chiaro per il secondario. Gli asset
+       (texture-pulsante-*.png/webp, incluse le 8 famiglie D-023) restano
+       su disco, non cancellati — stesso trattamento riservato a ogni
+       altro asset superato in questo progetto. */
     .buy, .pulsante {
       display: inline-block;
       font-family: var(--f-label); font-size: 12.5px; font-weight: 600;
       letter-spacing: .16em; text-transform: uppercase;
-      color: var(--raise);
-      background-color: #170f0b;
-      background-image:
-        linear-gradient(rgba(15, 10, 7, .88), rgba(15, 10, 7, .88)),
-        url('/pelle/texture-pulsante-reale.jpg');
-      background-size: cover, cover;
-      background-position: center, center;
-      background-repeat: no-repeat, no-repeat;
-      border: 1px solid var(--brass); padding: 17px 26px;
-      text-decoration: none; text-align: center; cursor: pointer;
-    }
-    @supports (background-image: url('data:image/webp;base64,UklGR')) {
-      .buy, .pulsante {
-        background-image:
-          linear-gradient(rgba(15, 10, 7, .88), rgba(15, 10, 7, .88)),
-          url('/pelle/texture-pulsante-reale.webp');
-      }
-    }
-    .buy:hover, .pulsante:hover { filter: brightness(1.15); }
-    .buy:disabled, .pulsante:disabled, .pulsante[aria-disabled="true"] { opacity: .45; cursor: not-allowed; filter: none; }
-    .buy.soon, .pulsante-secondario { background: transparent; color: var(--brass-testo); }
-
-    /* Eccezione deliberata, non dimenticata: i tre pulsanti che portano
-       all'incasso (D-015 rivista, condizione ferma) restano sul fondo
-       pieno di sempre. Non per un problema di contrasto — la pelle qui
-       misura 12,29-14,21:1, più del brass pieno (~7:1) — ma perché su
-       QUESTO sito l'ottone pieno è già il linguaggio visivo consolidato
-       per "azione primaria" (swatch attivo, voce di menu attiva, CTA):
-       cambiarlo proprio sul controllo più critico rischia di indebolirne
-       il riconoscimento, non il contrasto. Valutazione motivata nel
-       resoconto, non una misura che fallisce — il Founder può ribaltarla. */
-    #btn-aggiungi, #btn-vai-checkout, #btn-paga {
       color: var(--ink);
       background-color: var(--brass);
-      background-image: none;
+      border: 1px solid var(--brass); border-radius: 4px; padding: 17px 26px;
+      text-decoration: none; text-align: center; cursor: pointer;
     }
-    #btn-aggiungi:hover, #btn-vai-checkout:hover, #btn-paga:hover { filter: brightness(1.08); }
+    .buy:hover, .pulsante:hover { filter: brightness(1.08); }
+    .buy:disabled, .pulsante:disabled, .pulsante[aria-disabled="true"] { opacity: .45; cursor: not-allowed; filter: none; }
+    /* 2026-09-22: "tutti i pulsanti devono essere di questo colore" (foto
+       del pulsante ottone allegata) — il secondario perde la distinzione
+       bordo tratteggiato/fondo chiaro, diventa uguale al primario. Resta
+       una classe a parte (non unificata con .buy/.pulsante) solo perché
+       riscrivere ~7 file per usare un'unica classe sarebbe un rischio
+       inutile per un risultato visivo già identico — non perché ci sia
+       ancora una differenza voluta. Alias --secondario/-secondario: il
+       sito usa già "-secondario" a singolo trattino in quei punti. */
+    .buy.soon, .pulsante-secondario, .pulsante--secondario {
+      background-color: var(--brass);
+      color: var(--ink);
+      border: 1px solid var(--brass); border-radius: 4px;
+    }
+    .buy.soon:hover, .pulsante-secondario:hover, .pulsante--secondario:hover { filter: brightness(1.08); }
+    /* --grande (hero): stesso identico componente, solo più spazio interno.
+       --piccolo: per contesti compatti, non usato nel banner cookie
+       (già suo). */
+    .pulsante--grande { padding: 16px 36px; font-size: 13.5px; }
+    .pulsante--piccolo { padding: 10px 18px; font-size: 11px; }
 
     /* ---- prezzo, ricorre su scheda e pagina prodotto ---- */
     .p-price { font-family: var(--f-display); font-size: 23px; margin-top: 12px; font-variant-numeric: tabular-nums; }
@@ -597,19 +794,105 @@ const ogImageURL = new URL(ogImage, Astro.site);
     }
     .salta-contenuto:focus { left: 12px; top: 12px; }
 
-    /* ---- piè di pagina ---- */
-    .site-footer { border-top: 1px solid var(--line2); padding: 52px 22px 70px; text-align: center; margin-top: 20px; }
-    .flinks {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 26px; margin-top: 32px;
-      font-family: var(--f-label); font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
+    /* ---- piè di pagina (redesign 15/09/2026): fondo scurito con --ink,
+       nessun colore nuovo, come richiesto. Le custom property
+       --marchio-colore-nome/--marchio-colore-sub esistono in Marchio.astro
+       da inizio settembre, costruite apposta per un fondo scuro e rimaste
+       inutilizzate da quando il footer usava la foto invece del marchio
+       testuale — qui finalmente servono. */
+    /* 2026-09-22: stessa foto di pelle vera della testata (orizzontale su
+       desktop, verticale su mobile — il footer da telefono è molto più
+       alto che largo, l'orizzontale ritagliata lascerebbe vedere solo
+       una fetta stretta). Velo nero 35% sopra la foto: senza, il testo
+       misurava sotto soglia ovunque (2,6–3,1:1) — vedi DECISIONI.md D-024,
+       calibrato sul pixel più chiaro trovato, non a occhio.
+       --marchio-colore-nome portato a bianco puro (richiesta esplicita,
+       "tutto bianco") — prima era --raise (crema), coerente col resto del
+       sito ma meno bianco di quanto chiesto qui. */
+    .site-footer {
+      --marchio-colore-nome: #FFFFFF;
+      --marchio-colore-filetto: #FFFFFF;
+      --marchio-colore-sub: rgba(251, 246, 236, .72);
+      background-color: var(--ink);
+      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
+      background-size: cover;
+      background-position: center;
+      padding: 72px 22px 40px;
+      margin-top: 20px;
     }
-    .flinks a { color: var(--ink2); text-decoration: none; }
-    .flinks a:hover { color: var(--brass); }
+    @supports (background-image: url('data:image/webp;base64,UklGR')) {
+      .site-footer { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
+    }
+    .footer-in { max-width: 1120px; margin: 0 auto; }
+    /* Quattro colonne desktop (punto 5): logo largo il doppio delle altre
+       tre — è il blocco con più contenuto (badge+wordmark+descrizione). */
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1.4fr; gap: 40px;
+      text-align: left; padding-bottom: 48px; margin-bottom: 32px;
+      border-bottom: 1px solid rgba(251, 246, 236, .18);
+    }
+    .footer-badge-riga { display: flex; align-items: center; gap: 12px; }
+    .footer-col__desc { color: rgba(251, 246, 236, .72); font-size: 14px; line-height: 1.6; margin: 16px 0 0; max-width: 32ch; }
+    .footer-col__titolo {
+      font-family: var(--f-label); font-size: 10.5px; font-weight: 600; letter-spacing: .16em;
+      /* .5 misurava 4,88:1 — passa ma con margine sottile per un testo
+         così piccolo; alzato a .58 per un margine reale, stessa logica
+         già applicata al placeholder della newsletter. */
+      text-transform: uppercase; color: rgba(251, 246, 236, .58); margin: 0 0 16px;
+    }
+    .footer-col { display: flex; flex-direction: column; }
+    .footer-col a {
+      color: rgba(251, 246, 236, .78); text-decoration: none;
+      font-family: var(--f-label); font-size: 13px; letter-spacing: .02em;
+      padding: 6px 0;
+    }
+    .footer-col a:hover { color: var(--brass); }
+    .footer-news__titolo {
+      font-family: var(--f-display); font-style: italic; font-size: clamp(20px, 2.4vw, 24px);
+      color: var(--raise); margin: 0 0 10px;
+    }
+    .footer-news__testo { color: rgba(251, 246, 236, .78); font-size: 14px; line-height: 1.5; margin: 0 0 18px; }
+    .footer-news__form { display: flex; gap: 8px; flex-wrap: wrap; }
+    .footer-news__form input {
+      flex: 1 1 160px; min-width: 0; padding: 12px 14px;
+      /* Bordo alzato da .3 a .45: misurato 2,61:1 su --ink, sotto la
+         soglia 3:1 per i confini di un componente UI (WCAG 1.4.11). */
+      background: rgba(251, 246, 236, .06); border: 1px solid rgba(251, 246, 236, .45);
+      border-radius: 3px; color: var(--raise); font-size: 13.5px; font-family: var(--f-label);
+    }
+    /* Placeholder alzato da .5 a .62: misurato 4,53:1 sul fondo del campo,
+       troppo vicino alla soglia 4.5:1 per restarci apposta. */
+    .footer-news__form input::placeholder { color: rgba(251, 246, 236, .62); }
+    .footer-news__form input:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
     .fine {
-      margin: 28px 0 0; font-family: var(--f-label); font-size: 10.5px;
-      letter-spacing: .05em; color: var(--ink3); line-height: 1.9;
+      text-align: center;
+      margin: 0; font-family: var(--f-label); font-size: 10.5px;
+      letter-spacing: .05em; color: rgba(251, 246, 236, .6); line-height: 1.9;
     }
-    .fine a { color: var(--ink3); }
+    .fine a { color: rgba(251, 246, 236, .6); }
+    @media (max-width: 900px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px 24px; }
+      .footer-col--marchio { grid-column: 1 / -1; }
+    }
+    @media (max-width: 680px) {
+      /* Foto verticale invece dell'orizzontale: il footer da telefono è
+         molto più alto che largo (~994×375px, misurato) — l'orizzontale
+         ritagliata a "cover" lascerebbe vedere solo una fetta stretta al
+         centro, la verticale è pensata apposta per questa proporzione. */
+      .site-footer {
+        padding: 48px 20px 32px;
+        background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-verticale.jpg');
+      }
+      .footer-grid { grid-template-columns: 1fr; gap: 36px; padding-bottom: 32px; margin-bottom: 24px; text-align: center; }
+      .footer-badge-riga { justify-content: center; }
+      .footer-col__desc { margin-left: auto; margin-right: auto; }
+      .footer-news__form { justify-content: center; }
+    }
+    @media (max-width: 680px) {
+      @supports (background-image: url('data:image/webp;base64,UklGR')) {
+        .site-footer { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-verticale.webp'); }
+      }
+    }
 
     /* ---- banner cookie ---- */
     .cookie-banner {
@@ -628,6 +911,48 @@ const ogImageURL = new URL(ogImage, Astro.site);
     .cookie-banner__testo a { color: var(--brass-testo); }
     .cookie-banner__azioni { display: flex; gap: 10px; }
     .cookie-banner__azioni .pulsante { padding: 12px 18px; font-size: 11px; }
+
+    /* ---- banner iscrizione (2026-09-22) ----
+       Overlay a tutta pagina con pannello centrato, sopra al banner
+       cookie (z-index maggiore): si apre da solo appena il sito viene
+       aperto, richiesta diretta. Stesso fondo scuro (foto+velo) già
+       verificato per header/footer — stesso contrasto già misurato per
+       .footer-news__titolo/__testo/__form, non un contesto nuovo da
+       riverificare da zero. */
+    .banner-newsletter {
+      position: fixed; inset: 0; z-index: 90;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      background: rgba(15, 10, 7, .55);
+    }
+    /* stessa causa del bug banner cookie/menu mobile: serve sempre questa
+       regola più specifica, altrimenti [hidden] non vince su display:flex. */
+    .banner-newsletter[hidden] { display: none; }
+    .banner-newsletter__pannello {
+      position: relative;
+      width: 100%; max-width: 420px;
+      padding: 40px 32px;
+      border-radius: 4px;
+      background-color: var(--ink);
+      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
+      background-size: cover; background-position: center;
+      box-shadow: 0 20px 60px rgba(15, 10, 7, .4);
+    }
+    @supports (background-image: url('data:image/webp;base64,UklGR')) {
+      .banner-newsletter__pannello { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
+    }
+    .banner-newsletter__pannello .footer-news__titolo,
+    .banner-newsletter__pannello .footer-news__testo { text-align: left; }
+    .banner-newsletter__chiudi {
+      position: absolute; top: 12px; right: 12px;
+      width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+      background: none; border: 0; border-radius: 50%;
+      color: var(--raise); font-size: 24px; line-height: 1; cursor: pointer;
+    }
+    .banner-newsletter__chiudi:hover { background: rgba(251, 246, 236, .12); }
+    @media (max-width: 480px) {
+      .banner-newsletter__pannello { padding: 32px 22px; }
+    }
 
     :where(a, button, input, .sw):focus-visible { outline: 2px solid var(--brass); outline-offset: 4px; }
     @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
