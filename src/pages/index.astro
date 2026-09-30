@@ -75,9 +75,9 @@ const organizzazioneJsonLd = {
       <img src="/hero-portafoglio-marrone.jpg" alt={fotoHero.alt} width="820" height="1024" />
     </picture>
     <div class="hero-nuovo__testo">
-      <p class="eyebrow">Alta pelletteria Barbi</p>
-      <h1>L'arte di plasmare il domani con le mani di ieri</h1>
-      <p class="lede">Pelle conciata al vegetale, rifinita a mano bordo per bordo: la qualità si riconosce al tatto.</p>
+      <p class="eyebrow">Laboratorio di pelletteria</p>
+      <h1>Alta pelletteria Barbi:</h1>
+      <p class="sottotitolo">L'arte di plasmare il futuro grazie ad una nobile tradizione artigianale.</p>
       <a class="pulsante pulsante--grande" href="/portafogli/">Scopri i prodotti</a>
     </div>
   </section>
@@ -215,8 +215,15 @@ const organizzazioneJsonLd = {
     font-size: clamp(1.8rem, 3vw, 3.75rem); line-height: 1.24; margin: 0;
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .hero-nuovo__testo .lede {
-    text-align: left; margin: 18px 0 0; max-width: 42ch;
+  /* Richiesta esplicita: più grande e ben leggibile di un lede normale
+     (quello globale, .lede in Layout.astro, resta clamp(18px,2.1vw,21px) —
+     qui serve chiaramente sopra quella soglia). Colore --ink pieno, non
+     --ink2: la leggibilità richiesta vale anche per il contrasto, non solo
+     per la dimensione. */
+  .hero-nuovo__testo .sottotitolo {
+    text-align: left; margin: 18px 0 0; max-width: 40ch;
+    font-size: clamp(1.25rem, 2vw, 1.625rem); line-height: 1.5;
+    color: var(--ink); font-style: italic;
   }
   .hero-nuovo__testo .pulsante { margin-top: 34px; }
 
