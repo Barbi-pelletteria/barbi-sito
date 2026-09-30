@@ -103,10 +103,23 @@ const ogImageURL = new URL(ogImage, Astro.site);
         {/* PACCHETTO_AUDIT_SITO punto A2: niente contatore "(0)" finché non
             si può comprendere nulla — mostrarlo contraddice il resto del
             sito, che dice "vendita non ancora attiva". */}
+        {/* Icona carrello (richiesta esplicita, 30/09): line-art minimale,
+            stroke="currentColor" così eredita lo stesso colore del testo
+            (--raise, chiaro) senza bisogno di un secondo token colore —
+            nessun'altra icona sul sito, stesso vincolo "niente simboli
+            inventati" già rispettato altrove (vedi commento su
+            .header-badge) ma qui il simbolo è esplicitamente richiesto,
+            non inventato da soli. */}
         {VENDITA_ATTIVA ? (
-          <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>Carrello (<span id="contatore-carrello">0</span>)</a>
+          <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>
+            <svg class="icona-carrello" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none" /><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none" /><path d="M1.5 2.5h2.6l2.1 12.2a2 2 0 0 0 2 1.6h9.3a2 2 0 0 0 2-1.6l1.4-7.6H5.3" /></svg>
+            Carrello (<span id="contatore-carrello">0</span>)
+          </a>
         ) : (
-          <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>Carrello</a>
+          <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>
+            <svg class="icona-carrello" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none" /><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none" /><path d="M1.5 2.5h2.6l2.1 12.2a2 2 0 0 0 2 1.6h9.3a2 2 0 0 0 2-1.6l1.4-7.6H5.3" /></svg>
+            Carrello
+          </a>
         )}
         <button type="button" class="nav-burger" id="nav-burger" aria-expanded="false" aria-controls="nav-menu-mobile" aria-label="Apri il menu">
           <span></span><span></span><span></span>
@@ -617,28 +630,60 @@ const ogImageURL = new URL(ogImage, Astro.site);
     .nav {
       position: sticky; top: 0; z-index: 40;
       background-color: #16110E;
+      border-bottom: 1px solid var(--brass);
+      transition: box-shadow 180ms ease;
+    }
+    /* 30/09: foto spostata su ::before, non più background diretto di
+       .nav. Il file sorgente è 1024px di larghezza (è la risoluzione con
+       cui è stato fornito, verificato — non un ridimensionamento fatto
+       qui) — su una barra desktop larga anche 1900px+, "cover" la
+       scalava fino a ~1,9× per coprire tutta la larghezza, sempre
+       sfocata, indipendentemente da quale foto reale ci fosse dietro
+       (nessuna delle foto disponibili nel progetto supera questa
+       risoluzione). Dimensione fissa alla larghezza nativa invece:
+       l'immagine non è mai ingrandita oltre l'originale, quindi mai
+       sfocata. Sui monitor più larghi di 1024px avanza dello spazio ai
+       lati: un mask-image sfuma i due bordi veri della foto (misurati,
+       non a occhio: il bordo sinistro è chiaro, rgb(80,65,62), staccava
+       visibilmente dal colore pieno rgb(22,17,14) con un bordo netto) nel
+       colore pieno sottostante invece di tagliarli di netto — per questo
+       è un elemento a sé (assolutamente posizionato, inset:0) e non lo
+       stesso background di .nav: mask-image sfumerebbe anche il logo e i
+       link sopra, se fosse sull'elemento che li contiene. */
+    .nav::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
       background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
-      background-size: cover;
+      background-size: 1024px auto;
       /* Stessa foto del footer ma un'inquadratura diversa (15% 55%,
          verso sinistra): il footer mostra il nodo centrale, qui si vede
          una piega diversa — altrimenti le due barre, entrambe ritagliate
          "center" dalla stessa immagine, sarebbero praticamente identiche. */
       background-position: 15% 55%;
-      border-bottom: 1px solid var(--brass);
-      transition: box-shadow 180ms ease;
+      background-repeat: no-repeat;
+      mask-image: linear-gradient(to right, transparent, black 70px, black calc(100% - 70px), transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 70px, black calc(100% - 70px), transparent);
     }
     @supports (background-image: url('data:image/webp;base64,UklGR')) {
-      .nav { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
+      .nav::before { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
     }
     .nav.nav--scrolled { box-shadow: 0 2px 12px rgba(33, 27, 23, .08); }
     /* Grid a tre colonne, non flex: logo e servizio (carrello) hanno
        larghezze diverse, un flex "centrato a occhio" con margin-left:auto
        non mette davvero la nav in mezzo alla BARRA, solo in mezzo allo
-       spazio che resta — 1fr auto 1fr centra sempre la colonna di mezzo
-       sull'intera larghezza, qualunque sia la larghezza dei lati. */
+       spazio che resta. auto 1fr auto (non più 1fr auto 1fr, 30/09):
+       richiesta esplicita che il logo stia a sinistra, non in mezzo a una
+       colonna larga quanto il resto — colonne laterali sagomate sul loro
+       contenuto, quella centrale (nav) prende lo spazio restante e vi
+       centra i link dentro. */
     .nav-in {
+      /* position+z-index: sopra a .nav::before (z-index:0) — senza,
+         l'ordine di impilamento CSS per elementi non posizionati
+         dipingerebbe .nav-in PRIMA di un discendente posizionato con
+         z-index:auto, anche se viene dopo nel markup: la foto coprirebbe
+         logo e link. */
+      position: relative; z-index: 1;
       max-width: 1120px; margin: 0 auto; padding: 14px 22px;
-      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 28px;
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 28px;
       min-height: 56px;
     }
     @media (min-width: 681px) { .nav-in { min-height: 62px; } }
@@ -676,9 +721,10 @@ const ogImageURL = new URL(ogImage, Astro.site);
     .nav-right { grid-column: 2; justify-self: center; display: flex; gap: 28px; align-items: center; }
     .nav-servizio { grid-column: 3; justify-self: end; display: flex; gap: 18px; align-items: center; }
     .nav a {
-      font-family: var(--f-label); font-size: 12.5px; font-weight: 500; letter-spacing: .05em;
+      font-family: var(--f-label); font-size: 15px; font-weight: 500; letter-spacing: .05em;
       text-transform: uppercase; color: var(--raise); text-decoration: none; white-space: nowrap;
     }
+    .icona-carrello { width: 19px; height: 19px; flex: 0 0 auto; }
     /* Sottolineatura che si espande da sinistra invece del bottone cucito:
        i bottoni cuciti restano riservati alle call-to-action (richiesta
        esplicita), altrimenti perdono forza distintiva. scaleX invece di
@@ -703,7 +749,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
        font-weight restano il segnale non-color della voce attiva. */
     .nav a:hover { color: var(--raise); }
     .nav a[aria-current="page"] { color: var(--raise); font-weight: 600; }
-    .nav-carrello { padding: 8px 0; }
+    .nav-carrello { display: flex; align-items: center; gap: 7px; padding: 8px 0; }
 
     /* Tasto menu mobile (tre lineette): invisibile da computer, il menu
        a comparsa sotto sostituisce i link .hideable nascosti in basso. */
@@ -895,17 +941,26 @@ const ogImageURL = new URL(ogImage, Astro.site);
       --marchio-colore-nome: #FFFFFF;
       --marchio-colore-filetto: #FFFFFF;
       --marchio-colore-sub: rgba(251, 246, 236, .72);
+      position: relative;
       background-color: var(--ink);
-      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
-      background-size: cover;
-      background-position: center;
       padding: 72px 22px 40px;
       margin-top: 20px;
     }
-    @supports (background-image: url('data:image/webp;base64,UklGR')) {
-      .site-footer { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
+    /* Stessa correzione della testata (30/09), stesso motivo: vedi
+       commento esteso su .nav::before. */
+    .site-footer::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
+      background-size: 1024px auto;
+      background-position: center;
+      background-repeat: no-repeat;
+      mask-image: linear-gradient(to right, transparent, black 70px, black calc(100% - 70px), transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 70px, black calc(100% - 70px), transparent);
     }
-    .footer-in { max-width: 1120px; margin: 0 auto; }
+    @supports (background-image: url('data:image/webp;base64,UklGR')) {
+      .site-footer::before { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
+    }
+    .footer-in { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; }
     /* Quattro colonne desktop (punto 5): logo largo il doppio delle altre
        tre — è il blocco con più contenuto (badge+wordmark+descrizione). */
     .footer-grid {
@@ -988,10 +1043,17 @@ const ogImageURL = new URL(ogImage, Astro.site);
       /* Foto verticale invece dell'orizzontale: il footer da telefono è
          molto più alto che largo (~994×375px, misurato) — l'orizzontale
          ritagliata a "cover" lascerebbe vedere solo una fetta stretta al
-         centro, la verticale è pensata apposta per questa proporzione. */
-      .site-footer {
-        padding: 48px 20px 32px;
+         centro, la verticale è pensata apposta per questa proporzione.
+         Dimensione nativa (auto, non 1024px auto): qui il file 572×1024
+         è già più grande del riquadro su entrambi gli assi, copre da solo
+         senza bisogno dell'ingrandimento fisso della versione desktop —
+         niente sfumatura ai bordi di conseguenza, non c'è letterbox da
+         nascondere. */
+      .site-footer { padding: 48px 20px 32px; }
+      .site-footer::before {
         background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-verticale.jpg');
+        background-size: auto; background-position: center;
+        mask-image: none; -webkit-mask-image: none;
       }
       .footer-grid { grid-template-columns: 1fr; gap: 36px; padding-bottom: 32px; margin-bottom: 24px; text-align: center; }
       .footer-badge-riga { justify-content: center; }
@@ -1000,7 +1062,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
     }
     @media (max-width: 680px) {
       @supports (background-image: url('data:image/webp;base64,UklGR')) {
-        .site-footer { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-verticale.webp'); }
+        .site-footer::before { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-verticale.webp'); }
       }
     }
 
