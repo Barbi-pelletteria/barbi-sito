@@ -93,10 +93,15 @@ const ogImageURL = new URL(ogImage, Astro.site);
           perché logo e carrello hanno larghezze diverse fra loro — con un
           flex centrato "a occhio" la voce centrale non sarebbe stata
           davvero in mezzo alla barra, solo in mezzo allo spazio residuo. */}
+      {/* Voci D-029 Parte 1: Home · Collezione · Il laboratorio · Su misura ·
+          Contatti. "Collezione" tiene la rotta esistente /portafogli/ (l'hub
+          /prodotti/ citato nel pacchetto era stato tolto in
+          PACCHETTO_AUDIT_SITO B9 — nessuna rotta cambiata, come richiesto). */}
       <nav class="nav-right" aria-label="Menu principale">
         <a href="/" class="hideable" aria-current={eAttivo('/') ? 'page' : undefined}>Home</a>
-        <a href="/portafogli/" class="hideable" aria-current={eAttivo('/portafogli/') ? 'page' : undefined}>Prodotti</a>
+        <a href="/portafogli/" class="hideable" aria-current={eAttivo('/portafogli/') ? 'page' : undefined}>Collezione</a>
         <a href="/chi-siamo/" class="hideable" aria-current={eAttivo('/chi-siamo/') ? 'page' : undefined}>Il laboratorio</a>
+        <a href="/prodotto-personalizzato/" class="hideable" aria-current={eAttivo('/prodotto-personalizzato/') ? 'page' : undefined}>Su misura</a>
         <a href="/contatti/" class="hideable" aria-current={eAttivo('/contatti/') ? 'page' : undefined}>Contatti</a>
       </nav>
       <div class="nav-servizio">
@@ -110,17 +115,15 @@ const ogImageURL = new URL(ogImage, Astro.site);
             inventati" già rispettato altrove (vedi commento su
             .header-badge) ma qui il simbolo è esplicitamente richiesto,
             non inventato da soli. */}
-        {VENDITA_ATTIVA ? (
-          <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>
-            <svg class="icona-carrello" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none" /><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none" /><path d="M1.5 2.5h2.6l2.1 12.2a2 2 0 0 0 2 1.6h9.3a2 2 0 0 0 2-1.6l1.4-7.6H5.3" /></svg>
-            Carrello (<span id="contatore-carrello">0</span>)
-          </a>
-        ) : (
-          <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>
-            <svg class="icona-carrello" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none" /><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none" /><path d="M1.5 2.5h2.6l2.1 12.2a2 2 0 0 0 2 1.6h9.3a2 2 0 0 0 2-1.6l1.4-7.6H5.3" /></svg>
-            Carrello
-          </a>
-        )}
+        {/* D-029 Parte 1: il numero di pezzi compare solo quando è > 0
+            ("Carrello (1)"), in entrambi gli stati della vendita — a
+            carrello vuoto niente "(0)" (PACCHETTO_AUDIT_SITO A2 resta
+            rispettato). Lo span è sempre nel markup, lo script sotto lo
+            riempie e lo mostra. */}
+        <a href="/carrello/" class="nav-carrello" aria-current={eAttivo('/carrello/') ? 'page' : undefined}>
+          <svg class="icona-carrello" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none" /><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none" /><path d="M1.5 2.5h2.6l2.1 12.2a2 2 0 0 0 2 1.6h9.3a2 2 0 0 0 2-1.6l1.4-7.6H5.3" /></svg>
+          <span>Carrello<span id="contatore-carrello" hidden></span></span>
+        </a>
         <button type="button" class="nav-burger" id="nav-burger" aria-expanded="false" aria-controls="nav-menu-mobile" aria-label="Apri il menu">
           <span></span><span></span><span></span>
         </button>
@@ -128,8 +131,9 @@ const ogImageURL = new URL(ogImage, Astro.site);
     </div>
     <nav class="nav-menu-mobile" id="nav-menu-mobile" aria-label="Menu principale, mobile" hidden>
       <a href="/" aria-current={eAttivo('/') ? 'page' : undefined}>Home</a>
-      <a href="/portafogli/" aria-current={eAttivo('/portafogli/') ? 'page' : undefined}>Prodotti</a>
+      <a href="/portafogli/" aria-current={eAttivo('/portafogli/') ? 'page' : undefined}>Collezione</a>
       <a href="/chi-siamo/" aria-current={eAttivo('/chi-siamo/') ? 'page' : undefined}>Il laboratorio</a>
+      <a href="/prodotto-personalizzato/" aria-current={eAttivo('/prodotto-personalizzato/') ? 'page' : undefined}>Su misura</a>
       <a href="/contatti/" aria-current={eAttivo('/contatti/') ? 'page' : undefined}>Contatti</a>
     </nav>
   </header>
@@ -399,9 +403,15 @@ const ogImageURL = new URL(ogImage, Astro.site);
 
   <script>
     import { getCartCount } from '../scripts/cart.js';
+    // D-029 Parte 1: "(n)" solo quando n > 0 — lo spazio prima della
+    // parentesi è nel testo, non nel markup (uno spazio fra due span
+    // dentro un contenitore flex verrebbe ignorato, vedi Parte 2.4).
     function aggiornaContatore() {
       const el = document.getElementById('contatore-carrello');
-      if (el) el.textContent = String(getCartCount());
+      if (!el) return;
+      const n = getCartCount();
+      el.textContent = n > 0 ? ` (${n})` : '';
+      el.hidden = n === 0;
     }
     aggiornaContatore();
     window.addEventListener('barbi:cart-changed', aggiornaContatore);
@@ -627,44 +637,32 @@ const ogImageURL = new URL(ogImage, Astro.site);
        come sfondo di riserva mentre la foto carica. Sticky + ombra allo
        scroll (rifinitura 15/09) restano: comportamento indipendente dal
        colore della barra, non era oggetto della richiesta. */
+    /* D-029 Parte 1 (30/09): foto a tutta larghezza, "cover" sul 100%
+       del viewport, niente bande laterali (il QG ha misurato due bande
+       piatte a 1920px con la versione a dimensione fissa del giorno
+       stesso). La sfocatura segnalata dal Founder la stessa mattina
+       nasceva dall'ingrandimento al volo di un file da 1024px: qui si
+       usa foto-pelle-orizzontale-2x (2048px), ricampionato dal PNG
+       sorgente con Lanczos3 + nitidezza (_upscale-pelle-tmp.mjs, non
+       tenuto nel repo) — lo stesso scatto, non uno nuovo. Attenua, non
+       risolve alla radice: uno scatto nativo più grande resta l'unica
+       soluzione vera, segnalato nel resoconto. Velo scuro invariato
+       (D-024/D-027). Il file 1024px resta su disco, non cancellato. */
     .nav {
       position: sticky; top: 0; z-index: 40;
       background-color: #16110E;
-      border-bottom: 1px solid var(--brass);
-      transition: box-shadow 180ms ease;
-    }
-    /* 30/09: foto spostata su ::before, non più background diretto di
-       .nav. Il file sorgente è 1024px di larghezza (è la risoluzione con
-       cui è stato fornito, verificato — non un ridimensionamento fatto
-       qui) — su una barra desktop larga anche 1900px+, "cover" la
-       scalava fino a ~1,9× per coprire tutta la larghezza, sempre
-       sfocata, indipendentemente da quale foto reale ci fosse dietro
-       (nessuna delle foto disponibili nel progetto supera questa
-       risoluzione). Dimensione fissa alla larghezza nativa invece:
-       l'immagine non è mai ingrandita oltre l'originale, quindi mai
-       sfocata. Sui monitor più larghi di 1024px avanza dello spazio ai
-       lati: un mask-image sfuma i due bordi veri della foto (misurati,
-       non a occhio: il bordo sinistro è chiaro, rgb(80,65,62), staccava
-       visibilmente dal colore pieno rgb(22,17,14) con un bordo netto) nel
-       colore pieno sottostante invece di tagliarli di netto — per questo
-       è un elemento a sé (assolutamente posizionato, inset:0) e non lo
-       stesso background di .nav: mask-image sfumerebbe anche il logo e i
-       link sopra, se fosse sull'elemento che li contiene. */
-    .nav::before {
-      content: ''; position: absolute; inset: 0; z-index: 0;
-      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
-      background-size: 1024px auto;
+      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale-2x.jpg');
+      background-size: cover;
       /* Stessa foto del footer ma un'inquadratura diversa (15% 55%,
          verso sinistra): il footer mostra il nodo centrale, qui si vede
          una piega diversa — altrimenti le due barre, entrambe ritagliate
          "center" dalla stessa immagine, sarebbero praticamente identiche. */
       background-position: 15% 55%;
-      background-repeat: no-repeat;
-      mask-image: linear-gradient(to right, transparent, black 70px, black calc(100% - 70px), transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 70px, black calc(100% - 70px), transparent);
+      border-bottom: 1px solid var(--brass);
+      transition: box-shadow 180ms ease;
     }
     @supports (background-image: url('data:image/webp;base64,UklGR')) {
-      .nav::before { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
+      .nav { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale-2x.webp'); }
     }
     .nav.nav--scrolled { box-shadow: 0 2px 12px rgba(33, 27, 23, .08); }
     /* Grid a tre colonne, non flex: logo e servizio (carrello) hanno
@@ -676,17 +674,17 @@ const ogImageURL = new URL(ogImage, Astro.site);
        contenuto, quella centrale (nav) prende lo spazio restante e vi
        centra i link dentro. */
     .nav-in {
-      /* position+z-index: sopra a .nav::before (z-index:0) — senza,
-         l'ordine di impilamento CSS per elementi non posizionati
-         dipingerebbe .nav-in PRIMA di un discendente posizionato con
-         z-index:auto, anche se viene dopo nel markup: la foto coprirebbe
-         logo e link. */
-      position: relative; z-index: 1;
       max-width: 1120px; margin: 0 auto; padding: 14px 22px;
       display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 28px;
       min-height: 56px;
     }
     @media (min-width: 681px) { .nav-in { min-height: 62px; } }
+    /* D-029 Parte 1: da 1024px in su la testata NON sta più nel
+       contenitore centrato a 1120px — misurato dal QG: il logo finiva a
+       182px dal bordo a 1440 e a 422px a 1920, "sembra centrato". A tutta
+       larghezza con 40px di padding: logo al margine sinistro, menu al
+       centro dello spazio che resta, carrello al margine destro. */
+    @media (min-width: 1024px) { .nav-in { max-width: none; padding: 14px 40px; } }
     /* 2026-09-22: il marchio in testata torna al componente Marchio (nome +
        filetti + dicitura), come nel footer — non più l'immagine
        marchio-pelle-lettere*.png, richiesta esplicita dopo aver visto il
@@ -941,26 +939,18 @@ const ogImageURL = new URL(ogImage, Astro.site);
       --marchio-colore-nome: #FFFFFF;
       --marchio-colore-filetto: #FFFFFF;
       --marchio-colore-sub: rgba(251, 246, 236, .72);
-      position: relative;
       background-color: var(--ink);
+      /* Stessa foto 2x della testata (D-029 Parte 1), stesso motivo. */
+      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale-2x.jpg');
+      background-size: cover;
+      background-position: center;
       padding: 72px 22px 40px;
       margin-top: 20px;
     }
-    /* Stessa correzione della testata (30/09), stesso motivo: vedi
-       commento esteso su .nav::before. */
-    .site-footer::before {
-      content: ''; position: absolute; inset: 0; z-index: 0;
-      background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.jpg');
-      background-size: 1024px auto;
-      background-position: center;
-      background-repeat: no-repeat;
-      mask-image: linear-gradient(to right, transparent, black 70px, black calc(100% - 70px), transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 70px, black calc(100% - 70px), transparent);
-    }
     @supports (background-image: url('data:image/webp;base64,UklGR')) {
-      .site-footer::before { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale.webp'); }
+      .site-footer { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-orizzontale-2x.webp'); }
     }
-    .footer-in { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; }
+    .footer-in { max-width: 1120px; margin: 0 auto; }
     /* Quattro colonne desktop (punto 5): logo largo il doppio delle altre
        tre — è il blocco con più contenuto (badge+wordmark+descrizione). */
     .footer-grid {
@@ -1043,17 +1033,10 @@ const ogImageURL = new URL(ogImage, Astro.site);
       /* Foto verticale invece dell'orizzontale: il footer da telefono è
          molto più alto che largo (~994×375px, misurato) — l'orizzontale
          ritagliata a "cover" lascerebbe vedere solo una fetta stretta al
-         centro, la verticale è pensata apposta per questa proporzione.
-         Dimensione nativa (auto, non 1024px auto): qui il file 572×1024
-         è già più grande del riquadro su entrambi gli assi, copre da solo
-         senza bisogno dell'ingrandimento fisso della versione desktop —
-         niente sfumatura ai bordi di conseguenza, non c'è letterbox da
-         nascondere. */
-      .site-footer { padding: 48px 20px 32px; }
-      .site-footer::before {
+         centro, la verticale è pensata apposta per questa proporzione. */
+      .site-footer {
+        padding: 48px 20px 32px;
         background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-verticale.jpg');
-        background-size: auto; background-position: center;
-        mask-image: none; -webkit-mask-image: none;
       }
       .footer-grid { grid-template-columns: 1fr; gap: 36px; padding-bottom: 32px; margin-bottom: 24px; text-align: center; }
       .footer-badge-riga { justify-content: center; }
@@ -1062,7 +1045,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
     }
     @media (max-width: 680px) {
       @supports (background-image: url('data:image/webp;base64,UklGR')) {
-        .site-footer::before { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-verticale.webp'); }
+        .site-footer { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/pelle/foto-pelle-verticale.webp'); }
       }
     }
 
