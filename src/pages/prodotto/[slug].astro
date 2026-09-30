@@ -321,6 +321,26 @@ const prodottoJsonLd = {
     </div>
   </div>
 
+  {/*
+    Barra fissa in basso, solo da telefono (D-029 § 2.2): compare quando
+    il pulsante principale non è sullo schermo, sparisce quando rientra
+    (IntersectionObserver, script sotto). A sinistra nome + prezzo
+    aggiornato con le iniziali, a destra il pulsante. [VENDITA SPENTA] il
+    pulsante porta al campo "Avvisami" nella pagina. Da computer non
+    esiste (display:none), non è solo nascosta.
+  */}
+  <div class="barra-fissa" id="barra-fissa" hidden>
+    <div class="barra-fissa__testo">
+      <span class="barra-fissa__nome">{prodotto.nome}</span>
+      <span class="barra-fissa__prezzo" id="barra-prezzo">{formatEuroBreve(prodotto.prezzoCentesimi)}</span>
+    </div>
+    {VENDITA_ATTIVA ? (
+      <button type="button" class="pulsante barra-fissa__btn" id="barra-btn">Aggiungi al carrello</button>
+    ) : (
+      <a class="pulsante barra-fissa__btn" id="barra-btn" href="#avvisami">Avvisami</a>
+    )}
+  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </Layout>
 
@@ -578,6 +598,34 @@ const prodottoJsonLd = {
     });
     aggiornaVista();
 
+    // Barra fissa mobile (D-029 § 2.2): visibile solo quando il pulsante
+    // principale (acquisto o Avvisami) non è nello schermo. Il CSS la
+    // tiene display:none da computer, qui si gestisce solo [hidden].
+    const barra = document.getElementById('barra-fissa');
+    const barraBtn = document.getElementById('barra-btn');
+    const barraPrezzo = document.getElementById('barra-prezzo');
+    const pulsantePrincipale = document.getElementById('btn-aggiungi') || document.getElementById('btn-avvisami');
+    if (barra && pulsantePrincipale && 'IntersectionObserver' in window) {
+      const oss = new IntersectionObserver((voci) => {
+        voci.forEach((v) => { barra.hidden = v.isIntersecting; });
+      }, { threshold: 0 });
+      oss.observe(pulsantePrincipale);
+    }
+    document.addEventListener('pdp:prezzo', (e) => {
+      if (barraPrezzo) barraPrezzo.textContent = formatEuroBreve(e.detail.centesimi);
+    });
+    barraBtn?.addEventListener('click', (e) => {
+      if (barraBtn.tagName === 'BUTTON') {
+        document.dispatchEvent(new CustomEvent('pdp:aggiungi'));
+        return;
+      }
+      // Vendita spenta: al campo Avvisami, col cursore già dentro.
+      e.preventDefault();
+      const campo = document.getElementById('avvisami-email');
+      document.getElementById('avvisami')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => campo?.focus({ preventScroll: true }), 400);
+    });
+
     // Anteprima "impressione" delle iniziali (PACCHETTO_VETRINA punto 8).
     if (anteprima && anteprimaTesto) {
       const inputIn = document.getElementById('iniziali');
@@ -595,10 +643,15 @@ const prodottoJsonLd = {
   }
 </script>
 
-<style>
-  .pdp { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; padding: 70px 0; align-items: start; }
-  @media (max-width: 800px) { .pdp { grid-template-columns: 1fr; gap: 28px; padding: 32px 0 60px; } }
-
+<!--
+  is:global per galleria, puntini e barra fissa: gli elementi della galleria
+  vengono ricreati via JS a ogni cambio colore (e al primo caricamento) e
+  gli stili con ambito di Astro non li raggiungono — misurato: senza, la
+  striscia rendeva 1574px di altezza invece di una foto per volta. Stessa
+  ragione già documentata in carrello.astro. I nomi delle classi esistono
+  solo in questa pagina.
+-->
+<style is:global>
   /* Galleria: striscia a scorrimento orizzontale con aggancio (scroll-snap),
      una foto per volta. Barra di scorrimento nascosta: si naviga con le
      miniature (computer) o col dito (telefono). width/height reali
@@ -626,6 +679,46 @@ const prodottoJsonLd = {
   .pdp-miniatura.on { border-color: var(--brass); border-width: 2px; }
   .pdp-miniatura:hover:not(.on) { border-color: var(--brass-testo); }
   .pdp-miniatura:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+  /* Da telefono (D-029 § 2.2): si sfoglia col dito, una sola immagine
+     visibile, puntini al posto della griglia di miniature. Riquadro 4/5
+     (a 390px: 346×432px) invece dell'altezza naturale della foto (~458px):
+     con questo eyebrow, nome e prezzo stanno nel primo schermo a 390×844
+     (misurato, vedi resoconto). object-fit:cover ritaglia pochi px sopra
+     e sotto, non deforma. */
+  @media (max-width: 800px) {
+    .pdp-slide { aspect-ratio: 4 / 5; }
+    .pdp-slide img { height: 100%; object-fit: cover; }
+    .pdp-miniature { display: none; }
+    .pdp-puntini { display: flex; justify-content: center; gap: 8px; margin-top: 12px; min-height: 8px; }
+    .pdp-puntini span { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); transition: background 150ms ease; }
+    .pdp-puntini span.on { background: var(--brass-testo); }
+  }
+
+  /* Barra fissa in basso, solo da telefono (D-029 § 2.2). z-index sotto il
+     banner cookie (50) e sopra la testata sticky (40). */
+  .barra-fissa { display: none; }
+  @media (max-width: 800px) {
+    .barra-fissa {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+      background: var(--raise); border-top: 1px solid var(--line);
+      box-shadow: 0 -4px 16px rgba(33, 27, 23, .10);
+    }
+    .barra-fissa[hidden] { display: none; }
+    .barra-fissa__testo { display: flex; flex-direction: column; min-width: 0; }
+    .barra-fissa__nome { font-family: var(--f-display); font-size: 17px; line-height: 1.2; }
+    .barra-fissa__prezzo { font-family: var(--f-label); font-size: 13px; letter-spacing: .04em; color: var(--ink2); font-variant-numeric: tabular-nums; }
+    .barra-fissa__btn { flex: 0 0 auto; padding: 14px 18px; font-size: 11.5px; min-height: 48px; }
+  }
+</style>
+
+<style>
+  .pdp { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; padding: 70px 0; align-items: start; }
+  /* padding-bottom da telefono: spazio per la barra fissa, che altrimenti
+     coprirebbe il rimando finale. */
+  @media (max-width: 800px) { .pdp { grid-template-columns: 1fr; gap: 28px; padding: 32px 0 100px; } }
 
   .pdp-kick { margin-top: 0; }
   .pdp h1 {

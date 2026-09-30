@@ -265,8 +265,15 @@ const organizzazioneJsonLd = {
        sotto. flex-direction:column basta, l'ordine resta quello scritto
        in origine, non va invertito. */
     .hero-nuovo { flex-direction: column; height: auto; min-height: 0; }
-    .hero-nuovo__foto { flex: 0 0 auto; height: 48vh; min-height: 340px; }
-    .hero-nuovo__testo { flex: 0 0 auto; padding: 32px 20px 40px; }
+    /* D-029 § 2.6: a 390×844 titolo + frase + pulsante devono stare interi
+       nel primo schermo, sopra il banner cookie (che da telefono è alto
+       120px, quindi lo schermo utile è 724px). Misurato: con 48vh (405px)
+       il pulsante finiva a 874px; con 36vh a 773px, ancora sotto il
+       banner; con 30vh (253px) e i margini ridotti qui sotto finisce a
+       ~706px. */
+    .hero-nuovo__foto { flex: 0 0 auto; height: 30vh; min-height: 230px; }
+    .hero-nuovo__testo { flex: 0 0 auto; padding: 24px 20px 40px; }
+    .hero-nuovo__azioni { margin-top: 22px; }
     .hero-nuovo__testo h1 { max-width: none; }
   }
 
