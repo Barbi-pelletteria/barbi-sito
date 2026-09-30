@@ -13,7 +13,14 @@ export interface Props {
 const { title, description, ogImage = '/marchio-pelle.jpg' } = Astro.props;
 const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
 import Marchio from '../components/Marchio.astro';
-import { EMAIL_CONTATTO, VENDITA_ATTIVA } from '../data/prodotti.js';
+import { EMAIL_CONTATTO, VENDITA_ATTIVA, CONSENSO_NEWSLETTER } from '../data/prodotti.js';
+
+// Newsletter (footer + banner), D-029 § 4.11 (QG): due versioni dietro lo
+// stesso interruttore della vendita.
+const newsletterTitolo = VENDITA_ATTIVA ? 'Novità dal laboratorio' : 'Accesso anticipato';
+const newsletterTesto = VENDITA_ATTIVA
+  ? 'Nuovi modelli, nuovi colori. Poche email, solo quando c’è qualcosa da mostrare.'
+  : 'Nuovi modelli, nuovi colori e l’apertura della prima collezione online. Poche email, solo quando c’è qualcosa da mostrare.';
 
 // Voce "Home" nel menu (richiesta diretta del Founder, 31/08/2026): oggi
 // si torna alla home solo cliccando il marchio, un'interazione che molti
@@ -156,18 +163,19 @@ const ogImageURL = new URL(ogImage, Astro.site);
           <div class="footer-badge-riga">
             <Marchio size="piede" />
           </div>
-          <p class="footer-col__desc">Portafogli in pelle conciata al vegetale, fatti a mano dal 1992.</p>
+          <p class="footer-col__desc">Alta pelletteria dal laboratorio di Stefano Barbi, in Campania. Nel mestiere dal 1992.</p>
           <a href="https://www.instagram.com/barbi_pelletteria/" class="footer-col__social" target="_blank" rel="noopener noreferrer">Instagram</a>
         </div>
         <nav class="footer-col" aria-label="Navigazione">
-          <p class="footer-col__titolo">Il sito</p>
+          <p class="footer-col__titolo">Esplora</p>
           <a href="/">Home</a>
-          <a href="/portafogli/">Prodotti</a>
+          <a href="/portafogli/">Collezione</a>
           <a href="/chi-siamo/">Il laboratorio</a>
+          <a href="/prodotto-personalizzato/">Su misura</a>
           <a href="/contatti/">Contatti</a>
         </nav>
-        <nav class="footer-col" aria-label="Informazioni e supporto">
-          <p class="footer-col__titolo">Informazioni</p>
+        <nav class="footer-col" aria-label="Assistenza">
+          <p class="footer-col__titolo">Assistenza</p>
           <a href="/faq/">Domande frequenti</a>
           <a href="/termini-e-condizioni/">Informazioni legali</a>
           <a href="/spedizioni-e-resi/">Spedizioni</a>
@@ -177,8 +185,8 @@ const ogImageURL = new URL(ogImage, Astro.site);
           <a href="/privacy/">Privacy e cookie</a>
         </nav>
         <div class="footer-col footer-news">
-          <p class="footer-news__titolo">Resta aggiornato</p>
-          <p class="footer-news__testo">Nuovi colori, nuovi pezzi, e quando riparte la vendita online.</p>
+          <p class="footer-news__titolo">{newsletterTitolo}</p>
+          <p class="footer-news__testo">{newsletterTesto}</p>
           <!--
             Iscrizione a lista Brevo con double opt-in (D-026, chiude F-33):
             functions/api/iscrivi-newsletter.js. Non è un invio email come i
@@ -189,11 +197,11 @@ const ogImageURL = new URL(ogImage, Astro.site);
           <form class="footer-news__form" aria-label="Iscrizione alla newsletter">
             <label for="footer-news-email" class="sr-only">Email</label>
             <input type="email" id="footer-news-email" name="email" placeholder="La tua email" autocomplete="email" required />
-            <button type="submit" class="pulsante pulsante--piccolo">Iscriviti</button>
+            <button type="submit" class="pulsante pulsante--piccolo">Iscrivimi</button>
             <p class="footer-news__nascosto"><label>Non compilare questo campo <input name="nl-azienda" /></label></p>
             <label class="footer-news__consenso">
               <input type="checkbox" name="consenso" required />
-              <span>Accetto di ricevere email promozionali da Barbi Pelletteria (novità, nuovi colori, riapertura della vendita).</span>
+              <span>{CONSENSO_NEWSLETTER}</span>
             </label>
             <p class="footer-news__consenso-nota"><a href="/privacy/">Leggi come trattiamo i tuoi dati</a>.</p>
             <p class="footer-news__messaggio" role="status" hidden></p>
@@ -222,16 +230,16 @@ const ogImageURL = new URL(ogImage, Astro.site);
       <button type="button" class="banner-newsletter__chiudi" id="banner-newsletter-chiudi" aria-label="Chiudi">
         <span aria-hidden="true">&times;</span>
       </button>
-      <p class="footer-news__titolo">Resta aggiornato</p>
-      <p class="footer-news__testo">Nuovi colori, nuovi pezzi, e quando riparte la vendita online.</p>
+      <p class="footer-news__titolo">{newsletterTitolo}</p>
+      <p class="footer-news__testo">{newsletterTesto}</p>
       <form class="footer-news__form" id="banner-newsletter-form" aria-label="Iscrizione alla newsletter">
         <label for="banner-newsletter-email" class="sr-only">Email</label>
         <input type="email" id="banner-newsletter-email" name="email" placeholder="La tua email" autocomplete="email" required />
-        <button type="submit" class="pulsante pulsante--piccolo">Iscriviti</button>
+        <button type="submit" class="pulsante pulsante--piccolo">Iscrivimi</button>
         <p class="footer-news__nascosto"><label>Non compilare questo campo <input name="nl-azienda" /></label></p>
         <label class="footer-news__consenso">
           <input type="checkbox" name="consenso" required />
-          <span>Accetto di ricevere email promozionali da Barbi Pelletteria (novità, nuovi colori, riapertura della vendita).</span>
+          <span>{CONSENSO_NEWSLETTER}</span>
         </label>
         <p class="footer-news__consenso-nota"><a href="/privacy/">Leggi come trattiamo i tuoi dati</a>.</p>
         <p class="footer-news__messaggio" role="status" hidden></p>
@@ -241,13 +249,14 @@ const ogImageURL = new URL(ogImage, Astro.site);
 
   {gaId && (
     <div id="cookie-banner" class="cookie-banner" role="dialog" aria-live="polite" aria-label="Informativa cookie" data-ga-id={gaId} hidden>
+      {/* Testo D-029 § 4.12 (QG). Accetta e Rifiuta: stessa classe, stesso
+          peso e colore — obbligo, non si tocca. */}
       <p class="cookie-banner__testo">
-        Questo sito usa Google Analytics per contare le visite in forma anonima.
-        Parte solo se lo accetti. Vedi la <a href="/privacy/">privacy e cookie</a>.
+        Usiamo Google Analytics solo se lo accetti, per capire come migliorare il sito. <a href="/privacy/">Privacy e cookie</a>
       </p>
       <div class="cookie-banner__azioni">
         <button type="button" class="pulsante" id="cookie-accetta">Accetta</button>
-        <button type="button" class="pulsante pulsante-secondario" id="cookie-rifiuta">Rifiuta</button>
+        <button type="button" class="pulsante" id="cookie-rifiuta">Rifiuta</button>
       </div>
     </div>
   )}
@@ -875,6 +884,32 @@ const ogImageURL = new URL(ogImage, Astro.site);
        (già suo). */
     .pulsante--grande { padding: 16px 36px; font-size: 13.5px; }
     .pulsante--piccolo { padding: 10px 18px; font-size: 11px; }
+
+    /* Link secondario "testo, non pulsante" con freccia (hero, scheda
+       prodotto): etichetta in ottone scuro, area tocco ≥ 44px via padding
+       verticale. */
+    .link-freccia {
+      display: inline-block; padding: 12px 0;
+      font-family: var(--f-label); font-size: 12px; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--brass-testo); text-decoration: none;
+    }
+    .link-freccia:hover, .link-freccia:focus-visible { color: var(--brass); }
+
+    /* Toast "aggiunto al carrello" (PACCHETTO_VETRINA punto 3): fisso, non
+       invasivo, sparisce da solo. Globale perché lo usano scheda prodotto,
+       home e collezione (scripts/aggiungi-rapido.js lo crea a runtime). */
+    .toast {
+      position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(8px);
+      max-width: calc(100% - 32px); z-index: 60;
+      background: var(--ink); color: var(--ground);
+      font-family: var(--f-label); font-size: 13px; font-weight: 600; letter-spacing: .03em;
+      padding: 15px 24px; text-align: center; box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+      opacity: 0; transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast[hidden] { display: none; }
+    .toast--visibile { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 740px) { .toast { bottom: 92px; } }
 
     /* ---- prezzo, ricorre su scheda e pagina prodotto ---- */
     .p-price { font-family: var(--f-display); font-size: 23px; margin-top: 12px; font-variant-numeric: tabular-nums; }

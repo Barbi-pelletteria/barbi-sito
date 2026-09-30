@@ -1,17 +1,37 @@
 ---
+// Scheda prodotto, struttura e testi D-029 § 4.3/4.4 (QG). Ordine dei
+// blocchi dall'alto: galleria → eyebrow → nome → prezzo → frase breve →
+// colore → disponibilità → iniziali → pulsante (o "Avvisami" a vendita
+// spenta) → tre righe di servizio → punti di forza → descrizione →
+// fisarmoniche (Dettagli e misure / Cura della pelle / Spedizione e resi)
+// → rimando all'altro modello.
+//
+// Rispetto alla versione precedente spariscono: la riga "Reso · Garanzia"
+// (art. 23 lett. l, Parte 3), il pulsante spento "Disponibile a breve" e
+// la nota "La vendita online non è ancora attiva…" (sostituiti dal campo
+// Avvisami), il confronto spessori (non nell'ordine dei blocchi del
+// pacchetto — il dato vive nei punti di forza), l'elenco capienza (dentro
+// "Dettagli e misure"). Tabella e "Cura della pelle" restano invariati,
+// dentro le fisarmoniche. La fodera in poliestere resta dichiarata.
+//
+// La galleria è un'unica striscia a scorrimento (scroll-snap): da
+// computer se ne vede una foto alla volta e le miniature sotto la fanno
+// scorrere; da telefono (D-029 § 2.2, vedi CSS) si sfoglia col dito, con
+// i puntini al posto delle miniature.
 import Layout from '../../layouts/Layout.astro';
 import FotoSegnaposto from '../../components/FotoSegnaposto.astro';
-import ConfrontoSpessore from '../../components/ConfrontoSpessore.astro';
 import { galleriaProdotto } from '../../data/immagini.js';
 import {
   prodotti,
+  getProdottoBySlug,
   curaProdotto,
   avvisoIniziali,
-  formatEuro,
+  formatEuroBreve,
   VENDITA_ATTIVA,
   EMAIL_CONTATTO,
   INIZIALI_CENTESIMI,
   MACRO_PELLE,
+  CONSENSO_NEWSLETTER,
 } from '../../data/prodotti.js';
 
 export function getStaticPaths() {
@@ -23,19 +43,17 @@ const stockTotale = prodotto.colori.reduce((t, c) => t + c.stock, 0);
 const esauritoTutto = stockTotale === 0;
 const primoDisponibile = prodotto.colori.find((c) => c.stock > 0)?.slug || '';
 const coloreIniziale = prodotto.colori.find((c) => c.slug === primoDisponibile) || prodotto.colori[0];
+const altro = getProdottoBySlug(prodotto.rimando.slug);
 
 // Galleria completa per il colore iniziale (server-side, per il primo
 // caricamento) e per tutti gli altri colori (dentro datiClient, per lo
-// scambio via JS quando si cambia colore — punto 4 del pacchetto foto:
-// cambiando colore cambia l'intera galleria, non solo l'immagine
-// principale).
+// scambio via JS quando si cambia colore).
 const galleriaIniziale = galleriaProdotto(prodotto, coloreIniziale);
 const galleriaPerColore = Object.fromEntries(
   prodotto.colori.map((c) => [c.slug, galleriaProdotto(prodotto, c)])
 );
 
-// Dati minimi che servono allo script lato client (stock per colore, prezzi,
-// galleria per colore).
+// Dati minimi che servono allo script lato client.
 const datiClient = {
   slug: prodotto.slug,
   nome: prodotto.nome,
@@ -46,25 +64,36 @@ const datiClient = {
   galleria: galleriaPerColore,
 };
 
-const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent(
-  'Disponibilità portafoglio ' + prodotto.nome
+const mailtoPrenota = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent(
+  'Prenotazione portafoglio ' + prodotto.nome
 )}`;
 
-// PACCHETTO_AUDIT_SITO blocco C: dati strutturati Product, valori veri (letti
-// da prodotti.js, non inventati). "availability" resta PreOrder finché
-// VENDITA_ATTIVA è false — il prodotto esiste ma non si può ancora
-// acquistare, non è né "in magazzino" né "esaurito" in senso schema.org.
-// Da rivedere il giorno in cui VENDITA_ATTIVA passa a true (InStock/
-// OutOfStock a seconda dello stock reale).
+// Tre righe di servizio (§ 4.3, QG). Icone: segni lineari a tratto unico,
+// stesso linguaggio dell'icona carrello in testata — nessun simbolo
+// "inventato" al posto di un contenuto, solo il segnale della riga.
+const RIGHE_SERVIZIO = [
+  { icona: 'spedizione', testo: 'Spedizione gratuita, consegna in 1-3 giorni dalla spedizione' },
+  { icona: 'carta', testo: 'Pagamento con carta, protetto da Stripe' },
+  { icona: 'recesso', testo: 'Recesso entro 14 giorni e garanzia legale di 24 mesi, come previsto dalla legge' },
+];
+const ICONE = {
+  spedizione: '<path d="M1.5 6.5h12v10h-12z"/><path d="M13.5 10h4.5l3 3.5v3h-7.5z"/><circle cx="5.5" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
+  carta: '<rect x="2" y="5.5" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/>',
+  recesso: '<path d="M4 12a8 8 0 1 1 2.4 5.7"/><path d="M4 18v-6h6"/>',
+  spessore: '<path d="M3 16.5 16.5 3l4.5 4.5L7.5 21z"/><path d="m7 12.5 2 2M10 9.5l2 2M13 6.5l2 2"/>',
+  pelle: '<path d="M4 20c0-9 5-14 16-16-1 11-6 16-14 16"/><path d="M4 20c4-5 8-8 12-11"/>',
+  bordi: '<path d="M20 3c-3 0-9 6-11 9l3 3c3-2 9-8 8-12z"/><path d="M9 12c-2 0-4 1-4 4 0 2-1 3-2 3 3 1 7 0 8-3z"/>',
+  tasche: '<rect x="3" y="7" width="14" height="10" rx="1.5"/><path d="M7 4h14v10"/>',
+  portamonete: '<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5h5M9.5 13.5h5"/>',
+};
+
+// Dati strutturati Product (PACCHETTO_AUDIT_SITO blocco C), valori veri.
+// "availability" resta PreOrder finché VENDITA_ATTIVA è false.
 const prodottoJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Product',
   name: prodotto.nome,
   description: prodotto.sommario,
-  // D-028 punto 3: campo image, mancante finora. Stessa foto di copertina
-  // del colore iniziale già mostrata in pagina (galleriaIniziale[0]), non
-  // una nuova — new URL gestisce da sé lo slash iniziale del percorso,
-  // stesso pattern già usato per ogImageURL in Layout.astro.
   image: new URL(galleriaIniziale[0]?.jpg || '/marchio-pelle.jpg', Astro.site).href,
   brand: { '@type': 'Brand', name: 'Barbi Pelletteria' },
   offers: {
@@ -80,7 +109,7 @@ const prodottoJsonLd = {
 ---
 <Layout
   title={prodotto.nome}
-  description={`${prodotto.nome}: ${prodotto.sommario} ${formatEuro(prodotto.prezzoCentesimi)}, spedizione inclusa.`}
+  description={prodotto.metaDescription}
   ogImage={galleriaIniziale[0]?.jpg}
 >
   <Fragment slot="structured-data">
@@ -88,19 +117,18 @@ const prodottoJsonLd = {
   </Fragment>
   <div class="contenitore">
     <div class="pdp">
-      <div>
+      <div class="pdp-col-foto">
         {galleriaIniziale.length > 0 ? (
           <div class="pdp-galleria" id="pdp-galleria">
-            <picture class="pdp-foto-principale">
-              <source id="pdp-foto-principale-webp" srcset={galleriaIniziale[0].webp} type="image/webp" />
-              <img
-                id="pdp-foto-principale-img"
-                src={galleriaIniziale[0].jpg}
-                alt={galleriaIniziale[0].alt}
-                width={galleriaIniziale[0].width}
-                height={galleriaIniziale[0].height}
-              />
-            </picture>
+            <div class="pdp-track" id="pdp-track" aria-label={`Foto del portafoglio ${prodotto.nome}`}>
+              {galleriaIniziale.map((f, i) => (
+                <picture class="pdp-slide">
+                  <source srcset={f.webp} type="image/webp" />
+                  <img src={f.jpg} alt={f.alt} width={f.width} height={f.height} loading={i === 0 ? 'eager' : 'lazy'} />
+                </picture>
+              ))}
+            </div>
+            <div class="pdp-puntini" id="pdp-puntini" aria-hidden="true"></div>
             {galleriaIniziale.length > 1 && (
               <div class="pdp-miniature" id="pdp-miniature" role="group" aria-label="Altre immagini del prodotto">
                 {galleriaIniziale.map((f, i) => (
@@ -122,32 +150,21 @@ const prodottoJsonLd = {
         )}
       </div>
 
-      <div>
-        <p class="p-kick" style="margin-top:0">{prodotto.occhiello}</p>
+      <div class="pdp-col-info">
+        <p class="p-kick pdp-kick">{prodotto.occhiello}</p>
         <h1>{prodotto.nome}</h1>
-        <div class="p-price" style="font-size:27px">{formatEuro(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em></div>
-
-        <!--
-          PACCHETTO_AUDIT_SITO punto B1: il 64% degli utenti cerca queste
-          informazioni proprio nella scheda prodotto (dato Baymard citato nel
-          pacchetto), non nel footer dove stavano finora.
-        -->
-        <ul class="rassicurazioni">
-          <li>Spedizione gratuita in Italia</li>
-          <li>Consegna 1-3 giorni <a href="/spedizioni-e-resi/">dalla spedizione</a></li>
-          <li>Reso entro <a href="/diritto-di-recesso/">14 giorni</a></li>
-          <li>Garanzia <a href="/termini-e-condizioni/#garanzia">24 mesi</a></li>
-        </ul>
+        <div class="p-price pdp-prezzo">{formatEuroBreve(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em></div>
+        <p class="pdp-frase">{prodotto.fraseBreve}</p>
 
         <!--
           Le pastiglie colore stanno fuori dal form di acquisto (che esiste solo
-          quando VENDITA_ATTIVA è vero) così restano visibili — come anteprima
-          di colore e disponibilità — anche a vendita spenta. Nessun dato di
-          magazzino viene ricalcolato qui.
+          quando VENDITA_ATTIVA è vero) così restano visibili anche a vendita
+          spenta. Nessun dato di magazzino viene ricalcolato qui.
         -->
         <fieldset class="colori">
           <legend class="sr-only">Colore</legend>
-          <div class="swatches" style="margin-top:26px">
+          <p class="pdp-colore">Colore: <span id="colore-nome">{coloreIniziale.nome}</span></p>
+          <div class="swatches pdp-swatches">
             {prodotto.colori.map((c) => (
               <label class="sw-wrap">
                 <input
@@ -166,22 +183,22 @@ const prodottoJsonLd = {
                 ></span>
               </label>
             ))}
-            <span class="sw-label" id="stock-label"></span>
           </div>
         </fieldset>
+        <!-- Solo se lo stock reale del colore è ≤ 5 (§ 4.3), mai numeri finti. -->
+        <p class="pdp-scorte" id="pdp-scorte" hidden></p>
 
         <!--
-          Il riquadro delle iniziali resta visibile anche a vendita spenta:
-          spiega cosa si può chiedere e porta l'avviso sul reso. La casella da
-          spuntare invece è legata a VENDITA_ATTIVA — ricompare da sola quando
-          l'interruttore passa a true, senza rimettere mano al codice.
+          Il riquadro delle iniziali resta visibile anche a vendita spenta.
+          La casella da spuntare è legata a VENDITA_ATTIVA — ricompare da
+          sola quando l'interruttore passa a true.
         -->
         <div class="opt">
           <label class:list={['opt__label', { 'opt__label--statico': !VENDITA_ATTIVA }]}>
             {VENDITA_ATTIVA && <input type="checkbox" id="iniziali-checkbox" />}
             <span>
-              <span class="t">Le tue iniziali · +{formatEuro(INIZIALI_CENTESIMI)}</span>
-              <span class="n">Impresse sulla pelle prima che il pezzo esca dal laboratorio. {avvisoIniziali}</span>
+              <span class="t">Aggiungi le tue iniziali · +{formatEuroBreve(INIZIALI_CENTESIMI)}</span>
+              <span class="n">{avvisoIniziali}</span>
             </span>
           </label>
           {VENDITA_ATTIVA && (
@@ -202,22 +219,41 @@ const prodottoJsonLd = {
           )}
         </div>
 
+        {/*
+          [VENDITA ACCESA] pulsante "Aggiungi al carrello · 49 €", diventa
+          "· 59 €" con le iniziali (§ 4.3).
+          [VENDITA SPENTA] al posto del pulsante: campo email + "Avvisami
+          quando è disponibile" — stesso invio Brevo della newsletter
+          (functions/api/iscrivi-newsletter.js, double opt-in D-026),
+          stessa casella di consenso. La classe .footer-news__form è quella
+          che il gestore in Layout.astro intercetta: il modulo si comporta
+          esattamente come quello del footer, colori a parte (qui su fondo
+          chiaro, vedi CSS sotto).
+        */}
         {VENDITA_ATTIVA ? (
           <form class="acquisto" id="form-acquisto" onsubmit="return false">
             <div class="acquisto__riga">
               <label for="quantita">Quantità</label>
               <input type="number" id="quantita" name="quantita" value="1" min="1" />
-              <button class="buy" type="button" id="btn-aggiungi">Aggiungi al carrello</button>
+              <button class="buy" type="button" id="btn-aggiungi">Aggiungi al carrello · <span id="btn-prezzo">{formatEuroBreve(prodotto.prezzoCentesimi)}</span></button>
             </div>
             <p id="disponibilita" class="avviso" hidden></p>
           </form>
         ) : (
-          <div class="non-in-vendita">
-            <p class="buy soon" aria-disabled="true">Disponibile a breve</p>
-            <p class="non-in-vendita__nota">
-              La vendita online non è ancora attiva. Per informazioni o per prenotare un pezzo,
-              <a href={mailtoDisponibile}>scrivi a {EMAIL_CONTATTO}</a>.
-            </p>
+          <div class="avvisami" id="avvisami">
+            <form class="footer-news__form avvisami__form" aria-label="Avvisami quando è disponibile">
+              <label for="avvisami-email" class="sr-only">Email</label>
+              <input type="email" id="avvisami-email" name="email" placeholder="La tua email" autocomplete="email" required />
+              <button type="submit" class="pulsante" id="btn-avvisami">Avvisami quando è disponibile</button>
+              <p class="footer-news__nascosto"><label>Non compilare questo campo <input name="nl-azienda" /></label></p>
+              <label class="footer-news__consenso">
+                <input type="checkbox" name="consenso" required />
+                <span>{CONSENSO_NEWSLETTER}</span>
+              </label>
+              <p class="footer-news__consenso-nota"><a href="/privacy/">Leggi come trattiamo i tuoi dati</a>.</p>
+              <p class="footer-news__messaggio" role="status" hidden></p>
+            </form>
+            <p class="avvisami__nota">Vuoi prenotarlo subito? Scrivi a <a href={mailtoPrenota}>{EMAIL_CONTATTO}</a></p>
           </div>
         )}
 
@@ -225,41 +261,63 @@ const prodottoJsonLd = {
           <p class="avviso">Al momento tutti i colori sono esauriti.</p>
         )}
 
-        <!-- PACCHETTO_AUDIT_SITO punto B5: per un marchio che nessuno
-             conosce ancora, vedere il metodo di pagamento è un segnale di
-             normalità — oggi Stripe era nominato solo nei legali. -->
-        <p class="pagamenti-riga">Pagamenti con carta di credito e debito, gestiti in sicurezza da Stripe.</p>
-
-        <ConfrontoSpessore prodotti={prodotti} class="confronto-pdp" />
-
-        <!-- PACCHETTO_AUDIT_SITO punto B4: la capienza espressa come la
-             cercano davvero i clienti (tasche, scomparto banconote,
-             portamonete sì/no), non solo dentro la frase libera qui sotto. -->
-        <ul class="capienza">
-          <li><b>{prodotto.tascheCarte}</b> tasche per le carte</li>
-          <li><b>{prodotto.portamonete ? 'Sì' : 'No'}</b> portamonete</li>
-          <li><b>Sì</b> scomparto banconote</li>
+        <ul class="servizio">
+          {RIGHE_SERVIZIO.map((r) => (
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONE[r.icona]} />
+              <span>{r.testo}</span>
+            </li>
+          ))}
         </ul>
 
-        <table>
-          {prodotto.specifiche.map(([voce, valore]) => (
-            <tr><th>{voce}</th><td>{valore}</td></tr>
+        <div class="punti">
+          {prodotto.puntiForza.map((p) => (
+            <div class="punto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONE[p.icona]} />
+              <div>
+                <h2 class="punto__titolo">{p.titolo}</h2>
+                <p>{p.testo}</p>
+              </div>
+            </div>
           ))}
-        </table>
-
-        <div class="care" id="cura">
-          <h2>{curaProdotto.titolo}</h2>
-          <p>{curaProdotto.intro}</p>
-          <ul>
-            {curaProdotto.punti.map((p) => <li>{p}</li>)}
-          </ul>
-          <p style="margin-bottom:0">{curaProdotto.chiusura}</p>
         </div>
-      </div>
-    </div>
 
-    <div class="narrow descrizione">
-      {prodotto.descrizione.map((par) => <p>{par}</p>)}
+        <div class="pdp-descrizione">
+          {prodotto.descrizione.map((par) => <p>{par}</p>)}
+        </div>
+
+        <details class="fisarmonica">
+          <summary>Dettagli e misure</summary>
+          <div class="fisarmonica__corpo">
+            <table>
+              {prodotto.specifiche.map(([voce, valore]) => (
+                <tr><th>{voce}</th><td>{valore}</td></tr>
+              ))}
+            </table>
+          </div>
+        </details>
+
+        <details class="fisarmonica" id="cura">
+          <summary>Cura della pelle</summary>
+          <div class="fisarmonica__corpo">
+            <p>{curaProdotto.intro}</p>
+            <ul>
+              {curaProdotto.punti.map((p) => <li>{p}</li>)}
+            </ul>
+            <p>{curaProdotto.chiusura}</p>
+          </div>
+        </details>
+
+        <details class="fisarmonica">
+          <summary>Spedizione e resi</summary>
+          <div class="fisarmonica__corpo">
+            <p>Spediamo in tutta Italia con GLS o Poste Italiane, gratis. La consegna richiede 1-3 giorni lavorativi dalla spedizione. Hai 14 giorni per il recesso, come previsto dalla legge; i pezzi con iniziali sono esclusi perché realizzati su tua richiesta.</p>
+            <p><a class="link-freccia" href="/diritto-di-recesso/">Tutti i dettagli →</a></p>
+          </div>
+        </details>
+
+        <p class="pdp-rimando"><a href={`/prodotto/${altro.slug}/`}>{prodotto.rimando.testo}</a></p>
+      </div>
     </div>
   </div>
 
@@ -271,6 +329,7 @@ const prodottoJsonLd = {
 <script>
   import { addToCart, getQuantitaColore } from '../../scripts/cart.js';
   import { trackEvent } from '../../scripts/analytics.js';
+  import { formatEuroBreve } from '../../data/prodotti.js';
 
   const nodo = document.getElementById('prodotto-dati');
   const prodotto = nodo ? JSON.parse(nodo.textContent) : null;
@@ -283,6 +342,32 @@ const prodottoJsonLd = {
       items: [{ item_id: prodotto.slug, item_name: prodotto.nome }],
     });
 
+    // Le pastiglie stanno fuori dal form, quindi la ricerca è sul documento:
+    // c'è comunque un solo selettore colore per pagina.
+    function coloreSelezionato() {
+      return document.querySelector('input[name="colore"]:checked');
+    }
+    function stockColore(slug) {
+      const c = prodotto.colori.find((x) => x.slug === slug);
+      return c ? c.stock : 0;
+    }
+    // Pezzi ancora aggiungibili per il colore scelto (stock meno quelli già nel carrello).
+    function residuo(slug) {
+      return Math.max(0, stockColore(slug) - getQuantitaColore(prodotto.slug, slug));
+    }
+
+    // Prezzo mostrato sul pulsante (e sulla barra fissa mobile): base, più
+    // le iniziali se la casella è spuntata.
+    const checkboxIniziali = document.getElementById('iniziali-checkbox');
+    function prezzoCorrente() {
+      return prodotto.prezzoCentesimi + (checkboxIniziali?.checked ? prodotto.inizialiCentesimi : 0);
+    }
+    function aggiornaPrezzoBottone() {
+      const el = document.getElementById('btn-prezzo');
+      if (el) el.textContent = formatEuroBreve(prezzoCorrente());
+      document.dispatchEvent(new CustomEvent('pdp:prezzo', { detail: { centesimi: prezzoCorrente() } }));
+    }
+
     const form = document.getElementById('form-acquisto');
     if (form) {
       const btn = document.getElementById('btn-aggiungi');
@@ -292,8 +377,6 @@ const prodottoJsonLd = {
       const toast = document.getElementById('toast');
       let toastTimer = null;
 
-      // Notifica "toast" (PACCHETTO_VETRINA punto 3): non invasiva, sparisce
-      // da sola. Il testo include modello e colore, non solo "Aggiunto".
       function mostraToast(messaggio) {
         if (!toast) return;
         toast.textContent = messaggio;
@@ -304,22 +387,6 @@ const prodottoJsonLd = {
           toast.classList.remove('toast--visibile');
           setTimeout(() => { toast.hidden = true; }, 200);
         }, 2500);
-      }
-
-      // Le pastiglie stanno fuori dal form, quindi la ricerca è sul documento:
-      // c'è comunque un solo selettore colore per pagina.
-      function coloreSelezionato() {
-        return document.querySelector('input[name="colore"]:checked');
-      }
-
-      function stockColore(slug) {
-        const c = prodotto.colori.find((x) => x.slug === slug);
-        return c ? c.stock : 0;
-      }
-
-      // Pezzi ancora aggiungibili per il colore scelto (stock meno quelli già nel carrello).
-      function residuo(slug) {
-        return Math.max(0, stockColore(slug) - getQuantitaColore(prodotto.slug, slug));
       }
 
       function aggiorna() {
@@ -335,10 +402,6 @@ const prodottoJsonLd = {
         if (rimasti === 0) {
           disponibilita.textContent = 'Questo colore è esaurito.';
           disponibilita.hidden = false;
-        } else if (rimasti <= 3) {
-          const uno = rimasti === 1;
-          disponibilita.textContent = `${uno ? 'Disponibile' : 'Disponibili'} ${rimasti} ${uno ? 'pezzo' : 'pezzi'} in questo colore.`;
-          disponibilita.hidden = false;
         } else {
           disponibilita.hidden = true;
         }
@@ -350,7 +413,7 @@ const prodottoJsonLd = {
       inputQ.addEventListener('input', aggiorna);
       aggiorna();
 
-      btn.addEventListener('click', () => {
+      function aggiungi() {
         const scelto = coloreSelezionato();
         if (!scelto) return;
         const colore = scelto.value;
@@ -380,87 +443,116 @@ const prodottoJsonLd = {
         const nomeColore = prodotto.colori.find((x) => x.slug === colore)?.nome || colore;
         mostraToast(`${prodotto.nome} — ${nomeColore} aggiunto al carrello.`);
         aggiorna();
-      });
+      }
+      btn.addEventListener('click', aggiungi);
+      // La barra fissa mobile (vedi script più sotto) riusa lo stesso gesto.
+      document.addEventListener('pdp:aggiungi', aggiungi);
 
-      // Il campo iniziali compare solo se la casella è spuntata: è solo aspetto,
-      // il valore che finisce nel carrello resta quello dell'input.
-      const checkboxIniziali = document.getElementById('iniziali-checkbox');
+      // Il campo iniziali compare solo se la casella è spuntata.
       checkboxIniziali?.addEventListener('change', () => {
         inputIniziali.hidden = !checkboxIniziali.checked;
         if (!checkboxIniziali.checked) inputIniziali.value = '';
+        aggiornaPrezzoBottone();
       });
+      aggiornaPrezzoBottone();
     }
 
-    // Sotto qui solo la vista: etichetta scorta accanto alle pastiglie,
-    // didascalia del segnaposto foto, galleria immagini, anteprima iniziali.
-    // Non tocca stock, carrello o VENDITA_ATTIVA.
-    const stockLabel = document.getElementById('stock-label');
+    // Sotto qui solo la vista: nome colore, scorte, didascalia del
+    // segnaposto foto, galleria immagini, anteprima iniziali. Non tocca
+    // stock, carrello o VENDITA_ATTIVA.
+    const coloreNome = document.getElementById('colore-nome');
+    const scorte = document.getElementById('pdp-scorte');
     const didascalia = document.querySelector('#foto-pdp b'); // solo se niente foto — segnaposto
     const anteprima = document.getElementById('iniziali-anteprima');
     const anteprimaTesto = document.getElementById('iniziali-anteprima-testo');
     const anteprimaNota = document.getElementById('iniziali-anteprima-nota');
 
-    // Galleria (punto 4 del pacchetto foto): cambiare colore cambia
-    // l'immagine principale E l'intera striscia di miniature, non solo la
-    // prima. Le miniature si ricostruiscono da zero a ogni cambio colore
-    // invece di aggiornarne il src una per una: il numero di scatti può
-    // variare da un colore all'altro dello stesso prodotto finché non tutte
-    // le foto sono arrivate (oggi: completo/marrone ne ha una in meno,
-    // manca 03-portamonete) — vedi FOTO_SITO/LEGGIMI.md.
-    const fotoPrincipaleWebp = document.getElementById('pdp-foto-principale-webp');
-    const fotoPrincipaleImg = document.getElementById('pdp-foto-principale-img');
+    // Galleria: un'unica striscia a scorrimento. Cambiare colore
+    // ricostruisce striscia, miniature e puntini da zero: il numero di
+    // scatti può variare da un colore all'altro (vedi FOTO_SITO/LEGGIMI.md).
+    const track = document.getElementById('pdp-track');
     const miniature = document.getElementById('pdp-miniature');
+    const puntini = document.getElementById('pdp-puntini');
+    let indiceCorrente = 0;
 
-    function mostraScatto(scatto) {
-      if (!scatto || !fotoPrincipaleImg) return;
-      if (fotoPrincipaleWebp) fotoPrincipaleWebp.srcset = scatto.webp;
-      fotoPrincipaleImg.src = scatto.jpg;
-      fotoPrincipaleImg.alt = scatto.alt;
-      fotoPrincipaleImg.width = scatto.width;
-      fotoPrincipaleImg.height = scatto.height;
+    function evidenzia(i) {
+      indiceCorrente = i;
+      miniature?.querySelectorAll('.pdp-miniatura').forEach((b, j) => {
+        b.classList.toggle('on', j === i);
+        if (j === i) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
+      });
+      puntini?.querySelectorAll('span').forEach((p, j) => p.classList.toggle('on', j === i));
     }
 
-    function aggiornaGalleria(coloreSlug) {
-      const scatti = prodotto.galleria?.[coloreSlug] || [];
-      mostraScatto(scatti[0]);
-      if (!miniature) return;
-      miniature.innerHTML = '';
+    function vaiAScatto(i, animato = true) {
+      if (!track) return;
+      track.scrollTo({ left: i * track.clientWidth, behavior: animato ? 'smooth' : 'auto' });
+      evidenzia(i);
+    }
+
+    function costruisciGalleria(scatti) {
+      if (!track) return;
+      track.innerHTML = '';
       scatti.forEach((s, i) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'pdp-miniatura' + (i === 0 ? ' on' : '');
-        btn.dataset.index = String(i);
-        if (i === 0) btn.setAttribute('aria-current', 'true');
-        btn.setAttribute('aria-label', s.alt);
+        const pic = document.createElement('picture');
+        pic.className = 'pdp-slide';
+        const src = document.createElement('source');
+        src.srcset = s.webp;
+        src.type = 'image/webp';
         const img = document.createElement('img');
-        img.src = s.webp;
-        img.alt = '';
-        img.width = 72;
-        img.height = 90;
+        img.src = s.jpg;
+        img.alt = s.alt;
+        img.width = s.width;
+        img.height = s.height;
         img.loading = i === 0 ? 'eager' : 'lazy';
-        btn.appendChild(img);
-        miniature.appendChild(btn);
+        pic.append(src, img);
+        track.appendChild(pic);
       });
+      if (miniature) {
+        miniature.innerHTML = '';
+        scatti.forEach((s, i) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'pdp-miniatura';
+          b.dataset.index = String(i);
+          b.setAttribute('aria-label', s.alt);
+          const img = document.createElement('img');
+          img.src = s.webp;
+          img.alt = '';
+          img.width = 72;
+          img.height = 90;
+          img.loading = i === 0 ? 'eager' : 'lazy';
+          b.appendChild(img);
+          miniature.appendChild(b);
+        });
+      }
+      if (puntini) {
+        puntini.innerHTML = '';
+        scatti.forEach(() => puntini.appendChild(document.createElement('span')));
+      }
+      vaiAScatto(0, false);
     }
 
     // Delega sul contenitore: le miniature vengono ricreate a ogni cambio
-    // colore (sopra), un listener per bottone si perderebbe ogni volta.
+    // colore, un listener per bottone si perderebbe ogni volta.
     miniature?.addEventListener('click', (e) => {
-      const btn = e.target.closest('.pdp-miniatura');
-      if (!btn || !miniature.contains(btn)) return;
-      const scelto = document.querySelector('input[name="colore"]:checked');
-      const scatti = (scelto && prodotto.galleria?.[scelto.value]) || [];
-      const indice = parseInt(btn.dataset.index || '0', 10);
-      mostraScatto(scatti[indice]);
-      miniature.querySelectorAll('.pdp-miniatura').forEach((b) => {
-        b.classList.toggle('on', b === btn);
-        if (b === btn) b.setAttribute('aria-current', 'true');
-        else b.removeAttribute('aria-current');
-      });
+      const b = e.target.closest('.pdp-miniatura');
+      if (!b || !miniature.contains(b)) return;
+      vaiAScatto(parseInt(b.dataset.index || '0', 10));
     });
+    // Sfogliando col dito (o con lo scroll) la miniatura/il puntino attivo
+    // seguono la foto visibile.
+    let scrollTimer = null;
+    track?.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        const i = Math.round(track.scrollLeft / track.clientWidth);
+        if (i !== indiceCorrente) evidenzia(i);
+      }, 80);
+    }, { passive: true });
 
-    // Soglia scorte basse: PACCHETTO_VETRINA punto 1 — 5 pezzi o meno,
-    // sui numeri veri già in prodotti.js (nessuna soglia diversa altrove).
+    // Soglia scorte basse (§ 4.3): 5 pezzi o meno, sui numeri veri.
     const SOGLIA_SCORTE_BASSE = 5;
 
     function aggiornaVista() {
@@ -468,38 +560,25 @@ const prodottoJsonLd = {
       if (!scelto) return;
       const c = prodotto.colori.find((x) => x.slug === scelto.value);
       if (!c) return;
-      if (stockLabel) {
-        // PACCHETTO_AUDIT_SITO punto A2: a vendita spenta niente numeri di
-        // disponibilità — contraddicono "disponibile a breve" scritto sotto.
-        if (!prodotto.venditaAttiva) {
-          stockLabel.textContent = c.nome;
-          stockLabel.classList.remove('sw-label--scorte-basse');
-        } else {
-          const bassa = c.stock > 0 && c.stock <= SOGLIA_SCORTE_BASSE;
-          const uno = c.stock === 1;
-          stockLabel.textContent =
-            c.stock === 0 ? `${c.nome} · esaurito`
-            : bassa ? `${c.nome} · solo ${c.stock} ${uno ? 'rimasto' : 'rimasti'}`
-            : `${c.nome} · ${c.stock} ${uno ? 'disponibile' : 'disponibili'}`;
-          stockLabel.classList.toggle('sw-label--scorte-basse', bassa);
-        }
+      if (coloreNome) coloreNome.textContent = c.nome;
+      if (scorte) {
+        const bassa = c.stock > 0 && c.stock <= SOGLIA_SCORTE_BASSE;
+        scorte.hidden = !bassa;
+        // Accordo del verbo col numero (1 → "resta"), non un testo diverso.
+        if (bassa) scorte.textContent = `${c.stock === 1 ? 'Ne resta' : 'Ne restano'} ${c.stock} in ${c.nome}`;
       }
       if (didascalia) {
         didascalia.textContent = `Foto — ${prodotto.nome}, ${c.nome.toLowerCase()}`;
       }
-      aggiornaGalleria(c.slug);
-      if (anteprima) {
-        anteprima.setAttribute('data-c', c.slug);
-      }
+      costruisciGalleria(prodotto.galleria?.[c.slug] || []);
+      if (anteprima) anteprima.setAttribute('data-c', c.slug);
     }
     document.querySelectorAll('input[name="colore"]').forEach((el) => {
       el.addEventListener('change', aggiornaVista);
     });
     aggiornaVista();
 
-    // Anteprima "impressione" delle iniziali (PACCHETTO_VETRINA punto 8):
-    // compare solo quando la casella iniziali è spuntata e c'è testo,
-    // segue il colore scelto sopra. Puro CSS/JS, zero immagini.
+    // Anteprima "impressione" delle iniziali (PACCHETTO_VETRINA punto 8).
     if (anteprima && anteprimaTesto) {
       const inputIn = document.getElementById('iniziali');
       function aggiornaAnteprimaIniziali() {
@@ -510,7 +589,7 @@ const prodottoJsonLd = {
         if (mostra) anteprimaTesto.textContent = valore;
       }
       inputIn?.addEventListener('input', aggiornaAnteprimaIniziali);
-      document.getElementById('iniziali-checkbox')?.addEventListener('change', aggiornaAnteprimaIniziali);
+      checkboxIniziali?.addEventListener('change', aggiornaAnteprimaIniziali);
       aggiornaAnteprimaIniziali();
     }
   }
@@ -518,14 +597,21 @@ const prodottoJsonLd = {
 
 <style>
   .pdp { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; padding: 70px 0; align-items: start; }
-  @media (max-width: 800px) { .pdp { grid-template-columns: 1fr; gap: 32px; padding: 44px 0; } }
+  @media (max-width: 800px) { .pdp { grid-template-columns: 1fr; gap: 28px; padding: 32px 0 60px; } }
 
-  /* Galleria (PACCHETTO_FOTO_PRODOTTO_2026-09-02). width/height reali
-     dichiarati sull'<img> (non qui) evitano il salto di layout al
-     caricamento — variano leggermente scatto per scatto, quindi qui resta
-     solo il ridimensionamento proporzionale, non un aspect-ratio fisso. */
-  .pdp-foto-principale { display: block; border: 1px solid var(--line); background: var(--raise); }
-  .pdp-foto-principale img { display: block; width: 100%; height: auto; }
+  /* Galleria: striscia a scorrimento orizzontale con aggancio (scroll-snap),
+     una foto per volta. Barra di scorrimento nascosta: si naviga con le
+     miniature (computer) o col dito (telefono). width/height reali
+     dichiarati sull'<img> evitano il salto di layout al caricamento. */
+  .pdp-track {
+    display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+    scrollbar-width: none; border: 1px solid var(--line); background: var(--raise);
+  }
+  .pdp-track::-webkit-scrollbar { display: none; }
+  .pdp-slide { flex: 0 0 100%; scroll-snap-align: start; display: block; }
+  .pdp-slide img { display: block; width: 100%; height: auto; }
+
+  .pdp-puntini { display: none; }
 
   .pdp-miniature {
     display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;
@@ -537,48 +623,30 @@ const prodottoJsonLd = {
     flex: 0 0 auto; position: relative;
   }
   .pdp-miniatura img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  /* Stesso linguaggio dell'anello sugli swatch colore: bordo ottone sulla
-     miniatura attiva, non un cambio di dimensione (che sposterebbe le
-     altre miniature nella riga). */
   .pdp-miniatura.on { border-color: var(--brass); border-width: 2px; }
   .pdp-miniatura:hover:not(.on) { border-color: var(--brass-testo); }
   .pdp-miniatura:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 
+  .pdp-kick { margin-top: 0; }
   .pdp h1 {
     font-size: clamp(30px, 4.4vw, 44px);
     margin: 8px 0 0;
     max-width: none;
     text-align: left;
   }
+  .pdp-prezzo { font-size: 27px; }
+  .pdp-frase { margin: 16px 0 0; color: var(--ink2); font-size: 17.5px; line-height: 1.6; }
 
-  .rassicurazioni {
-    display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0 0; padding: 0; list-style: none;
-    font-family: var(--f-label); font-size: 11.5px; font-weight: 500; letter-spacing: .04em;
-    color: var(--ink2);
+  .colori { border: 0; padding: 0; margin: 26px 0 0; }
+  .pdp-colore {
+    margin: 0 0 10px; font-family: var(--f-label); font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink3);
   }
-  .rassicurazioni li { display: flex; align-items: center; }
-  .rassicurazioni li::before { content: '·'; margin-right: 6px; color: var(--brass-testo); }
-  .rassicurazioni li:first-child::before { content: none; }
-  .rassicurazioni a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-  .rassicurazioni a:hover { color: var(--brass-testo); }
-
-  .pagamenti-riga { margin-top: 16px; font-size: 14.5px; color: var(--ink3); }
-
-  .capienza {
-    display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 34px 0 0; padding: 20px 0;
-    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); list-style: none;
-  }
-  .capienza li { font-size: 15.5px; color: var(--ink2); }
-  .capienza b { font-family: var(--f-display); font-size: 19px; color: var(--ink); margin-right: 6px; }
-
-  .colori { border: 0; padding: 0; margin: 0; }
+  .pdp-swatches { margin-top: 0; }
+  .pdp-scorte { margin: 12px 0 0; font-size: 15px; color: var(--brass-testo); font-weight: 500; }
 
   .sw-wrap { position: relative; display: inline-block; line-height: 0; }
-  /* PACCHETTO_INTERFACCIA punto 2: niente più larghezza/altezza fisse a
-     26px — inset:0 da solo copre esattamente .sw (ora 44px, la soglia di
-     area toccabile), qualunque sia la sua dimensione reale. Un valore
-     fisso qui avrebbe lasciato l'area cliccabile piccola sotto un cerchio
-     visivo più grande. */
+  /* inset:0 copre esattamente .sw (44px, la soglia di area toccabile). */
   .sw-wrap input {
     position: absolute; inset: 0; margin: 0;
     opacity: 0; cursor: pointer;
@@ -590,14 +658,10 @@ const prodottoJsonLd = {
   .sw-wrap input:disabled + .sw { opacity: .32; }
   .sw-wrap input:focus-visible + .sw { outline: 2px solid var(--brass); outline-offset: 4px; }
 
-  /* Scorte basse (PACCHETTO_VETRINA punto 1): stesso ottone degli avvisi,
-     mai un rosso — la tavolozza non ne ha uno, vedi checkout.astro. */
-  .sw-label--scorte-basse { color: var(--brass-testo); font-weight: 600; }
-
   .opt { margin-top: 22px; padding: 17px; border: 1px solid var(--line); background: var(--raise); }
   .opt__label { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
   .opt__label--statico { cursor: default; }
-  .opt input[type="checkbox"] { margin: 4px 0 0; width: 17px; height: 17px; accent-color: var(--brass); flex: 0 0 auto; }
+  .opt input[type="checkbox"] { margin: 4px 0 0; width: 20px; height: 20px; accent-color: var(--brass); flex: 0 0 auto; }
   .opt .t { font-family: var(--f-label); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
   .opt .n { display: block; margin-top: 8px; font-size: 16.5px; color: var(--ink2); line-height: 1.5; }
   .opt__input {
@@ -606,17 +670,12 @@ const prodottoJsonLd = {
     font-size: 14px; letter-spacing: .1em; text-transform: uppercase;
   }
 
-  /*
-    Anteprima iniziali (PACCHETTO_VETRINA punto 8): un riquadro nel colore
-    reale scelto, lettere "impresse" solo via text-shadow — nessun riempimento
-    pieno, per non sembrare un'etichetta stampata ma un'impronta nella pelle.
-  */
+  /* Anteprima iniziali (PACCHETTO_VETRINA punto 8): riquadro nel colore
+     reale scelto, lettere "impresse" solo via text-shadow. */
   .iniziali-anteprima {
     display: flex; align-items: center; justify-content: center;
     width: 88px; height: 58px; margin-top: 14px; border: 1px solid var(--line2);
   }
-  /* stessa causa del bug banner cookie: display:flex batte [hidden] a
-     parità di specificità, quindi anteprima.hidden = true da solo non basta. */
   .iniziali-anteprima[hidden] { display: none; }
   .iniziali-anteprima[data-c="blu"] { background: var(--blu); }
   .iniziali-anteprima[data-c="bordeaux"] { background: var(--bordeaux); }
@@ -634,7 +693,6 @@ const prodottoJsonLd = {
   }
 
   .buy { margin-top: 26px; width: 100%; }
-
   .acquisto__riga { display: flex; align-items: center; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
   .acquisto__riga label {
     font-family: var(--f-label); font-size: 10.5px; font-weight: 600;
@@ -646,46 +704,71 @@ const prodottoJsonLd = {
     font-variant-numeric: tabular-nums;
   }
   .acquisto__riga .buy { width: auto; flex: 1 1 12rem; margin-top: 0; }
-
-  /*
-    Bottone carrello fisso su mobile (PACCHETTO_VETRINA punto 4): solo sotto
-    i 740px, sempre raggiungibile col pollice. Il padding-bottom sul form
-    evita che il bottone fisso copra l'ultimo contenuto durante lo scroll.
-  */
-  @media (max-width: 740px) {
-    .acquisto { padding-bottom: 76px; }
-    .acquisto__riga .buy {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-      width: 100%; flex: none; margin: 0; padding: 18px 26px;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, .12);
-    }
-  }
-
   .avviso { margin-top: 14px; font-size: 16.5px; color: var(--ink2); }
 
-  .non-in-vendita__nota { margin: 16px 0 0; font-size: 16.5px; color: var(--ink2); }
-  .non-in-vendita__nota a { color: var(--brass-testo); }
-
-  /*
-    Toast (PACCHETTO_VETRINA punto 3): fisso, non invasivo, sparisce da solo
-    (2,5s, gestito in JS). Scuro anche sul tema chiaro — un contrasto
-    volutamente diverso dal resto della pagina rende la notifica riconoscibile.
-  */
-  .toast {
-    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(8px);
-    max-width: calc(100% - 32px); z-index: 60;
-    background: var(--ink); color: var(--ground);
-    font-family: var(--f-label); font-size: 13px; font-weight: 600; letter-spacing: .03em;
-    padding: 15px 24px; text-align: center; box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
-    opacity: 0; transition: opacity .2s ease, transform .2s ease;
+  /* Avvisami (vendita spenta): stesso modulo del footer, ma su fondo
+     chiaro — le classi .footer-news__* sono pensate per il fondo scuro,
+     qui si riprendono con i colori del resto della scheda. */
+  .avvisami { margin-top: 26px; padding: 20px; border: 1px solid var(--line); background: var(--raise); }
+  .avvisami .footer-news__form input[type="email"] {
+    background: var(--sunk); border-color: var(--line2); color: var(--ink); font-size: 16px;
   }
-  .toast--visibile { opacity: 1; transform: translateX(-50%) translateY(0); }
-  @media (max-width: 740px) { .toast { bottom: 92px; } }
+  .avvisami .footer-news__form input[type="email"]::placeholder { color: var(--ink3); }
+  .avvisami .footer-news__form .pulsante { flex: 1 1 auto; }
+  .avvisami .footer-news__consenso { color: var(--ink2); font-size: 13.5px; }
+  .avvisami .footer-news__consenso-nota { color: var(--ink3); }
+  .avvisami .footer-news__consenso-nota a { color: var(--brass-testo); }
+  .avvisami .footer-news__messaggio { color: var(--ink); }
+  .avvisami__nota { margin: 16px 0 0; font-size: 15.5px; color: var(--ink2); }
+  .avvisami__nota a { color: var(--brass-testo); overflow-wrap: anywhere; }
 
-  .confronto-pdp { margin-top: 36px; }
+  /* Tre righe di servizio: icona + testo, senza link (art. 23 lett. l:
+     recesso e garanzia come informazione, "come previsto dalla legge"). */
+  .servizio {
+    list-style: none; margin: 26px 0 0; padding: 18px 0 6px; border-top: 1px solid var(--line);
+    display: grid; gap: 10px;
+  }
+  .servizio li { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.5; color: var(--ink2); }
+  .servizio svg { width: 20px; height: 20px; flex: 0 0 auto; margin-top: 2px; color: var(--brass-testo); }
 
-  table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+  /* Punti di forza (formato "highlights"): 4 riquadri icona + titolo + riga. */
+  .punti { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 34px; }
+  @media (max-width: 480px) { .punti { grid-template-columns: 1fr; } }
+  .punto {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 16px; border: 1px solid var(--line); background: var(--raise);
+  }
+  .punto svg { width: 22px; height: 22px; flex: 0 0 auto; margin-top: 2px; color: var(--brass-testo); }
+  .punto__titolo { font-family: var(--f-display); font-weight: 500; font-size: 17px; margin: 0 0 4px; line-height: 1.25; }
+  .punto p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink2); }
+
+  .pdp-descrizione { margin-top: 34px; }
+  .pdp-descrizione p { margin: 0 0 16px; }
+
+  /* Fisarmoniche: <details> nativo, accessibile senza JS. Il summary è
+     alto almeno 44px (bersaglio tocco). */
+  .fisarmonica { border-top: 1px solid var(--line); }
+  .fisarmonica:last-of-type { border-bottom: 1px solid var(--line); }
+  .fisarmonica summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    min-height: 52px; padding: 12px 0; cursor: pointer; list-style: none;
+    font-family: var(--f-display); font-size: 19px;
+  }
+  .fisarmonica summary::-webkit-details-marker { display: none; }
+  .fisarmonica summary::after {
+    content: '+'; font-family: var(--f-label); font-size: 20px; line-height: 1;
+    color: var(--brass-testo); flex: 0 0 auto;
+  }
+  .fisarmonica[open] summary::after { content: '−'; }
+  .fisarmonica summary:hover { color: var(--brass-testo); }
+  .fisarmonica__corpo { padding: 0 0 22px; }
+  .fisarmonica__corpo p { margin: 0 0 12px; color: var(--ink2); font-size: 17px; }
+  .fisarmonica__corpo ul { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: 17px; }
+  .fisarmonica__corpo li { margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 11px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child th, tr:last-child td { border-bottom: 0; }
   th {
     font-family: var(--f-label); font-size: 9.5px; font-weight: 600; letter-spacing: .15em;
     text-transform: uppercase; color: var(--ink3); width: 11rem; padding-right: 18px;
@@ -696,17 +779,7 @@ const prodottoJsonLd = {
     td { display: block; padding-top: 0; }
   }
 
-  .care { border: 1px solid var(--line); background: var(--raise); padding: 26px; margin-top: 34px; }
-  /* PACCHETTO_AUDIT_SITO punto C: era h3 (saltava da h1 senza un h2 nel
-     mezzo). Ora h2 per la gerarchia corretta — dimensione tenuta uguale a
-     prima (era pensata come sottotitolo, non come titolo di pagina). */
-  .care h2 {
-    font-family: var(--f-display); font-weight: 400; font-size: 23px; margin: 0 0 12px;
-  }
-  .care p { margin: 0 0 12px; color: var(--ink2); font-size: 17px; }
-  .care ul { margin: 0 0 12px; padding-left: 20px; color: var(--ink2); font-size: 17px; }
-  .care li { margin-bottom: 6px; }
-
-  .descrizione { padding-bottom: 70px; }
-  .descrizione p { margin: 0 0 20px; }
+  .pdp-rimando { margin: 30px 0 0; font-size: 17px; }
+  .pdp-rimando a { color: var(--brass-testo); text-decoration: none; display: inline-block; padding: 8px 0; }
+  .pdp-rimando a:hover { text-decoration: underline; }
 </style>

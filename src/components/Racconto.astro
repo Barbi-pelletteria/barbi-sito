@@ -1,28 +1,23 @@
 ---
-// Il racconto lungo del laboratorio. Dal 27/08/2026 vive solo su /chi-siamo/
-// (PACCHETTO_RIFINITURA, punto 3 — prima stava anche in home). Resta un
-// componente a sé perché lo stesso testo non va scritto due volte.
+// Il racconto del laboratorio, solo su /chi-siamo/ (dal 27/08/2026).
 //
-// Intestazione "Chi è Stefano?" a sinistra, non centrata: voluta dal Founder
-// il 27/08/2026 al posto del vecchio occhiello "Il laboratorio" + titolo
-// "Stefano" centrati. Da quando il componente vive solo su chi-siamo, il
-// titolo è sempre un h1 — tolta la prop `titolo` che serviva a renderlo h2
-// quando il racconto stava anche in home.
+// Testi D-029 § 4.5, scritti dal QG e non riscritti. Rispetto alla
+// versione precedente spariscono, come richiesto: "senza un marchio noto
+// alle spalle, senza vetrine, senza catalogo", "Cresceremo alla velocità
+// con cui una persona riesce a produrre…", "Per ora trovi due modelli e
+// tre colori… non abbiamo messo online niente…", "Nei prossimi mesi
+// arriveranno…" e il numero "1 persona in laboratorio" (divieto 8: in
+// laboratorio c'è anche Jacopo, saltuariamente).
 //
-// Testi verbatim dall'anteprima approvata. Nel capitolo "2023 · Il proprio
-// nome" il nome del figlio di Stefano era stato tolto il 26/08/2026 (restava
-// "Con il figlio che passa a dare una mano quando serve"). Il QG l'ha
-// rimesso il 27/08/2026: è un fatto vero e verificato, non il nome di chi
-// gestisce il sito (quelli restano fuori) ma il figlio di Stefano.
-//
-// I due <span class="gap"> in ottone erano PROMEMORIA VISIBILI per i punti
-// dove mancavano le parole di Stefano. Sostituiti il 27/08/2026 con le sue
-// frasi vere, verbatim, arrivate dal QG: nel racconto non resta nessun
-// placeholder.
+// Le due foto vere del laboratorio (22/09/2026) restano dov'erano:
+// taglio della pelle in alto, fustelle a metà pagina — ora con la
+// didascalia del QG. La foto di Stefano resta nella sezione storia della
+// home, non qui.
 ---
 <div class="contenitore">
   <section class="sec">
-    <h1 class="story-title">Chi è Stefano?</h1>
+    <h1 class="story-title">Il laboratorio</h1>
+    <p class="story-intro">Un laboratorio in Campania, un banco di lavoro e un mestiere imparato in oltre trent’anni. Qui nasce ogni pezzo Barbi.</p>
 
     <picture class="story-foto story-foto--principale">
       <source srcset="/laboratorio-taglio-pelle.webp" type="image/webp" />
@@ -30,41 +25,37 @@
     </picture>
 
     <div class="narrow story">
-      <h3>1992</h3>
-      <p class="first">Stefano Barbi ha diciassette anni quando comincia a lavorare la pelle. Non è una scelta di carriera. In Campania, allora, la pelletteria è un mestiere che si impara stando accanto a chi lo sa già fare: si guarda, si prova, si sbaglia, si ricomincia. Le prime cose che gli riescono bene sono quelle che nessuno vede — un bordo dritto, una piega che non si apre.</p>
+      <h3>Le origini · 1992</h3>
+      <p class="first">Stefano Barbi cresce tra forme e pellami: in famiglia il mestiere si tramanda da prima di lui, il padre lavorava nelle scarpe. È il fratello a insegnargli la pelletteria. Nel 1992, a diciassette anni, comincia. Le prime cose che impara a fare bene sono quelle che non si vedono: un bordo dritto, una piega che non si apre.</p>
 
-      <p>Prima della pelle ci sono state le scarpe: la sua infanzia si consuma tra forme e pellami, in una famiglia dove il mestiere si tramanda da prima di lui — il padre lavorava già così. Quando arriva il momento di imparare per davvero, è il fratello a passargli il testimone: gli insegna la pelletteria, un passo oltre le scarpe di famiglia. Stefano ci si ritrova dentro senza cercarlo, gli piace, e da lì non si ferma più.</p>
+      <h3>Gli anni per altri marchi</h3>
+      <p>Per gran parte della sua carriera Stefano realizza portafogli, borse e cinture per marchi più affermati del suo. Sono gli anni in cui impara la parte lunga del mestiere: quanto tirare un filo, quando una pelle è pronta, perché due pezzi tagliati dallo stesso pellame, a dieci centimetri di distanza, non invecchiano allo stesso modo.</p>
 
-      <h3>Gli anni per gli altri</h3>
-      <p>Per gran parte della sua vita professionale Stefano ha fatto portafogli, borse e cinture che portavano il nome di qualcun altro. Marchi più conosciuti del suo. È il modo in cui funziona davvero la pelletteria italiana: dietro molte etichette famose ci sono laboratori piccoli e mani che nessuno nomina.</p>
-      <p>Sono anche gli anni in cui si impara la parte lunga del mestiere. Quanto tirare un filo. Quando una pelle è pronta e quando no. Perché due pezzi tagliati dallo stesso pellame, a distanza di dieci centimetri, non invecchiano allo stesso modo.</p>
+      <figure class="story-foto story-foto--dettaglio">
+        <picture>
+          <source srcset="/laboratorio-fustelle.webp" type="image/webp" />
+          <img src="/laboratorio-fustelle.jpg" alt="Fustelle di metallo per il taglio della pelle, etichettate a mano una per una, appoggiate sul tavolo da lavoro del laboratorio" width="1179" height="1562" loading="lazy" />
+        </picture>
+        <figcaption>Le fustelle dell’articolo 642 — il Completo — etichettate a mano sul banco del laboratorio.</figcaption>
+      </figure>
 
-      <picture class="story-foto story-foto--dettaglio">
-        <source srcset="/laboratorio-fustelle.webp" type="image/webp" />
-        <img src="/laboratorio-fustelle.jpg" alt="Fustelle di metallo per il taglio della pelle, etichettate a mano una per una, appoggiate sul tavolo da lavoro del laboratorio" width="1179" height="1562" loading="lazy" />
-      </picture>
-
-      <h3>2023 · Il proprio nome</h3>
-      <p>Poi Stefano ha deciso di mettere il proprio nome sui pezzi che fa. Ha aperto la sua attività e il suo laboratorio, in Campania, e ha ricominciato da capo: senza un marchio noto alle spalle, senza vetrine, senza catalogo. Con il figlio Jacopo che passa a dare una mano quando serve.</p>
-
-      <h3>Le fiere</h3>
-      <p>Da allora vende come si vendeva prima che esistessero i negozi: di persona. Quattro fiere al mese, una cinquantina in un anno, in giro per l’Italia. Un banco, i portafogli in fila, e la parte che nessun sito potrà mai sostituire — qualcuno che prende un pezzo in mano, lo apre, lo gira contro la luce, e chiede quanto costa.</p>
+      <h3>2023 · La firma</h3>
+      <p>Nel 2023 Stefano apre il suo laboratorio e sceglie di mettere il proprio nome su ciò che fa. Accanto a lui, quando serve, il figlio Jacopo. Da allora i suoi pezzi incontrano i clienti di persona, in circa cinquanta fiere l’anno in tutta Italia: persone che prendono un portafoglio in mano, lo aprono, lo guardano contro luce. E lo scelgono.</p>
 
       <div class="figures">
-        <div><b>1992</b><span>l’anno in cui ha iniziato</span></div>
-        <div><b>~50</b><span>fiere in un anno</span></div>
-        <div><b>2-3 h</b><span>di lavoro per pezzo</span></div>
-        <div><b>1</b><span>persona in laboratorio</span></div>
+        <div><b>1992</b><span>l’inizio</span></div>
+        <div><b>2-3 ore</b><span>per ogni pezzo</span></div>
+        <div><b>circa 50</b><span>fiere l’anno</span></div>
+        <div><b>3 colori</b><span>per ogni modello</span></div>
       </div>
 
       <h3>Oggi</h3>
-      <p>Questo sito è la prima volta che i portafogli di Stefano si possono comprare senza aspettare che la fiera passi dalla tua città. Quello che trovi qui esce dallo stesso banco di lavoro, dalle stesse mani e dalla stessa pelle: cambia soltanto il modo in cui arriva fino a te.</p>
+      <p>Questo sito porta il laboratorio fino a casa tua. Quello che trovi qui esce dallo stesso banco, dalle stesse mani e dalla stessa pelle che si trovano in fiera: direttamente da chi lo realizza, senza intermediari.</p>
 
-      <h3>Dove vogliamo andare</h3>
-      <p>Per ora trovi due modelli e tre colori, ed è esattamente quello che c’è in laboratorio: non abbiamo messo online niente che non possiamo spedirti oggi. Nei prossimi mesi arriveranno gli altri pezzi che Stefano porta già in fiera — borse, portachiavi, altri portafogli — e i colori che qui ancora non ci sono.</p>
-      <p>Cresceremo alla velocità con cui una persona riesce a produrre, non a quella di un magazzino. È il limite del lavoro fatto così, ed è anche l’unica ragione per cui vale la pena comprarlo.</p>
+      <h3>Dove vogliamo arrivare</h3>
+      <p>Il sogno di Stefano è fare del suo laboratorio un luogo di eccellenza artigianale, dove i giovani possano imparare un mestiere che, ne è convinto, tornerà a essere tra i più belli che esistano. Ogni pezzo che scegli sostiene questo lavoro.</p>
 
-      <p>Il sogno di Stefano per il laboratorio non si ferma al prossimo portafoglio: lo vede diventare un punto di riferimento per l’eccellenza artigianale, un posto dove i giovani possano imparare un mestiere che lui è convinto tornerà centrale — perché chi oggi impara a lavorare la pelle con le mani avrà domani, ne è certo, uno dei mestieri più belli che esistano. Formare chi verrà dopo non è un’idea lontana: è il modo in cui Stefano vuole che quello che suo padre gli ha lasciato continui a vivere, oltre di lui.</p>
+      <p class="story-cta"><a class="pulsante" href="/portafogli/">Scegli il tuo portafoglio</a></p>
     </div>
   </section>
 </div>
@@ -72,24 +63,30 @@
 <style>
   /* A sinistra, non centrato: l'allineamento di default di .sec-top (in
      Layout.astro) è center, per questo qui non si usa quella classe. Il
-     riquadro condivide larghezza e centratura di .narrow così il testo
-     "Chi è Stefano?" risulta allineato con il testo del racconto sotto. */
+     riquadro condivide larghezza e centratura di .narrow così il titolo
+     risulta allineato con il testo del racconto sotto. */
   .story-title {
     text-align: left;
     max-width: 660px;
-    margin: 0 auto 36px;
+    margin: 0 auto 18px;
+  }
+  .story-intro {
+    max-width: 660px; margin: 0 auto 40px;
+    font-size: clamp(18px, 2.1vw, 21px); color: var(--ink2); line-height: 1.6;
   }
 
-  /* Due foto vere del laboratorio (22/09/2026), per "dare un tocco di vita"
-     a una pagina che prima era solo testo. Stesso trattamento piatto già
-     usato altrove (border-radius, niente ombra) — .storia-home__foto in
-     home, non un nuovo stile inventato qui. */
+  /* Due foto vere del laboratorio (22/09/2026). Stesso trattamento piatto
+     già usato altrove (border-radius, niente ombra). */
   .story-foto { display: block; border-radius: 4px; overflow: hidden; }
   .story-foto img { display: block; width: 100%; height: auto; }
   .story-foto--principale { max-width: 420px; margin: 0 auto 48px; }
   .story-foto--dettaglio { max-width: 280px; margin: 40px auto; }
+  .story-foto--dettaglio figcaption {
+    margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--ink3);
+    text-align: center; font-style: italic;
+  }
 
-  /* Gli occhielli dei capitoli sono etichette in ottone, non titoli Bodoni. */
+  /* Gli occhielli dei capitoli sono etichette in ottone, non titoli. */
   .story h3 {
     font-family: var(--f-label);
     font-size: 10.5px;
@@ -102,7 +99,7 @@
   .story h3:first-child { margin-top: 0; }
   .story p { margin: 0 0 20px; }
 
-  /* Capolettera in Bodoni ottone sul primo paragrafo. */
+  /* Capolettera in ottone sul primo paragrafo. */
   .story p.first::first-letter {
     float: left;
     font-family: var(--f-display);
@@ -125,7 +122,7 @@
   .figures b {
     display: block;
     font-family: var(--f-display);
-    font-size: 34px;
+    font-size: 30px;
     font-weight: 400;
     color: var(--brass-testo);
     line-height: 1;
@@ -148,4 +145,6 @@
     .figures div:nth-child(3) { border-left: 0; }
     .figures div:nth-child(3), .figures div:nth-child(4) { border-top: 1px solid var(--line); }
   }
+
+  .story-cta { margin-top: 36px; }
 </style>

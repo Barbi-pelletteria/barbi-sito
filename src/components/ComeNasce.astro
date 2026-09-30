@@ -1,44 +1,43 @@
 ---
-// "Come nasce un portafoglio": cinque passi numerati 01-05.
-// Testi verbatim dall'anteprima approvata.
+// "Come nasce un portafoglio Barbi": cinque passi numerati 01-05.
+// Testi D-029 § 4.1 "Come nasce" (QG), non riscritti. Il numero "01 ·"
+// davanti a ogni titolo viene dal contatore CSS (counter(s)), il titolo
+// nel dato è la sola parte testuale.
 //
-// Il terzo passo dice che la cucitura è a macchina, e la rivendica. Non è una
-// svista: nasconderlo è ciò che fa sembrare un sito insincero.
-//
-// 2026-09-22: la macro della pelle sul primo passo (PACCHETTO_MACRO_PELLE)
-// è stata tolta su richiesta diretta ("togli l'immagine") — macroProdotto()
-// resta in src/data/immagini.js, usata ancora dalla galleria prodotto.
+// Il terzo passo dice che la cucitura è a macchina: non è una svista,
+// nasconderlo è ciò che fa sembrare un sito insincero (divieto 15: mai
+// "cucito a mano").
 const passi = [
   {
     titolo: 'La pelle',
-    testo: 'Capra conciata al vegetale, spessore 1,2-1,3 mm. Conciata e tinta con metodi naturali, senza protezioni chimiche: è un materiale vivo, e si comporta come tale.',
+    testo: 'Capra conciata al vegetale, spessore 1,2-1,3 mm. Una concia lenta, senza protezioni chimiche: la pelle resta viva e con l’uso prende un tono che è solo tuo.',
   },
   {
     titolo: 'Il taglio',
-    testo: 'Ogni pelle ha zone più tese e zone più morbide. Da dove si taglia un pezzo decide come invecchierà: è la parte che non si può insegnare in fretta.',
+    testo: 'Ogni pelle ha zone più tese e zone più morbide. Stefano sceglie da dove ricavare ogni pezzo: è da qui che dipende come invecchierà il portafoglio.',
   },
   {
-    titolo: 'Il montaggio e la cucitura',
-    testo: 'Le parti si montano a mano, la cucitura si fa a macchina — una macchina da pelletteria, guidata punto per punto. Non lo nascondiamo: è come si lavora in un laboratorio vero, e tiene meglio di una cucitura a mano fatta di fretta.',
+    titolo: 'Montaggio e cucitura',
+    testo: 'Le parti si montano a mano. La cucitura è eseguita con una macchina da pelletteria, guidata punto per punto: un punto regolare e serrato, fatto per durare.',
   },
   {
-    titolo: 'I bordi, a mano',
-    testo: 'Tinti uno per uno, a pennello. È la lavorazione più lunga e quella che si vede di più: quando un portafoglio sembra fatto bene, quasi sempre stai guardando i bordi.',
+    titolo: 'I bordi',
+    testo: 'Tinti a mano, uno per uno, a pennello. È il passaggio più lungo e il segno più chiaro di un lavoro fatto con cura.',
   },
   {
-    titolo: 'Le iniziali, se le vuoi',
-    testo: 'Impresse sulla pelle in cinque minuti, prima che il pezzo esca dal laboratorio. Dieci euro, nessun giorno di attesa in più.',
+    titolo: 'Le iniziali',
+    testo: 'Se le desideri, le tue iniziali vengono impresse sulla pelle prima della spedizione. 10 € in più, nessun giorno di attesa.',
   },
 ];
 ---
 <div class="contenitore">
   <section class="sec">
     <div class="sec-top">
-      <h2>Come nasce <em>un portafoglio</em></h2>
-      <p>Due o tre ore di lavoro. Ecco dove finiscono.</p>
+      <h2>Come nasce un portafoglio Barbi</h2>
+      <p>Due o tre ore di lavoro, cinque passaggi, un solo standard.</p>
     </div>
     <div class="steps">
-      {passi.map((p, i) => (
+      {passi.map((p) => (
         <div class="step">
           <div>
             <h3>{p.titolo}</h3>
@@ -69,8 +68,9 @@ const passi = [
       repeating-linear-gradient(180deg, rgba(var(--brass-rgb), .6) 0 4px, transparent 4px 8px) left / 1px 100% no-repeat,
       repeating-linear-gradient(180deg, rgba(var(--brass-rgb), .6) 0 4px, transparent 4px 8px) right / 1px 100% no-repeat;
   }
+  /* "01 ·" davanti al titolo, come nel pacchetto ("01 · La pelle"). */
   .step::before {
-    content: counter(s, decimal-leading-zero);
+    content: counter(s, decimal-leading-zero) " ·";
     font-family: var(--f-label);
     font-size: 11px;
     font-weight: 600;

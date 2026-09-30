@@ -1,5 +1,12 @@
 ---
-import { formatEuro, MACRO_PELLE, VENDITA_ATTIVA } from '../data/prodotti.js';
+// Card della pagina collezione. Testi: gli stessi della home, D-029 § 4.1
+// e § 4.2 (QG) — eyebrow, nome, prezzo "49 €" + "spedizione inclusa",
+// testo, pulsante "Scopri il…" (+ "Aggiungi al carrello" a vendita
+// accesa). La riga di specifiche che c'era sotto (tasche · spessore ·
+// peso) non è nei testi del pacchetto: tolta. Le pastiglie colore
+// restano: non sono testo, sono il bersaglio del filtro per colore di
+// CategoriaTemplate.astro.
+import { formatEuroBreve, MACRO_PELLE, VENDITA_ATTIVA } from '../data/prodotti.js';
 import { copertinaProdotto, coloreVetrina } from '../data/immagini.js';
 import FotoSegnaposto from './FotoSegnaposto.astro';
 
@@ -14,37 +21,18 @@ const coloreAttivo = preferito || prodotto.colori.find((c) => c.stock > 0) || pr
 const fotoAttiva = copertinaProdotto(prodotto, coloreAttivo);
 const fotoId = `foto-${prodotto.slug}`;
 
-// I tre dati in vista sotto le pastiglie (testo verbatim dall'anteprima).
-// Se un domani arriva un prodotto senza voce dedicata, si ricava dalle
-// specifiche invece di lasciare la riga vuota.
-const SPECLINE = {
-  sottile: ['8 tasche', '0,55 cm', '50 g'],
-  completo: ['5 tasche', 'portamonete', '0,65 cm'],
-};
-function speclineDaSpecifiche(p) {
-  const capienza = p.specifiche.find(([voce]) => voce === 'Capienza')?.[1] || '';
-  const tasche = capienza.match(/\d+ tasche/)?.[0];
-  const spessore = p.specifiche.find(([voce]) => voce === 'Spessore')?.[1];
-  const peso = p.specifiche.find(([voce]) => voce === 'Peso')?.[1];
-  return [tasche, spessore, peso].filter(Boolean);
-}
-const specline = SPECLINE[prodotto.slug] || speclineDaSpecifiche(prodotto);
-
-// Copertina di ogni colore, per lo scambio foto al click su una pastiglia
-// (punto 4 del pacchetto: cambiando colore cambia l'immagine). Un solo
-// oggetto per prodotto, passato allo script via data-foto: niente richieste
-// di rete in più, sono già URL — solo quale mostrare cambia.
+// Copertina di ogni colore, per lo scambio foto al click su una pastiglia.
 const fotoPerColore = Object.fromEntries(
   prodotto.colori.map((c) => [c.slug, copertinaProdotto(prodotto, c)])
 );
 
 // PACCHETTO_AUDIT_SITO punto A2: a vendita spenta un numero di "disponibili"
-// contraddice "disponibile a breve" scritto due righe sotto — resta solo il
-// nome del colore, il numero torna quando VENDITA_ATTIVA sarà vero.
+// contraddirebbe il resto del sito — resta solo il nome del colore, il
+// numero torna quando VENDITA_ATTIVA sarà vero.
 const etichettaScorta = (c) =>
   VENDITA_ATTIVA ? (c.stock > 0 ? `${c.nome} · ${c.stock} ${c.stock === 1 ? 'disponibile' : 'disponibili'}` : `${c.nome} · esaurito`) : c.nome;
 ---
-<div class="scheda">
+<div class="scheda" data-scheda>
   <a href={url} class:list={['scheda__foto', `scheda__foto--${prodotto.slug}`]} aria-hidden="true" tabindex="-1">
     {fotoAttiva ? (
       <picture id={fotoId}>
@@ -56,9 +44,9 @@ const etichettaScorta = (c) =>
     )}
   </a>
 
-  <p class="p-kick">{prodotto.occhiello}</p>
+  <p class="p-kick">{prodotto.occhielloCard}</p>
   <h2 class="p-name"><a href={url}>{prodotto.nome}</a></h2>
-  <div class="p-price">{formatEuro(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em></div>
+  <div class="p-price">{formatEuroBreve(prodotto.prezzoCentesimi)}<em>spedizione inclusa</em></div>
   <p class="p-desc">{prodotto.sommario}</p>
 
   <div
@@ -76,6 +64,7 @@ const etichettaScorta = (c) =>
         class:list={['sw', { on: c.slug === coloreAttivo.slug }]}
         data-c={c.slug}
         data-nome={c.nome}
+        data-stock={c.stock}
         title={c.nome}
         disabled={c.stock === 0}
         aria-label={c.nome + (c.stock === 0 ? ' (esaurito)' : '')}
@@ -86,40 +75,44 @@ const etichettaScorta = (c) =>
     <span class="sw-label">{etichettaScorta(coloreAttivo)}</span>
   </div>
 
-  <div class="specline">
-    {specline.map((s) => <span>{s}</span>)}
+  <div class:list={['scheda__bottoni', { 'scheda__bottoni--due': VENDITA_ATTIVA }]}>
+    <a href={url} class="pulsante">{prodotto.scopri}</a>
+    {VENDITA_ATTIVA && (
+      <button
+        type="button"
+        class="pulsante v-aggiungi"
+        data-slug={prodotto.slug}
+        data-nome={prodotto.nome}
+        data-colore={coloreAttivo.slug}
+        data-colore-nome={coloreAttivo.nome}
+        data-stock={coloreAttivo.stock}
+      >Aggiungi al carrello</button>
+    )}
   </div>
 </div>
 
 <style>
-  .scheda { display: block; color: inherit; }
+  .scheda { display: flex; flex-direction: column; color: inherit; }
   /* Riquadro a proporzioni fisse (Founder, 02/09/2026): senza, l'immagine
      rendeva alla sua dimensione intrinseca e una scheda arrivava a occupare
      quasi tutto lo schermo. object-fit:cover riempie senza mai deformare —
-     ritaglia, non stira. overflow:hidden perché object-fit da solo non
-     taglia il layout, solo il contenuto visivo. */
+     ritaglia, non stira. */
   .scheda__foto {
     display: block; text-decoration: none;
     aspect-ratio: 4 / 5; overflow: hidden; background: var(--sunk);
   }
-  /* > * prende <picture> e il segnaposto, ma <picture> è solo un
-     selettore di sorgente: non costringe l'<img> dentro, che va vincolato
-     a parte, altrimenti rende alla sua dimensione intrinseca (attributi
-     width/height) invece che alla cornice. */
   .scheda__foto > * { display: block; width: 100%; height: 100%; }
   .scheda__foto img { display: block; width: 100%; height: 100%; object-fit: cover; }
   /* Stessa correzione già applicata in VetrinaProdotti.astro (home,
      03/09/2026): le foto di copertina non sono state scattate alla stessa
      distanza dal soggetto — misurato sui pixel reali di QUESTA pagina, non
      a occhio: il portafoglio Sottile (blu) riempie il 70,3%×46,6% del
-     riquadro, il Completo (marrone) il 76,9%×50,0% — l'8% di differenza
-     già documentato altrove, non un caso isolato di questa scheda. Stesso
-     zoom correttivo, solo sulla scheda più piccola. */
+     riquadro, il Completo (marrone) il 76,9%×50,0%. Stesso zoom
+     correttivo, solo sulla scheda più piccola. */
   .scheda__foto--sottile img { transform: scale(1.08); }
   @media (max-width: 680px) {
     /* Limite in vh, non solo aspect-ratio: su schermi molto stretti e alti
-       4/5 da solo può comunque superare metà schermo. object-fit:cover
-       ritaglia l'eccedenza, l'immagine non si deforma. */
+       4/5 da solo può comunque superare metà schermo. */
     .scheda__foto { max-height: 55vh; }
   }
 
@@ -128,14 +121,14 @@ const etichettaScorta = (c) =>
   .p-name a:hover { color: var(--brass); }
   .p-desc { margin: 14px 0 0; color: var(--ink2); font-size: 17.5px; line-height: 1.6; }
 
-  .specline {
-    margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--line);
-    font-family: var(--f-label); font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
-    color: var(--ink3); display: flex; flex-wrap: wrap; gap: 7px 20px; font-variant-numeric: tabular-nums;
-  }
+  .scheda__bottoni { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: auto; padding-top: 22px; }
+  .scheda__bottoni--due { grid-template-columns: 1fr 1fr; }
+  .scheda__bottoni .pulsante { text-align: center; }
 </style>
 
 <script>
+  import { initAggiungiRapido } from '../scripts/aggiungi-rapido.js';
+
   document.querySelectorAll('.swatches[data-foto-target]').forEach((gruppo) => {
     const nomeProdotto = gruppo.getAttribute('data-nome-prodotto') || '';
     const scorte = JSON.parse(gruppo.getAttribute('data-scorte') || '{}');
@@ -175,4 +168,6 @@ const etichettaScorta = (c) =>
       });
     });
   });
+
+  initAggiungiRapido();
 </script>

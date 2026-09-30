@@ -1,19 +1,14 @@
 ---
-// "La nostra storia" del redesign 15/09/2026. Foto vera di Stefano al
-// lavoro arrivata il 22/09/2026 (FOTO_SITO/stefano-laboratorio.jpg),
-// sostituisce il segnaposto esplicito che il Founder aveva chiesto
-// ("ci andrà una foto di stefano che lavora, togli questa e metti una
-// scritta segnaposto") in attesa di questo momento.
+// Sezione storia della home (redesign 15/09/2026). Foto vera di Stefano
+// al lavoro (22/09/2026, FOTO_SITO/stefano-laboratorio.jpg).
 //
 // object-position verticale calcolato misurando i pixel reali della foto
-// (non a occhio): il crop quadrato di default (centrato) tagliava i
-// capelli in alto lasciando margine non necessario in basso. 12% lascia
-// un margine sopra la testa e mostra mani+strumenti sotto, come richiesto
-// ("soggetto centrato in alto, spazio sotto con gli strumenti").
+// (non a occhio): 12% lascia un margine sopra la testa e mostra
+// mani+strumenti sotto ("soggetto centrato in alto, spazio sotto con gli
+// strumenti").
 //
-// Testo: due frasi VERBATIM da Racconto.astro (capitoli "1992" e "2023 · Il
-// proprio nome"), non riscritte. Link a /chi-siamo/ per il racconto intero,
-// stesso pattern già in Citazione.astro.
+// Testi D-029 § 4.1 "Sezione storia" (QG), non riscritti — sparisce anche
+// da qui "senza vetrine, senza catalogo" (Parte 3).
 ---
 <section class="storia-home">
   <picture class="storia-home__foto">
@@ -21,11 +16,10 @@
     <img src="/stefano-laboratorio.jpg" alt="Stefano Barbi al lavoro nel suo laboratorio, mentre rifinisce un pezzo in pelle" width="1024" height="1536" loading="lazy" />
   </picture>
   <div class="storia-home__testo">
-    <p class="eyebrow">Dal 1992</p>
-    <h2>La nostra storia</h2>
-    <p class="lede">Stefano Barbi ha diciassette anni quando comincia a lavorare la pelle. Non è una scelta di carriera.</p>
-    <p>Poi Stefano ha deciso di mettere il proprio nome sui pezzi che fa. Ha aperto la sua attività e il suo laboratorio, in Campania, e ha ricominciato da capo: senza un marchio noto alle spalle, senza vetrine, senza catalogo.</p>
-    <a class="storia-home__link" href="/chi-siamo/">Scopri la nostra storia</a>
+    <p class="eyebrow">L’artigiano</p>
+    <h2>Per anni il suo lavoro ha portato altri nomi. Oggi porta il suo.</h2>
+    <p>Stefano Barbi comincia a lavorare la pelle nel 1992, a diciassette anni. Per gran parte della sua carriera realizza portafogli, borse e cinture per marchi più affermati del suo. Nel 2023 apre il proprio laboratorio e sceglie di firmare ogni pezzo con il suo nome.</p>
+    <a class="storia-home__link" href="/chi-siamo/">Scopri la sua storia →</a>
   </div>
 </section>
 
@@ -38,10 +32,9 @@
   .storia-home__foto { display: block; aspect-ratio: 1; overflow: hidden; border-radius: 4px; }
   .storia-home__foto img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
   .storia-home__testo h2 { margin: 6px 0 22px; }
-  .storia-home__testo .lede { font-size: 19px; color: var(--ink); margin: 0 0 16px; font-style: italic; }
   .storia-home__testo p { color: var(--ink2); line-height: 1.7; margin: 0 0 16px; }
   .storia-home__link {
-    display: inline-block; margin-top: 10px;
+    display: inline-block; margin-top: 10px; padding: 12px 0;
     font-family: var(--f-label); font-size: 11px; font-weight: 600;
     letter-spacing: .14em; text-transform: uppercase; color: var(--brass-testo);
   }

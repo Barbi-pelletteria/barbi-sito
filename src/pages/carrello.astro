@@ -1,6 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
+import { VENDITA_ATTIVA } from '../data/prodotti.js';
+// Testi D-029 § 4.8 (QG), due versioni dietro VENDITA_ATTIVA. Prezzi in
+// formato completo (formatEuro), come richiesto per carrello e riepilogo.
 ---
 <Layout title="Carrello" description="Il tuo carrello Barbi Pelletteria.">
   <div class="contenitore">
@@ -10,15 +12,15 @@ import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
       <div id="carrello-vuoto" hidden>
         {VENDITA_ATTIVA ? (
           <>
-            <p class="carrello-vuoto__testo">Il carrello è vuoto.</p>
-            <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+            <p class="carrello-vuoto__testo">Il tuo carrello è vuoto.</p>
+            <a class="pulsante" href="/portafogli/">Scopri la collezione</a>
           </>
         ) : (
           <>
-            <p class="carrello-vuoto__testo">Il carrello è vuoto perché la vendita online non è ancora attiva — è per questo che è vuoto, non per un errore.</p>
+            <p class="carrello-vuoto__testo">La prima collezione online non è ancora aperta. Puoi scoprire i portafogli e lasciare la tua email: ti avvisiamo appena sono disponibili.</p>
             <p class="carrello-vuoto__azioni">
-              <a class="pulsante" href="/portafogli/">Guarda i portafogli</a>
-              <a class="pulsante pulsante-secondario" href={`mailto:${EMAIL_CONTATTO}`}>Scrivici per informazioni</a>
+              <a class="pulsante" href="/portafogli/">Scopri la collezione</a>
+              <a class="pulsante pulsante-secondario" href="/contatti/#avvisami">Avvisami all’apertura</a>
             </p>
           </>
         )}
@@ -38,11 +40,13 @@ import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
       </table>
 
       <div id="riepilogo-carrello" class="riepilogo-carrello" hidden>
-        <p class="riepilogo-carrello__totale">Totale <span id="totale-carrello"></span></p>
-        <a class="pulsante" id="btn-vai-checkout" href="/checkout/">Vai al pagamento</a>
+        <div>
+          <p class="riepilogo-carrello__spedizione">Spedizione: gratuita</p>
+          <p class="riepilogo-carrello__totale">Totale <span id="totale-carrello"></span></p>
+        </div>
+        <a class="pulsante" id="btn-vai-checkout" href="/checkout/">Procedi al pagamento sicuro</a>
       </div>
-      <!-- PACCHETTO_AUDIT_SITO punto B5 -->
-      <p id="pagamenti-riga-carrello" class="pagamenti-riga-carrello" hidden>Pagamenti con carta di credito e debito, gestiti in sicurezza da Stripe.</p>
+      <p id="pagamenti-riga-carrello" class="pagamenti-riga-carrello" hidden>Pagamento con carta su pagina protetta Stripe. I dati della carta non passano dal nostro sito.</p>
     </section>
   </div>
 </Layout>
@@ -107,8 +111,7 @@ import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
       ].filter(Boolean).join(' · ');
 
       // Stessa copertina (01-chiuso) usata in vetrina/scheda prodotto per
-      // questo modello+colore — non una foto nuova, la stessa fonte già
-      // verificata (immagini.js).
+      // questo modello+colore (immagini.js).
       const copertina = colore ? copertinaProdotto(prodotto, colore) : null;
       const fotoHtml = copertina
         ? `<picture class="riga-foto">
@@ -202,8 +205,9 @@ import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
     background: var(--sunk); color: var(--ink); font-size: 16px;
     font-variant-numeric: tabular-nums;
   }
+  /* min-height 44px: bersaglio tocco (D-029 § 2.3), il testo resta piccolo. */
   .link-rimuovi {
-    background: none; border: 0; padding: 0; cursor: pointer;
+    background: none; border: 0; padding: 12px 0; min-height: 44px; cursor: pointer;
     font-family: var(--f-label); font-size: 10px; letter-spacing: .12em;
     text-transform: uppercase; color: var(--ink3); text-decoration: underline;
   }
@@ -217,6 +221,10 @@ import { VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
   /* stessa causa del bug banner cookie: display:flex batte [hidden] a
      parità di specificità, quindi riepilogo.hidden = true da solo non basta. */
   .riepilogo-carrello[hidden] { display: none; }
+  .riepilogo-carrello__spedizione {
+    margin: 0 0 6px; font-family: var(--f-label); font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink3);
+  }
   .riepilogo-carrello__totale {
     margin: 0; font-family: var(--f-display); font-size: 27px; font-variant-numeric: tabular-nums;
   }

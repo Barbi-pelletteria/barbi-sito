@@ -1,8 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────
 // Interruttore VENDITA ATTIVA (punto 4C del pacchetto catalogo).
-//   false → i pulsanti "Aggiungi al carrello" diventano "Disponibile a breve"
-//           con un link che scrive a info.barbipelletteria@gmail.com. Carrello
-//           e checkout restano raggiungibili ma non pubblicizzati.
+//   false → niente "Aggiungi al carrello": sulla scheda c'è il campo
+//           "Avvisami quando è disponibile" (D-029), in vetrina solo
+//           "Scopri il…". Carrello e checkout restano raggiungibili ma non
+//           pubblicizzati.
 //   true  → il sito vende normalmente.
 // Il sito va online per essere visitato PRIMA del via libera fiscale: si passa
 // alla vendita cambiando solo questo valore.
@@ -59,30 +60,49 @@ export const curaProdotto = {
   chiusura: 'Conservalo in un luogo asciutto, al riparo dalla luce diretta.',
 };
 
-// Avviso legale accanto alla casella delle iniziali (testo verbatim).
+// Riquadro iniziali sulla scheda prodotto (D-029 § 4.3, testo del QG).
 export const avvisoIniziali =
-  'Le iniziali rendono il portafoglio unico: per questo un pezzo personalizzato non può essere restituito.';
+  'Impresse sulla pelle prima della spedizione. Rendono il portafoglio solo tuo: per questo un pezzo personalizzato non può essere reso.';
+
+// Casella di consenso dei moduli newsletter/avvisami (D-029 § 4.11): un
+// testo solo, usato dal footer, dal banner e dalla scheda prodotto.
+export const CONSENSO_NEWSLETTER =
+  'Accetto di ricevere email da Barbi Pelletteria su novità e nuovi modelli. Posso annullare l’iscrizione in qualsiasi momento.';
 
 // I DUE prodotti reali. Stock per singolo colore (punto 4A).
 export const prodotti = [
+  // Tutti i testi qui sotto (occhielli, sommario, fraseBreve, puntiForza,
+  // descrizione, rimando, metaDescription) sono quelli definitivi del QG,
+  // D-029 § 4.1/4.3/4.4/4.14 — non riscritti. Apostrofi tipografici come
+  // nel resto del sito (uniformati il 26/08).
   {
     slug: 'sottile',
     categoria: 'portafogli',
     nome: 'Sottile',
-    occhiello: 'Portafoglio da 8 carte',
-    // Riga singola mostrata sulla scheda in home (testo verbatim dall'anteprima).
-    sommario: 'Mezzo centimetro di spessore. Sta nella tasca interna di una giacca senza deformarla.',
+    // Eyebrow della scheda prodotto (§ 4.3) e della card in vetrina (§ 4.1).
+    occhiello: 'Portafoglio slim · 8 carte',
+    occhielloCard: '8 carte · 0,55 cm',
+    scopri: 'Scopri il Sottile',
+    // Testo della card (home e collezione, § 4.1).
+    sommario: 'Mezzo centimetro di pelle che scompare nella tasca interna della giacca. Per chi ha lasciato il contante alle spalle.',
+    // Frase breve sopra il pulsante della scheda (§ 4.3).
+    fraseBreve: 'Otto carte, banconote e documenti in 0,55 cm. Scivola nella tasca interna della giacca senza lasciare traccia.',
     prezzoCentesimi: 4900,
-    // Gli stessi due fatti già scritti in "Capienza" qui sotto, ma in forma
-    // strutturata: servono a ProductCard.astro per non dover leggere
-    // (e sbagliare) una frase libera.
     tascheCarte: 8,
     portamonete: false,
-    descrizione: [
-      'Otto tasche per le carte, lo spazio per i documenti e per le banconote, e nient’altro. Chiuso è alto 8,5 cm e spesso poco più di mezzo centimetro: sta nella tasca interna di una giacca senza deformarla, e in quella dei pantaloni senza farsi sentire.',
-      'Stefano lo descrive così: «un portafoglio ridimensionato per lo stile di vita odierno». Meno contante, più carte, meno ingombro.',
-      'La pelle è di capra conciata al vegetale, spessore 1,2-1,3 mm, con i bordi tinti a mano uno per uno. La fodera è in poliestere.',
+    // Punti di forza (§ 4.3): icona + titolo + riga. L'icona è solo un
+    // segno lineare scelto per tema, vedi ICONE in prodotto/[slug].astro.
+    puntiForza: [
+      { icona: 'spessore', titolo: '0,55 cm di spessore', testo: 'Pensato per la tasca interna della giacca e dei pantaloni: non deforma, non si sente.' },
+      { icona: 'pelle', titolo: 'Pelle conciata al vegetale', testo: 'Capra, spessore 1,2-1,3 mm. Senza protezioni chimiche: con l’uso cambia tono e diventa tuo.' },
+      { icona: 'bordi', titolo: 'Bordi tinti a mano', testo: 'Uno per uno, a pennello. Il dettaglio che distingue un portafoglio fatto con cura.' },
+      { icona: 'tasche', titolo: '8 tasche per le carte', testo: 'Più scomparto banconote e tasca documenti. L’essenziale, niente di superfluo.' },
     ],
+    descrizione: [
+      '«Un portafoglio ridimensionato per lo stile di vita odierno»: così lo descrive Stefano. Meno contante, più carte, nessun ingombro. Chiuso misura 10,9 × 8,5 cm e pesa 50 grammi.',
+    ],
+    rimando: { slug: 'completo', testo: 'Ti serve anche il portamonete? Scopri il Completo →' },
+    metaDescription: 'Sottile: portafoglio slim da 8 carte, 0,55 cm, in pelle di capra conciata al vegetale con bordi tinti a mano. 49 €, spedizione inclusa.',
     specifiche: [
       ['Pelle', 'capra conciata al vegetale, spessore 1,2-1,3 mm'],
       ['Fodera', 'poliestere'],
@@ -103,17 +123,25 @@ export const prodotti = [
     slug: 'completo',
     categoria: 'portafogli',
     nome: 'Completo',
-    occhiello: 'Portafoglio con portamonete',
-    // Riga singola mostrata sulla scheda in home (testo verbatim dall'anteprima).
-    sommario: 'Il classico di tutti i giorni. Non lascia fuori niente, spiccioli compresi.',
+    occhiello: 'Portafoglio classico · con portamonete',
+    occhielloCard: '5 carte · portamonete',
+    scopri: 'Scopri il Completo',
+    sommario: 'Il portafoglio classico, senza ingombro: carte, banconote, documenti e monete in 0,65 cm.',
+    fraseBreve: 'Carte, banconote, documenti e monete in 0,65 cm. Il classico di ogni giorno, senza ingombro.',
     prezzoCentesimi: 5500,
     tascheCarte: 5,
     portamonete: true,
-    descrizione: [
-      'Cinque tasche per le carte, lo spazio per documenti e banconote, e il portamonete. È il portafoglio classico: quello che serve quando in tasca finisce di tutto, spiccioli compresi.',
-      'Stefano lo chiama «il classico per l’uso di tutti i giorni». Un millimetro più spesso del Sottile, cinque grammi in più, e in cambio non lascia fuori niente.',
-      'La pelle è di capra conciata al vegetale, spessore 1,2-1,3 mm, con i bordi tinti a mano uno per uno. La fodera è in poliestere.',
+    puntiForza: [
+      { icona: 'portamonete', titolo: 'Portamonete con patta', testo: 'Chiuso da un bottone: le monete restano al loro posto.' },
+      { icona: 'spessore', titolo: '0,65 cm di spessore', testo: 'Solo un millimetro in più del Sottile, e non lascia fuori niente.' },
+      { icona: 'pelle', titolo: 'Pelle conciata al vegetale', testo: 'Capra, spessore 1,2-1,3 mm. Senza protezioni chimiche: con l’uso cambia tono e diventa tuo.' },
+      { icona: 'bordi', titolo: 'Bordi tinti a mano', testo: 'Uno per uno, a pennello. Il dettaglio che distingue un portafoglio fatto con cura.' },
     ],
+    descrizione: [
+      'Stefano lo chiama «il classico per l’uso di tutti i giorni». Cinque tasche per le carte, scomparto banconote, tasca documenti e portamonete. Chiuso misura 10,9 × 8,5 cm e pesa 55 grammi.',
+    ],
+    rimando: { slug: 'sottile', testo: 'Preferisci qualcosa di ancora più sottile? Scopri il Sottile →' },
+    metaDescription: 'Completo: portafoglio con portamonete e 5 carte, 0,65 cm, in pelle di capra conciata al vegetale con bordi tinti a mano. 55 €, spedizione inclusa.',
     specifiche: [
       ['Pelle', 'capra conciata al vegetale, spessore 1,2-1,3 mm'],
       ['Fodera', 'poliestere'],
@@ -148,4 +176,13 @@ export function getColore(prodotto, coloreSlug) {
 // Formatta un importo in centesimi come prezzo italiano, es. 4900 → "49,00 €".
 export function formatEuro(centesimi) {
   return (centesimi / 100).toFixed(2).replace('.', ',') + ' €';
+}
+
+// Prezzo "da vetrina" (D-029 § 2.7): "49 €" senza decimali quando
+// l'importo è intero — convenzione dell'alta pelletteria. Carrello,
+// checkout e riepilogo restano su formatEuro (formato completo). Se un
+// giorno un prezzo non fosse tondo, ricade sul formato completo invece di
+// troncare i centesimi.
+export function formatEuroBreve(centesimi) {
+  return centesimi % 100 === 0 ? `${centesimi / 100} €` : formatEuro(centesimi);
 }

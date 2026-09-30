@@ -39,7 +39,7 @@ const organizzazioneJsonLd = {
   },
 };
 ---
-<Layout title="Home" description="Portafogli in pelle conciata al vegetale, fatti a mano a Casoria da Stefano Barbi dal 1992. Spedizione gratuita in tutta Italia, reso 14 giorni, garanzia 24 mesi.">
+<Layout title="Home" description="Alta pelletteria Barbi: portafogli in pelle di capra conciata al vegetale, rifiniti a mano da Stefano Barbi in Campania. Spedizione gratuita in Italia.">
   <Fragment slot="structured-data">
     <script type="application/ld+json" set:html={JSON.stringify(organizzazioneJsonLd)} />
   </Fragment>
@@ -75,48 +75,74 @@ const organizzazioneJsonLd = {
       <img src="/hero-portafoglio-marrone.jpg" alt={fotoHero.alt} width="820" height="1024" />
     </picture>
     <div class="hero-nuovo__testo">
-      <p class="eyebrow">Laboratorio di pelletteria</p>
+      {/* Testi D-029 § 4.1 "Hero" (QG). La frase è quella del Founder. */}
+      <p class="eyebrow">Laboratorio di pelletteria · dal 1992</p>
       <h1>Alta pelletteria Barbi:</h1>
       <p class="sottotitolo">L'arte di plasmare il futuro grazie ad una nobile tradizione artigianale.</p>
-      <a class="pulsante pulsante--grande" href="/portafogli/">Scopri i prodotti</a>
+      <p class="hero-nuovo__supporto">Portafogli in pelle di capra conciata al vegetale, montati e rifiniti a mano da Stefano Barbi nel suo laboratorio in Campania.</p>
+      <div class="hero-nuovo__azioni">
+        <a class="pulsante pulsante--grande" href="/portafogli/">Scegli il tuo portafoglio</a>
+        <a class="link-freccia" href="/chi-siamo/">Entra nel laboratorio →</a>
+      </div>
     </div>
   </section>
 
   <!--
-    PACCHETTO_AUDIT_SITO punto A2: a vendita spenta queste quattro non sono
-    promesse attive, sono impegni futuri — l'etichetta sopra la fascia lo
-    dice esplicitamente invece di lasciarle sembrare condizioni valide oggi.
+    Fascia vantaggi, D-029 § 4.1 (QG). Recesso e garanzia NON stanno più
+    qui (Parte 3: art. 23 lett. l Codice del Consumo — i diritti che la
+    legge già dà non si presentano come vantaggi dell'offerta); l'etichetta
+    "alla riapertura" sparisce ("riapertura" è falso: la vendita online non
+    è mai stata aperta).
   -->
-  {!VENDITA_ATTIVA && <p class="strip-etichetta">Alla riapertura della vendita</p>}
   <div class="strip">
-    <div>Spedizione gratuita</div>
-    <div>Consegna 1-3 giorni</div>
-    <div>14 giorni per il reso</div>
-    <div>Garanzia 2 anni</div>
+    <div>Spedizione gratuita in Italia</div>
+    <div>Consegna in 1-3 giorni dalla spedizione</div>
+    <div>Le tue iniziali impresse sulla pelle</div>
+    <div>Pagamento protetto da Stripe</div>
   </div>
 
   <!-- 2 · griglia prodotti, due bottoni per scheda -->
   <div class="contenitore">
     <section class="sec sec--vetrina">
       <div class="sec-top">
-        {/* "I più venduti": il Founder ha confermato la scelta esplicitamente
-            dopo essere stato avvisato che con VENDITA_ATTIVA=false non
-            esistono ancora vendite reali da cui derivarla — non decisa da
-            soli, richiesta ribadita dopo il segnale. */}
-        <p class="eyebrow">I più venduti</p>
-        <h2>Due modelli, <em>fatti a mano</em></h2>
-        <p>Il catalogo si allarga presto: altri tre modelli in arrivo.</p>
+        {/* D-029 § 4.1 "Sezione collezione" (QG). "I più venduti" tolto:
+            non dimostrabile online (Parte 3). */}
+        <p class="eyebrow">La collezione</p>
+        <h2>Due portafogli. Nessun compromesso.</h2>
+        <p>Stessa pelle, stesse mani, due modi di portare con sé l’essenziale.</p>
       </div>
 
       <VetrinaProdotti prodotti={prodotti} />
     </section>
   </div>
 
-  <!-- 3 · la nostra storia -->
+  <!-- 3 · fascia numeri (D-029 § 4.1, QG): fondo scuro, 4 colonne / 2×2.
+       Numeri veri già registrati in DATI_REALI (1992, 2-3 ore, ~50 fiere,
+       1,2 mm), nessuno inventato. -->
+  <section class="numeri" aria-label="Il laboratorio in numeri">
+    <div class="numeri__in">
+      <div><b>1992</b><span>l’anno in cui Stefano inizia a lavorare la pelle</span></div>
+      <div><b>2-3 ore</b><span>di lavoro su ogni portafoglio</span></div>
+      <div><b>circa 50</b><span>fiere l’anno in tutta Italia</span></div>
+      <div><b>1,2 mm</b><span>lo spessore della pelle scelta</span></div>
+    </div>
+  </section>
+
+  <!-- 4 · l'artigiano -->
   <StoriaHome />
 
-  <!-- 4 · come nasce un portafoglio (contenuto esistente, tenuto) -->
+  <!-- 5 · come nasce un portafoglio -->
   <ComeNasce />
+
+  <!-- 6 · da regalare (D-029 § 4.1, QG), prima della chiusura -->
+  <div class="contenitore">
+    <section class="regalo">
+      <p class="eyebrow">Da regalare</p>
+      <h2>Un regalo che porta un nome.</h2>
+      <p>Un portafoglio si usa ogni giorno, per anni. Con le iniziali impresse sulla pelle diventa un oggetto che appartiene soltanto a chi lo riceve.</p>
+      <a class="pulsante" href="/portafogli/">Personalizza il tuo portafoglio</a>
+    </section>
+  </div>
 
   <!--
     PACCHETTO_AUDIT_SITO punto B7: prima la home finiva nel footer, senza
@@ -124,16 +150,18 @@ const organizzazioneJsonLd = {
   -->
   <div class="contenitore">
     <section class="cta-finale">
+      {/* Chiusura, D-029 § 4.1 (QG), due versioni dietro l'interruttore. */}
       {VENDITA_ATTIVA ? (
         <>
-          <h2>Pronto a scegliere <em>il tuo</em>?</h2>
-          <a class="pulsante" href="/portafogli/">Vai al catalogo</a>
+          <h2>Il tuo portafoglio, dal laboratorio a casa tua.</h2>
+          <p>Spedizione gratuita in tutta Italia, consegna in 1-3 giorni dalla spedizione.</p>
+          <a class="pulsante" href="/portafogli/">Scegli il tuo portafoglio</a>
         </>
       ) : (
         <>
-          <h2>Vuoi sapere <em>quando riapre</em>?</h2>
-          <p>Lascia il tuo contatto: ti scriviamo appena la vendita online riparte.</p>
-          <a class="pulsante" href="/contatti/#avvisami">Avvisami alla riapertura</a>
+          <h2>La prima collezione online sta per aprire.</h2>
+          <p>Lascia la tua email: ti scriviamo appena i portafogli sono disponibili.</p>
+          <a class="pulsante" href="/contatti/#avvisami">Avvisami all’apertura</a>
         </>
       )}
     </section>
@@ -225,7 +253,11 @@ const organizzazioneJsonLd = {
     font-size: clamp(1.25rem, 2vw, 1.625rem); line-height: 1.5;
     color: var(--ink); font-style: italic;
   }
-  .hero-nuovo__testo .pulsante { margin-top: 34px; }
+  .hero-nuovo__supporto {
+    margin: 16px 0 0; max-width: 46ch;
+    font-size: 17px; line-height: 1.6; color: var(--ink2);
+  }
+  .hero-nuovo__azioni { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 30px; }
 
   @media (max-width: 780px) {
     /* Due colonne affiancate non hanno senso stretto in verticale su
@@ -247,12 +279,7 @@ const organizzazioneJsonLd = {
   @media (max-width: 680px) { .sec--vetrina { padding: 56px 0; } }
   .sec--vetrina .sec-top .eyebrow { display: block; }
 
-  .strip-etichetta {
-    text-align: center; margin: 40px 0 0;
-    font-family: var(--f-label); font-size: 10px; font-weight: 600;
-    letter-spacing: .16em; text-transform: uppercase; color: var(--brass-testo);
-  }
-  .strip { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+  .strip { display: flex; flex-wrap: wrap; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .strip div {
     flex: 1 1 200px; padding: 17px 0; text-align: center;
     font-family: var(--f-label); font-size: 11px; font-weight: 500;
@@ -265,6 +292,32 @@ const organizzazioneJsonLd = {
     .strip div:nth-child(3), .strip div:nth-child(4) { border-top: 1px solid var(--line); }
     .strip div:nth-child(3) { border-left: 0; }
   }
+
+  /* Fascia numeri: fondo --ink (nessun colore nuovo), numeri in --brass
+     (7,1:1 su --ink, calcolato), didascalie in crema al 78% (~10:1). */
+  .numeri { background: var(--ink); color: var(--raise); padding: 54px 22px; }
+  .numeri__in { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+  .numeri__in div { padding: 8px 18px; text-align: center; }
+  .numeri__in div + div { border-left: 1px solid rgba(251, 246, 236, .18); }
+  .numeri b {
+    display: block; font-family: var(--f-display); font-weight: 400;
+    font-size: clamp(30px, 3.4vw, 42px); line-height: 1; color: var(--brass);
+    font-variant-numeric: tabular-nums;
+  }
+  .numeri span {
+    display: block; margin: 12px auto 0; max-width: 22ch;
+    font-family: var(--f-label); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    line-height: 1.5; color: rgba(251, 246, 236, .78);
+  }
+  @media (max-width: 680px) {
+    .numeri { padding: 40px 16px; }
+    .numeri__in { grid-template-columns: 1fr 1fr; gap: 32px 0; }
+    .numeri__in div:nth-child(3) { border-left: 0; }
+  }
+
+  .regalo { padding: 80px 0 30px; text-align: center; max-width: 620px; margin: 0 auto; }
+  .regalo h2 { margin: 0 0 16px; }
+  .regalo p { color: var(--ink2); margin: 0 auto 28px; }
 
   .cta-finale { padding: 70px 0 84px; text-align: center; }
   .cta-finale h2 { margin: 0 0 16px; }

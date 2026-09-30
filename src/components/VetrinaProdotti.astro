@@ -1,17 +1,17 @@
 ---
-// Griglia prodotti del redesign 15/09/2026 (riferimento "Stitch & Hide"):
-// due bottoni per scheda invece del click-through unico di ProductCard.astro.
+// Griglia prodotti della home (redesign 15/09/2026). Testi delle card:
+// D-029 § 4.1 (QG) — eyebrow, nome, prezzo "49 €" + "spedizione inclusa",
+// testo, pulsante "Scopri il…". A vendita spenta niente pulsante
+// disabilitato ("un pulsante spento sembra un sito rotto"); a vendita
+// accesa il secondo pulsante è "Aggiungi al carrello".
 //
 // Componente a sé, non una modifica di ProductCard: quel componente è
-// condiviso con le pagine categoria (CategoriaTemplate.astro), che questo
-// redesign non tocca — cambiargli la struttura avrebbe spostato anche le
-// pagine categoria senza che nessuno lo avesse chiesto. Stessa fonte dati
-// (prodotti.js, immagini.js), zero duplicazione della logica di lettura.
-import { formatEuro, VENDITA_ATTIVA, EMAIL_CONTATTO } from '../data/prodotti.js';
+// condiviso con la pagina collezione. Stessa fonte dati (prodotti.js,
+// immagini.js), zero duplicazione della logica di lettura.
+import { formatEuroBreve, VENDITA_ATTIVA } from '../data/prodotti.js';
 import { copertinaProdotto, coloreVetrina } from '../data/immagini.js';
 
 const { prodotti } = Astro.props;
-const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent('Disponibilità portafogli Barbi')}`;
 ---
 <div class="vetrina">
   {prodotti.map((p) => {
@@ -20,7 +20,7 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
     const foto = copertinaProdotto(p, coloreAttivo);
     const url = `/prodotto/${p.slug}/`;
     return (
-      <article class="v-scheda">
+      <article class="v-scheda" data-scheda>
         <a href={url} class:list={['v-scheda__foto', `v-scheda__foto--${p.slug}`]} tabindex="-1" aria-hidden="true">
           {foto && (
             <picture>
@@ -29,38 +29,33 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
             </picture>
           )}
         </a>
-        <p class="p-kick">{p.occhiello}</p>
+        <p class="p-kick">{p.occhielloCard}</p>
         <h3 class="v-scheda__nome"><a href={url}>{p.nome}</a></h3>
-        <div class="p-price">{formatEuro(p.prezzoCentesimi)}</div>
+        <div class="p-price">{formatEuroBreve(p.prezzoCentesimi)}<em>spedizione inclusa</em></div>
         <p class="v-scheda__desc">{p.sommario}</p>
-        <div class="v-scheda__bottoni">
-          {/*
-            Primario/secondario invertiti rispetto al primo giro (D-019):
-            qui "Aggiungi al carrello" è .pulsante primario (texture pelle),
-            "Vedi dettagli" è --secondario — così vuole la rifinitura del
-            15/09, punto 3+6. NOTA PER CHI RIPRENDE QUESTO FILE: questo è
-            in tensione con D-015 rivista (i pulsanti di incasso restano
-            sempre sul fondo pieno d'ottone, "l'elemento più evidente della
-            pagina") — qui non lo è più, è testurizzato come tutti gli
-            altri .pulsante primari. Con VENDITA_ATTIVA=false oggi questo
-            bottone non è mai raggiungibile (mostra "Disponibile a breve"),
-            quindi la differenza non si vede ancora dal vivo — segnalato nel
-            resoconto, da confermare col Founder prima che la vendita si
-            accenda, non deciso qui in autonomia una seconda volta.
-          */}
-          <a href={url} class="pulsante pulsante-secondario">Vedi dettagli</a>
-          {VENDITA_ATTIVA ? (
-            <button type="button" class="pulsante" data-slug={p.slug} data-colore={coloreAttivo.slug}>
-              Aggiungi al carrello
-            </button>
-          ) : (
-            <a href={mailtoDisponibile} class="pulsante pulsante-secondario" aria-disabled="true">Disponibile a breve</a>
+        <div class:list={['v-scheda__bottoni', { 'v-scheda__bottoni--due': VENDITA_ATTIVA }]}>
+          <a href={url} class="pulsante">{p.scopri}</a>
+          {VENDITA_ATTIVA && (
+            <button
+              type="button"
+              class="pulsante v-aggiungi"
+              data-slug={p.slug}
+              data-nome={p.nome}
+              data-colore={coloreAttivo.slug}
+              data-colore-nome={coloreAttivo.nome}
+              data-stock={coloreAttivo.stock}
+            >Aggiungi al carrello</button>
           )}
         </div>
       </article>
     );
   })}
 </div>
+
+<script>
+  import { initAggiungiRapido } from '../scripts/aggiungi-rapido.js';
+  initAggiungiRapido();
+</script>
 
 <style>
   .vetrina { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
@@ -70,13 +65,9 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
      all'hover (le card "si sollevano appena", non saltano — richiesta
      esplicita). Lo zoom è SOLO sulla foto (scale 1.03, 300ms), mai su
      tutta la scheda: overflow:hidden sul riquadro foto la contiene. */
-  /* display:flex + colonna (non il default a blocco): i due riassunti
-     prodotto hanno lunghezze diverse (una riga vs due), senza questo i
-     bottoni finivano ad altezze diverse fra le due schede — misurato
-     22px di scarto, non solo "sembrava storto". margin-top:auto sui
-     bottoni li ancora in fondo alla scheda, qualunque sia la lunghezza
-     del testo sopra: le due schede hanno già la stessa altezza totale
-     (la griglia le pareggia), qui si allinea cosa succede DENTRO. */
+  /* display:flex + colonna: i due riassunti prodotto hanno lunghezze
+     diverse, senza questo i bottoni finivano ad altezze diverse fra le
+     due schede. margin-top:auto sui bottoni li ancora in fondo. */
   .v-scheda {
     display: flex; flex-direction: column;
     border: 1px solid var(--sunk); border-radius: 4px; padding: 14px 14px 20px;
@@ -85,11 +76,7 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
   }
   .v-scheda:hover { box-shadow: 0 6px 18px rgba(33, 27, 23, .10); }
 
-  /* Stesso riquadro a proporzioni fisse già corretto per ProductCard.astro
-     il 03/09/2026 (l'immagine rendeva alla sua dimensione intrinseca) —
-     qui riscritto perché questa è una scheda diversa, non un import
-     condiviso: se in futuro serve, vale la pena estrarlo in una classe
-     globale invece di duplicarlo una terza volta. */
+  /* Stesso riquadro a proporzioni fisse di ProductCard.astro. */
   .v-scheda__foto {
     display: block; text-decoration: none;
     aspect-ratio: 4 / 5; overflow: hidden; background: var(--sunk);
@@ -103,10 +90,9 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
   /* Le due foto di copertina non sono state scattate alla stessa distanza
      dal soggetto (misurato, non a occhio: il portafoglio blu riempie il
      71,1%×47,2% del proprio scatto, il marrone il 77,4%×50,6% — circa
-     l'8% più piccolo, non un'illusione della griglia). Zoom correttivo
-     solo sulla scheda più piccola, non tocca il file originale — se in
-     futuro arrivano scatti nuovi con la stessa inquadratura, questa
-     regola va tolta, non lasciata "tanto non si vede più". */
+     l'8% più piccolo). Zoom correttivo solo sulla scheda più piccola —
+     se arrivano scatti nuovi con la stessa inquadratura, questa regola
+     va tolta. */
   .v-scheda__foto--sottile img { transform: scale(1.08); }
   .v-scheda:hover .v-scheda__foto--sottile img { transform: scale(1.112); }
 
@@ -115,6 +101,7 @@ const mailtoDisponibile = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent
   .v-scheda__nome a:hover { color: var(--brass); }
   .v-scheda__desc { color: var(--ink2); font-size: 15px; line-height: 1.5; margin: 10px 0 0; }
 
-  .v-scheda__bottoni { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; padding-top: 20px; }
+  .v-scheda__bottoni { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: auto; padding-top: 20px; }
+  .v-scheda__bottoni--due { grid-template-columns: 1fr 1fr; }
   .v-scheda__bottoni .pulsante { text-align: center; }
 </style>
