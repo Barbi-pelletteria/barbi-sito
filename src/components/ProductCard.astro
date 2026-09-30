@@ -45,7 +45,7 @@ const etichettaScorta = (c) =>
   VENDITA_ATTIVA ? (c.stock > 0 ? `${c.nome} · ${c.stock} ${c.stock === 1 ? 'disponibile' : 'disponibili'}` : `${c.nome} · esaurito`) : c.nome;
 ---
 <div class="scheda">
-  <a href={url} class="scheda__foto" aria-hidden="true" tabindex="-1">
+  <a href={url} class:list={['scheda__foto', `scheda__foto--${prodotto.slug}`]} aria-hidden="true" tabindex="-1">
     {fotoAttiva ? (
       <picture id={fotoId}>
         <source srcset={fotoAttiva.webp} type="image/webp" />
@@ -108,6 +108,14 @@ const etichettaScorta = (c) =>
      width/height) invece che alla cornice. */
   .scheda__foto > * { display: block; width: 100%; height: 100%; }
   .scheda__foto img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* Stessa correzione già applicata in VetrinaProdotti.astro (home,
+     03/09/2026): le foto di copertina non sono state scattate alla stessa
+     distanza dal soggetto — misurato sui pixel reali di QUESTA pagina, non
+     a occhio: il portafoglio Sottile (blu) riempie il 70,3%×46,6% del
+     riquadro, il Completo (marrone) il 76,9%×50,0% — l'8% di differenza
+     già documentato altrove, non un caso isolato di questa scheda. Stesso
+     zoom correttivo, solo sulla scheda più piccola. */
+  .scheda__foto--sottile img { transform: scale(1.08); }
   @media (max-width: 680px) {
     /* Limite in vh, non solo aspect-ratio: su schermi molto stretti e alti
        4/5 da solo può comunque superare metà schermo. object-fit:cover
