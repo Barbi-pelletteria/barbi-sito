@@ -41,6 +41,20 @@ Per referenza, se in futuro servisse rigenerare le chiavi:
    un nuovo deploy perché la modifica si applichi, le variabili d'ambiente
    non sono retroattive sui deploy già fatti).
 
+**Wallet (Apple Pay / Google Pay) — verificato il 05/10/2026 (D-029 Parte 5).**
+Il codice chiede solo `card`: in Stripe Checkout i due wallet viaggiano
+dentro `card` e compaiono da soli, sopra il modulo carta, quando il
+dispositivo del cliente li supporta (Safari/iPhone con una carta in Wallet;
+Chrome con account Google e carta salvata) e la **configurazione dei metodi
+di pagamento** di Stripe li ha accesi. In modalità **test** Apple Pay era
+già acceso, Google Pay è stato acceso via API (configurazione
+`pmc_1UA713JuzG0zjLHs4PIkRiEF`, `livemode:false`). La configurazione
+**live** è un oggetto separato: si controlla al go-live (D-014) da
+**Settings → Payments → Payment methods**, senza toccare chiavi. Prova
+reale: una sessione di test aperta da un Chrome senza account Google mostra
+solo "Carta" — comportamento atteso, il pulsante wallet dipende dal
+dispositivo del cliente, non dal sito.
+
 **Passaggio a Stripe Live**: non si esegue mai di impulso — segue solo
 `D-014` (`PACCHETTO_GO_LIVE...`), un ordine scritto apposta perché è il
 passaggio in cui un errore costa denaro vero.

@@ -100,6 +100,17 @@ export async function onRequestPost({ request, env }) {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      // Solo 'card', di proposito. In Stripe Checkout Apple Pay e Google Pay
+      // viaggiano dentro 'card': compaiono da soli, sopra il modulo carta,
+      // quando il dispositivo li supporta (Safari/iPhone con una carta in
+      // Wallet; Chrome con un account Google e una carta salvata) e la
+      // configurazione dei metodi di pagamento di Stripe li ha accesi.
+      // Verificato il 05/10/2026 (D-029 Parte 5): in modalità TEST Apple Pay
+      // era già acceso e Google Pay è stato acceso via API; la configurazione
+      // LIVE è un oggetto separato e si rivede al go-live (D-014).
+      // automatic_payment_methods non si usa: aprirebbe anche Klarna, PayPal,
+      // bonifico e altri metodi mai decisi (la casella 'Salva le mie
+      // informazioni' di Link compare comunque: fa parte del modulo carta).
       payment_method_types: ['card'],
       line_items,
       // Solo Italia per ora, coerente con DECISIONI.md D-006: l'estero si
