@@ -711,6 +711,11 @@ const prodottoJsonLd = {
     .barra-fissa__nome { font-family: var(--f-display); font-size: 17px; line-height: 1.2; }
     .barra-fissa__prezzo { font-family: var(--f-label); font-size: 13px; letter-spacing: .04em; color: var(--ink2); font-variant-numeric: tabular-nums; }
     .barra-fissa__btn { flex: 0 0 auto; padding: 14px 18px; font-size: 11.5px; min-height: 48px; }
+    /* Finché il banner cookie (fisso in basso, z-index 50) è aperto, la barra
+       resterebbe coperta del tutto (misurato in verifica a 390×844: banner
+       120px, barra 70px). Nascosta finché non si sceglie sui cookie; da lì
+       in poi compare e sparisce come sopra. */
+    body:has(#cookie-banner:not([hidden])) .barra-fissa { display: none; }
   }
 </style>
 
