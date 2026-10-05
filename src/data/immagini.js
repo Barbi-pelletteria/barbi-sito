@@ -45,7 +45,15 @@ const DIDASCALIE = {
 
 // Didascalie specifiche per prodotto, quando gli scatti mostrano altro
 // rispetto allo schema comune (testi alt scritti dal QG per quel modello).
-const DIDASCALIE_PRODOTTO = {};
+// Essenziale: D-030 § 2.2 — "03" è il fermasoldi, non un portamonete.
+const DIDASCALIE_PRODOTTO = {
+  essenziale: {
+    '01-chiuso': 'Portafoglio Essenziale in pelle bordeaux a grana, chiuso, con fermasoldi in metallo',
+    '02-aperto': 'Portafoglio Essenziale aperto: sei tasche per le carte e fermasoldi centrale',
+    '03-fermasoldi': 'Dettaglio del fermasoldi in metallo del portafoglio Essenziale',
+    '05-dettaglio-bordo': 'Dettaglio dell’angolo del portafoglio Essenziale: grana della pelle e cucitura',
+  },
+};
 
 function didascalia(prodotto, colore, id) {
   const propria = DIDASCALIE_PRODOTTO[prodotto.slug]?.[id];
@@ -113,4 +121,5 @@ export function copertinaProdotto(prodotto, colore, pelleId) {
 export const coloreVetrina = {
   sottile: 'blu',
   completo: 'marrone',
+  essenziale: 'bordeaux',
 };

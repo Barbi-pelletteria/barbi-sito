@@ -152,6 +152,31 @@ se cambiano.
 
 ---
 
+## Bozze di prodotto e blocco di pubblicazione (D-030)
+
+Un prodotto con `pubblicato: false` in `src/data/prodotti.js` (oggi:
+**Essenziale**) è costruito tutto ma non esiste per il sito pubblico: la
+sua URL è un 404, non compare in collezione, home, sitemap, filtri né nei
+dati strutturati. Per vederlo in locale:
+
+```bash
+MOSTRA_BOZZE=true npm run build
+```
+
+(in PowerShell: `$env:MOSTRA_BOZZE='true'; npm run build`), poi si apre
+`dist/` con un server statico qualunque. Su Cloudflare la variabile non va
+mai impostata.
+
+Per pubblicarlo serve **una sola consegna del QG** con i dati di Stefano:
+la pelle confermata in `src/data/pelli.js` (`confermata: true`, nome e
+campi pieni), misure, peso e stock per variante in `prodotti.js`, e
+`pubblicato: true`. Se manca qualcosa **la build si ferma** con il
+messaggio "BLOCCO DI PUBBLICAZIONE (D-030 Parte 4)" che elenca i campi
+vuoti: è voluto, non è un guasto. `npm test` esegue i test del blocco e
+dell'anti-sovravendita per variante colore+pelle.
+
+---
+
 ## Verifica finale end-to-end (chiude B3 punto 5 + B4)
 
 Con Stripe e GA4 collegati, un solo giro convalida tutto:

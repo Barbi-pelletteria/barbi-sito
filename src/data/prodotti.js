@@ -183,6 +183,57 @@ export const prodotti = [
       { colore: 'marrone', pelle: 'capra-vegetale', stock: 4 },
     ],
   },
+  // ───────────────────────────────────────────────────────────────────────
+  // Essenziale (D-030 Parte 2): costruito tutto, NON pubblicato. Pelle
+  // ancora da confermare, misure/peso/stock/fodera vuoti: arrivano da
+  // Stefano via QG, con `pubblicato: true` nella stessa consegna. Finché
+  // resta false: nessuna pagina (404), fuori da collezione, home, sitemap,
+  // filtri e dati strutturati; visibile in locale con MOSTRA_BOZZE=true.
+  // Testi § 2.3/2.4 (QG), prezzo deciso dal QG (D-030), spessore
+  // dichiarato dal Founder, capienza contata sulle foto.
+  // ───────────────────────────────────────────────────────────────────────
+  {
+    slug: 'essenziale',
+    categoria: 'portafogli',
+    nome: 'Essenziale',
+    pubblicato: false,
+    occhiello: 'Portafoglio con fermasoldi · 6 carte',
+    occhielloCard: '6 carte · fermasoldi',
+    scopri: 'Scopri l’Essenziale',
+    sommario: 'Sei carte e un fermasoldi in metallo. Niente di più, niente di superfluo.',
+    fraseBreve: 'Sei carte e un fermasoldi in metallo, in 0,55 cm. Per chi porta le banconote piegate e nient’altro.',
+    prezzoCentesimi: 5500,
+    tascheCarte: 6,
+    portamonete: false,
+    fermasoldi: true,
+    // Disattivate finché Stefano non conferma che su questo modello le
+    // iniziali si possono imprimere.
+    inizialiDisponibili: false,
+    puntiForza: [
+      { icona: 'fermasoldi', titolo: 'Fermasoldi in metallo', testo: 'Tiene le banconote ferme e piatte, senza bisogno di uno scomparto in più.' },
+      { icona: 'spessore', titolo: '0,55 cm di spessore', testo: 'Lo stesso del Sottile: sparisce nella tasca interna della giacca.' },
+      { icona: 'pelle', titolo: 'Due superfici', testo: 'Esterno a grana impressa, interno liscio: due tocchi diversi nello stesso pezzo.' },
+      { icona: 'tasche', titolo: '6 tasche per le carte', testo: 'Tre per lato, più due scomparti piatti per documenti e ricevute.' },
+    ],
+    descrizione: [
+      'Il portafoglio di chi ha scelto l’essenziale: sei carte, due scomparti piatti e un fermasoldi in metallo che tiene le banconote al loro posto. Chiuso è sottile quanto il Sottile, e il marchio Barbi è impresso a secco sul fronte.',
+    ],
+    rimandi: [
+      { slug: 'sottile', testo: 'Preferisci lo scomparto per le banconote? Scopri il Sottile →' },
+      { slug: 'completo', testo: 'Ti serve il portamonete? Scopri il Completo →' },
+    ],
+    metaDescription: 'Essenziale: portafoglio con fermasoldi in metallo e 6 carte, 0,55 cm, in pelle bordeaux a grana. 55 €, spedizione inclusa.',
+    // Vuoti = da Stefano (l'interno sembra in pelle, ma non si scrive
+    // finché non lo conferma: divieto 16).
+    fodera: '',
+    misure: { chiuso: '', aperto: '' },
+    spessore: '0,55 cm',
+    peso: '',
+    capienza: '6 tasche carte, 2 scomparti piatti, fermasoldi in metallo',
+    lavorazione: '',
+    colori: [{ slug: 'bordeaux', nome: 'Bordeaux' }],
+    varianti: [{ colore: 'bordeaux', pelle: 'grana-da-confermare', stock: null }],
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────

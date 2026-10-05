@@ -214,7 +214,7 @@ const prodottoJsonLd = {
                   value={c.slug}
                   data-stock={stockColore(prodotto, c.slug)}
                   disabled={stockColore(prodotto, c.slug) === 0}
-                  checked={c.slug === primoDisponibile}
+                  checked={c.slug === coloreIniziale.slug}
                 />
                 <span
                   class="sw"
@@ -233,7 +233,7 @@ const prodottoJsonLd = {
           due o più pelli con stock (lo script lo mostra/nasconde al cambio
           colore). Una pelle senza nome (bozza) non mostra la riga.
         */}
-        <fieldset class="pelle" id="pelle-blocco">
+        <fieldset class="pelle" id="pelle-blocco" hidden={!pelleInizialeObj?.nome && !mostraSelettorePelle}>
           <legend class="sr-only">Pelle</legend>
           <p class="pdp-colore pdp-pelle" id="pelle-riga" hidden={!pelleInizialeObj?.nome}>Pelle: <span id="pelle-nome">{pelleInizialeObj?.nome}</span></p>
           <div class="pelle-opzioni" id="pelle-opzioni" hidden={!mostraSelettorePelle}>
@@ -491,6 +491,10 @@ const prodottoJsonLd = {
       const dati = prodotto.pelli[pelleCorrente] || {};
       if (nomePelle) nomePelle.textContent = dati.nome || '';
       if (rigaPelle) rigaPelle.hidden = !dati.nome;
+      // Senza nome né selettore (pelle in bozza) l'intero blocco sparisce,
+      // legenda compresa: niente "Pelle" vuoto per gli screen reader.
+      const blocco = document.getElementById('pelle-blocco');
+      if (blocco) blocco.hidden = !dati.nome && disponibili.length < 2;
       if (descPelle) { descPelle.textContent = dati.descrizione || ''; descPelle.hidden = !dati.descrizione; }
       // Riga "Pelle" della tabella dettagli e fisarmonica "Cura della pelle".
       const rigaTabella = document.getElementById('riga-pelle');
@@ -937,6 +941,7 @@ const prodottoJsonLd = {
      (input invisibile sopra l'etichetta, bordo ottone sulla scelta),
      altezza minima 44px come ogni bersaglio tocco. */
   .pelle { border: 0; padding: 0; margin: 18px 0 0; }
+  .pelle[hidden] { display: none; }
   .pdp-pelle { margin-bottom: 8px; }
   .pdp-pelle[hidden], .pelle-opzioni[hidden], .pelle-wrap[hidden], .pdp-pelle-desc[hidden] { display: none; }
   .pelle-opzioni { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }

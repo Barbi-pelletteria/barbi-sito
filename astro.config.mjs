@@ -1,9 +1,16 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { bozze } from './src/data/prodotti.js';
 
 // Dominio vero (PACCHETTO_DEPLOY_2026-08-30, punto 5): barbipelletteria.it
 // è registrato e collegato (Cloudflare Pages, D-016/D-017) — questo valore
 // serve a generare URL assoluti corretti (canonical, sitemap).
+//
+// D-030 Parte 4: le pagine dei prodotti in bozza (pubblicato: false)
+// esistono solo nell'anteprima locale (MOSTRA_BOZZE=true) e anche lì
+// restano fuori dalla sitemap. In produzione non vengono proprio generate.
+const pagineBozze = bozze.map((p) => `/prodotto/${p.slug}/`);
+
 export default defineConfig({
   site: 'https://barbipelletteria.it',
   output: 'static',
@@ -19,7 +26,7 @@ export default defineConfig({
   integrations: [
     sitemap({
       filter: (pagina) =>
-        !['/carrello/', '/checkout/', '/conferma-ordine/', '/grazie/', '/newsletter-confermata/']
+        !['/carrello/', '/checkout/', '/conferma-ordine/', '/grazie/', '/newsletter-confermata/', ...pagineBozze]
           .some((esclusa) => pagina.endsWith(esclusa)),
     }),
   ],

@@ -149,5 +149,29 @@
         "height": 1569
       }
     ]
+  },
+  "essenziale": {
+    "bordeaux": [
+      {
+        "id": "01-chiuso",
+        "width": 1179,
+        "height": 1570
+      },
+      {
+        "id": "02-aperto",
+        "width": 1179,
+        "height": 1562
+      },
+      {
+        "id": "03-fermasoldi",
+        "width": 1179,
+        "height": 1566
+      },
+      {
+        "id": "05-dettaglio-bordo",
+        "width": 1179,
+        "height": 1567
+      }
+    ]
   }
 }
