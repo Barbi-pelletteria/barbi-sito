@@ -8,15 +8,17 @@
 // Componente a sé, non una modifica di ProductCard: quel componente è
 // condiviso con la pagina collezione. Stessa fonte dati (prodotti.js,
 // immagini.js), zero duplicazione della logica di lettura.
-import { formatEuroBreve, VENDITA_ATTIVA } from '../data/prodotti.js';
+import { formatEuroBreve, VENDITA_ATTIVA, stockColore, pelleIniziale } from '../data/prodotti.js';
 import { copertinaProdotto, coloreVetrina } from '../data/immagini.js';
 
 const { prodotti } = Astro.props;
 ---
-<div class="vetrina">
+{/* Con tre modelli (D-030 § 2.4) la griglia passa a tre colonne da
+    computer; da telefono resta una card sotto l'altra. */}
+<div class:list={['vetrina', { 'vetrina--tre': prodotti.length >= 3 }]}>
   {prodotti.map((p) => {
-    const preferito = p.colori.find((c) => c.slug === coloreVetrina[p.slug] && c.stock > 0);
-    const coloreAttivo = preferito || p.colori.find((c) => c.stock > 0) || p.colori[0];
+    const preferito = p.colori.find((c) => c.slug === coloreVetrina[p.slug] && stockColore(p, c.slug) > 0);
+    const coloreAttivo = preferito || p.colori.find((c) => stockColore(p, c.slug) > 0) || p.colori[0];
     const foto = copertinaProdotto(p, coloreAttivo);
     const url = `/prodotto/${p.slug}/`;
     return (
@@ -43,7 +45,8 @@ const { prodotti } = Astro.props;
               data-nome={p.nome}
               data-colore={coloreAttivo.slug}
               data-colore-nome={coloreAttivo.nome}
-              data-stock={coloreAttivo.stock}
+              data-pelle={pelleIniziale(p, coloreAttivo.slug)}
+              data-stock={stockColore(p, coloreAttivo.slug)}
             >Aggiungi al carrello</button>
           )}
         </div>
@@ -59,7 +62,8 @@ const { prodotti } = Astro.props;
 
 <style>
   .vetrina { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-  @media (max-width: 740px) { .vetrina { grid-template-columns: 1fr; gap: 48px; } }
+  .vetrina--tre { grid-template-columns: 1fr 1fr 1fr; gap: 28px; }
+  @media (max-width: 740px) { .vetrina, .vetrina--tre { grid-template-columns: 1fr; gap: 48px; } }
 
   /* Cornice sottile + ombra minima a riposo, leggermente più marcata
      all'hover (le card "si sollevano appena", non saltano — richiesta

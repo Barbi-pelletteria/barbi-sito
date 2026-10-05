@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import VetrinaProdotti from '../components/VetrinaProdotti.astro';
 import StoriaHome from '../components/StoriaHome.astro';
 import ComeNasce from '../components/ComeNasce.astro';
-import { prodotti, VENDITA_ATTIVA } from '../data/prodotti.js';
+import { prodottiVisibili, getProdottoBySlug, VENDITA_ATTIVA } from '../data/prodotti.js';
 import { copertinaProdotto } from '../data/immagini.js';
 
 // Redesign 15/09/2026 (riferimento "Stitch & Hide"): foto grande nell'hero.
@@ -12,7 +12,7 @@ import { copertinaProdotto } from '../data/immagini.js';
 // stessa per Sottile e Completo dello stesso colore (FOTO_SITO/LEGGIMI.md):
 // prendo "completo" solo perché è il primo che la trova, non per un motivo
 // di prodotto.
-const completo = prodotti.find((p) => p.slug === 'completo');
+const completo = getProdottoBySlug('completo');
 const coloreHero = completo.colori.find((c) => c.slug === 'marrone');
 const fotoHero = copertinaProdotto(completo, coloreHero);
 
@@ -112,7 +112,9 @@ const organizzazioneJsonLd = {
         <p>Stessa pelle, stesse mani, due modi di portare con sé l’essenziale.</p>
       </div>
 
-      <VetrinaProdotti prodotti={prodotti} />
+      {/* Solo i prodotti visibili: pubblicati, più le bozze in anteprima
+          locale (D-030 Parte 4). */}
+      <VetrinaProdotti prodotti={prodottiVisibili} />
     </section>
   </div>
 

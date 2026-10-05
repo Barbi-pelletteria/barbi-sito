@@ -1,18 +1,25 @@
 ---
 // Scheda prodotto, struttura e testi D-029 § 4.3/4.4 (QG). Ordine dei
 // blocchi dall'alto: galleria → eyebrow → nome → prezzo → frase breve →
-// colore → disponibilità → iniziali → pulsante (o "Avvisami" a vendita
-// spenta) → tre righe di servizio → punti di forza → descrizione →
-// fisarmoniche (Dettagli e misure / Cura della pelle / Spedizione e resi)
-// → rimando all'altro modello.
+// colore → pelle (D-030) → disponibilità → iniziali → pulsante (o
+// "Avvisami" a vendita spenta) → tre righe di servizio → punti di forza →
+// descrizione → fisarmoniche (Dettagli e misure / Cura della pelle /
+// Spedizione e resi) → rimandi agli altri modelli.
 //
 // Rispetto alla versione precedente spariscono: la riga "Reso · Garanzia"
 // (art. 23 lett. l, Parte 3), il pulsante spento "Disponibile a breve" e
 // la nota "La vendita online non è ancora attiva…" (sostituiti dal campo
 // Avvisami), il confronto spessori (non nell'ordine dei blocchi del
 // pacchetto — il dato vive nei punti di forza), l'elenco capienza (dentro
-// "Dettagli e misure"). Tabella e "Cura della pelle" restano invariati,
-// dentro le fisarmoniche. La fodera in poliestere resta dichiarata.
+// "Dettagli e misure"). La fodera in poliestere resta dichiarata.
+//
+// D-030: ogni pezzo è modello + colore + PELLE. Dopo "Colore" c'è la riga
+// "Pelle: {nome}"; se per il colore scelto esistono due o più pelli con
+// stock, sotto la riga compare un selettore (stesso pattern delle
+// pastiglie colore, con etichette di testo). Cambiando pelle si aggiornano
+// scorte, galleria, riga "Pelle" della tabella e fisarmonica "Cura della
+// pelle". Un prodotto in bozza (pubblicato: false) non ha pagina: la sua
+// URL è un 404, salvo anteprima locale con MOSTRA_BOZZE=true.
 //
 // La galleria è un'unica striscia a scorrimento (scroll-snap): da
 // computer se ne vede una foto alla volta e le miniature sotto la fanno
@@ -21,37 +28,63 @@
 import Layout from '../../layouts/Layout.astro';
 import FotoSegnaposto from '../../components/FotoSegnaposto.astro';
 import { galleriaProdotto } from '../../data/immagini.js';
+import { getPelle } from '../../data/pelli.js';
 import {
-  prodotti,
-  getProdottoBySlug,
-  curaProdotto,
+  prodottiVisibili,
+  getColore,
+  getVarianti,
   avvisoIniziali,
   formatEuroBreve,
   VENDITA_ATTIVA,
   EMAIL_CONTATTO,
   INIZIALI_CENTESIMI,
-  MACRO_PELLE,
   CONSENSO_NEWSLETTER,
+  stockColore,
+  stockTotale,
+  pelliColore,
+  pelleIniziale,
+  pelliProdotto,
+  pelleVariantePrincipale,
+  specificheProdotto,
+  rigaPelle,
+  swatchColore,
 } from '../../data/prodotti.js';
 
 export function getStaticPaths() {
-  return prodotti.map((p) => ({ params: { slug: p.slug }, props: { prodotto: p } }));
+  // Solo i prodotti visibili: pubblicati, più le bozze in anteprima locale.
+  return prodottiVisibili.map((p) => ({ params: { slug: p.slug }, props: { prodotto: p } }));
 }
 
 const { prodotto } = Astro.props;
-const stockTotale = prodotto.colori.reduce((t, c) => t + c.stock, 0);
-const esauritoTutto = stockTotale === 0;
-const primoDisponibile = prodotto.colori.find((c) => c.stock > 0)?.slug || '';
+const esauritoTutto = stockTotale(prodotto) === 0;
+const primoDisponibile = prodotto.colori.find((c) => stockColore(prodotto, c.slug) > 0)?.slug || '';
 const coloreIniziale = prodotto.colori.find((c) => c.slug === primoDisponibile) || prodotto.colori[0];
-const altro = getProdottoBySlug(prodotto.rimando.slug);
+const pelleInizialeId = pelleIniziale(prodotto, coloreIniziale.slug);
+const pelleInizialeObj = getPelle(pelleInizialeId);
+const inizialiDisponibili = prodotto.inizialiDisponibili !== false;
 
-// Galleria completa per il colore iniziale (server-side, per il primo
-// caricamento) e per tutti gli altri colori (dentro datiClient, per lo
-// scambio via JS quando si cambia colore).
-const galleriaIniziale = galleriaProdotto(prodotto, coloreIniziale);
-const galleriaPerColore = Object.fromEntries(
-  prodotto.colori.map((c) => [c.slug, galleriaProdotto(prodotto, c)])
+// Rimandi agli altri modelli (§ 4.3/4.4, D-030 § 2.3): solo verso
+// prodotti visibili, mai verso una bozza.
+const rimandi = (prodotto.rimandi || []).filter((r) => prodottiVisibili.some((p) => p.slug === r.slug));
+
+// Galleria completa per la variante iniziale (server-side, per il primo
+// caricamento) e per tutte le varianti colore+pelle (dentro datiClient,
+// per lo scambio via JS quando si cambia colore o pelle).
+const galleriaIniziale = galleriaProdotto(prodotto, coloreIniziale, pelleInizialeId);
+const galleriaPerVariante = Object.fromEntries(
+  getVarianti(prodotto).map((v) => [`${v.colore}|${v.pelle}`, galleriaProdotto(prodotto, getColore(prodotto, v.colore), v.pelle)])
 );
+
+// Pelli usate da questo prodotto (catalogo pelli): per le etichette del
+// selettore e per i testi che cambiano con la pelle (riga della tabella,
+// cura). Una pelle senza nome (bozza) non ha testi da mostrare.
+const pelliDelProdotto = pelliProdotto(prodotto).map((id) => getPelle(id)).filter(Boolean);
+const pelliClient = Object.fromEntries(
+  pelliDelProdotto.map((p) => [p.id, { nome: p.nome, descrizione: p.descrizione, rigaTabella: rigaPelle(p), cura: p.cura }])
+);
+const specifiche = specificheProdotto(prodotto, pelleInizialeId);
+const mostraCura = pelliDelProdotto.some((p) => p.cura);
+const mostraSelettorePelle = pelliColore(prodotto, coloreIniziale.slug).length >= 2;
 
 // Dati minimi che servono allo script lato client.
 const datiClient = {
@@ -59,9 +92,11 @@ const datiClient = {
   nome: prodotto.nome,
   prezzoCentesimi: prodotto.prezzoCentesimi,
   inizialiCentesimi: INIZIALI_CENTESIMI,
-  colori: prodotto.colori.map((c) => ({ slug: c.slug, nome: c.nome, stock: c.stock })),
+  colori: prodotto.colori.map((c) => ({ slug: c.slug, nome: c.nome })),
+  varianti: getVarianti(prodotto).map((v) => ({ colore: v.colore, pelle: v.pelle, stock: Number.isInteger(v.stock) ? v.stock : 0 })),
+  pelli: pelliClient,
   venditaAttiva: VENDITA_ATTIVA,
-  galleria: galleriaPerColore,
+  galleria: galleriaPerVariante,
 };
 
 const mailtoPrenota = `mailto:${EMAIL_CONTATTO}?subject=${encodeURIComponent(
@@ -85,10 +120,15 @@ const ICONE = {
   bordi: '<path d="M20 3c-3 0-9 6-11 9l3 3c3-2 9-8 8-12z"/><path d="M9 12c-2 0-4 1-4 4 0 2-1 3-2 3 3 1 7 0 8-3z"/>',
   tasche: '<rect x="3" y="7" width="14" height="10" rx="1.5"/><path d="M7 4h14v10"/>',
   portamonete: '<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5h5M9.5 13.5h5"/>',
+  // Fermasoldi (Essenziale, D-030): la molla di metallo vista di taglio
+  // sopra le banconote piegate.
+  fermasoldi: '<rect x="3" y="8" width="18" height="10" rx="1.5"/><path d="M6 8V5.5a1.5 1.5 0 0 1 1.5-1.5h9A1.5 1.5 0 0 1 18 5.5V8"/><path d="M7 13h10"/>',
 };
 
 // Dati strutturati Product (PACCHETTO_AUDIT_SITO blocco C), valori veri.
-// "availability" resta PreOrder finché VENDITA_ATTIVA è false.
+// "availability" resta PreOrder finché VENDITA_ATTIVA è false. "material"
+// dalla pelle della variante principale (D-030 § 1.3.7), solo se ha un nome.
+const materiale = pelleVariantePrincipale(prodotto)?.nome;
 const prodottoJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Product',
@@ -96,6 +136,7 @@ const prodottoJsonLd = {
   description: prodotto.sommario,
   image: new URL(galleriaIniziale[0]?.jpg || '/marchio-pelle.jpg', Astro.site).href,
   brand: { '@type': 'Brand', name: 'Barbi Pelletteria' },
+  ...(materiale ? { material: materiale } : {}),
   offers: {
     '@type': 'Offer',
     priceCurrency: 'EUR',
@@ -171,53 +212,77 @@ const prodottoJsonLd = {
                   type="radio"
                   name="colore"
                   value={c.slug}
-                  data-stock={c.stock}
-                  disabled={c.stock === 0}
+                  data-stock={stockColore(prodotto, c.slug)}
+                  disabled={stockColore(prodotto, c.slug) === 0}
                   checked={c.slug === primoDisponibile}
                 />
                 <span
                   class="sw"
                   data-c={c.slug}
                   title={c.nome}
-                  style={MACRO_PELLE[c.slug] ? `background-image:url(${MACRO_PELLE[c.slug]})` : undefined}
+                  style={swatchColore(prodotto, c.slug) ? `background-image:url(${swatchColore(prodotto, c.slug)})` : undefined}
                 ></span>
               </label>
             ))}
           </div>
         </fieldset>
-        <!-- Solo se lo stock reale del colore è ≤ 5 (§ 4.3), mai numeri finti. -->
+
+        {/*
+          Pelle (D-030 § 1.3.1): riga "Pelle: {nome}" dal catalogo pelli;
+          selettore sotto la riga solo quando il colore scelto esiste in
+          due o più pelli con stock (lo script lo mostra/nasconde al cambio
+          colore). Una pelle senza nome (bozza) non mostra la riga.
+        */}
+        <fieldset class="pelle" id="pelle-blocco">
+          <legend class="sr-only">Pelle</legend>
+          <p class="pdp-colore pdp-pelle" id="pelle-riga" hidden={!pelleInizialeObj?.nome}>Pelle: <span id="pelle-nome">{pelleInizialeObj?.nome}</span></p>
+          <div class="pelle-opzioni" id="pelle-opzioni" hidden={!mostraSelettorePelle}>
+            {pelliDelProdotto.map((p) => (
+              <label class="pelle-wrap" data-pelle={p.id}>
+                <input type="radio" name="pelle" value={p.id} checked={p.id === pelleInizialeId} />
+                <span class="pelle-chip">{p.nome}</span>
+              </label>
+            ))}
+          </div>
+          <p class="pdp-pelle-desc" id="pelle-desc" hidden={!pelleInizialeObj?.descrizione}>{pelleInizialeObj?.descrizione}</p>
+        </fieldset>
+        <!-- Solo se lo stock reale della variante è ≤ 5 (§ 4.3), mai numeri finti. -->
         <p class="pdp-scorte" id="pdp-scorte" hidden></p>
 
         <!--
           Il riquadro delle iniziali resta visibile anche a vendita spenta.
           La casella da spuntare è legata a VENDITA_ATTIVA — ricompare da
-          sola quando l'interruttore passa a true.
+          sola quando l'interruttore passa a true. Non esiste affatto sui
+          modelli dove le iniziali non sono ancora confermate (D-030:
+          Essenziale, inizialiDisponibili: false).
         -->
-        <div class="opt">
-          <label class:list={['opt__label', { 'opt__label--statico': !VENDITA_ATTIVA }]}>
-            {VENDITA_ATTIVA && <input type="checkbox" id="iniziali-checkbox" />}
-            <span>
-              <span class="t">Aggiungi le tue iniziali · +{formatEuroBreve(INIZIALI_CENTESIMI)}</span>
-              <span class="n">{avvisoIniziali}</span>
-            </span>
-          </label>
-          {VENDITA_ATTIVA && (
-            <>
-              <label for="iniziali" class="sr-only">Iniziali</label>
-              <input type="text" id="iniziali" name="iniziali" maxlength="3" autocomplete="off" placeholder="es. G.B." class="opt__input" hidden />
-              <!--
-                Anteprima simbolica, CSS puro (PACCHETTO_VETRINA punto 8):
-                colore reale dello swatch selezionato, iniziali "impresse" via
-                text-shadow. Non è una foto della pelle: lo dice anche il testo
-                sotto, apposta.
-              -->
-              <div class="iniziali-anteprima" id="iniziali-anteprima" data-c={coloreIniziale.slug} hidden>
-                <span id="iniziali-anteprima-testo">AB</span>
-              </div>
-              <p class="iniziali-anteprima__nota" id="iniziali-anteprima-nota" hidden>Anteprima simbolica del colore e delle iniziali — non è una foto della pelle vera.</p>
-            </>
-          )}
-        </div>
+        {inizialiDisponibili && (
+          <div class="opt">
+            <label class:list={['opt__label', { 'opt__label--statico': !VENDITA_ATTIVA }]}>
+              {VENDITA_ATTIVA && <input type="checkbox" id="iniziali-checkbox" />}
+              <span>
+                <span class="t">Aggiungi le tue iniziali · +{formatEuroBreve(INIZIALI_CENTESIMI)}</span>
+                <span class="n">{avvisoIniziali}</span>
+              </span>
+            </label>
+            {VENDITA_ATTIVA && (
+              <>
+                <label for="iniziali" class="sr-only">Iniziali</label>
+                <input type="text" id="iniziali" name="iniziali" maxlength="3" autocomplete="off" placeholder="es. G.B." class="opt__input" hidden />
+                {/*
+                  Anteprima simbolica, CSS puro (PACCHETTO_VETRINA punto 8):
+                  colore reale dello swatch selezionato, iniziali "impresse" via
+                  text-shadow. Non è una foto della pelle: lo dice anche il testo
+                  sotto, apposta.
+                */}
+                <div class="iniziali-anteprima" id="iniziali-anteprima" data-c={coloreIniziale.slug} hidden>
+                  <span id="iniziali-anteprima-testo">AB</span>
+                </div>
+                <p class="iniziali-anteprima__nota" id="iniziali-anteprima-nota" hidden>Anteprima simbolica del colore e delle iniziali — non è una foto della pelle vera.</p>
+              </>
+            )}
+          </div>
+        )}
 
         {/*
           [VENDITA ACCESA] pulsante "Aggiungi al carrello · 49 €", diventa
@@ -286,27 +351,37 @@ const prodottoJsonLd = {
           {prodotto.descrizione.map((par) => <p>{par}</p>)}
         </div>
 
+        {/* Righe della tabella: solo quelle con un dato (specificheProdotto),
+            mai "n.d." o trattini. La riga Pelle segue la pelle scelta. */}
         <details class="fisarmonica">
           <summary>Dettagli e misure</summary>
           <div class="fisarmonica__corpo">
             <table>
-              {prodotto.specifiche.map(([voce, valore]) => (
-                <tr><th>{voce}</th><td>{valore}</td></tr>
+              {specifiche.map(([voce, valore]) => (
+                <tr id={voce === 'Pelle' ? 'riga-pelle' : undefined}><th>{voce}</th><td id={voce === 'Pelle' ? 'riga-pelle-valore' : undefined}>{valore}</td></tr>
               ))}
             </table>
           </div>
         </details>
 
-        <details class="fisarmonica" id="cura">
-          <summary>Cura della pelle</summary>
-          <div class="fisarmonica__corpo">
-            <p>{curaProdotto.intro}</p>
-            <ul>
-              {curaProdotto.punti.map((p) => <li>{p}</li>)}
-            </ul>
-            <p>{curaProdotto.chiusura}</p>
-          </div>
-        </details>
+        {/* Cura della pelle: testo della pelle scelta (catalogo pelli).
+            Senza testo di cura (pelle in bozza) la fisarmonica non c'è. */}
+        {mostraCura && (
+          <details class="fisarmonica" id="cura">
+            <summary>Cura della pelle</summary>
+            <div class="fisarmonica__corpo" id="cura-corpo">
+              {pelleInizialeObj?.cura && (
+                <>
+                  <p>{pelleInizialeObj.cura.intro}</p>
+                  <ul>
+                    {pelleInizialeObj.cura.punti.map((p) => <li>{p}</li>)}
+                  </ul>
+                  <p>{pelleInizialeObj.cura.chiusura}</p>
+                </>
+              )}
+            </div>
+          </details>
+        )}
 
         <details class="fisarmonica">
           <summary>Spedizione e resi</summary>
@@ -316,7 +391,9 @@ const prodottoJsonLd = {
           </div>
         </details>
 
-        <p class="pdp-rimando"><a href={`/prodotto/${altro.slug}/`}>{prodotto.rimando.testo}</a></p>
+        {rimandi.map((r) => (
+          <p class="pdp-rimando"><a href={`/prodotto/${r.slug}/`}>{r.testo}</a></p>
+        ))}
       </div>
     </div>
   </div>
@@ -355,26 +432,110 @@ const prodottoJsonLd = {
   const prodotto = nodo ? JSON.parse(nodo.textContent) : null;
 
   if (prodotto) {
-    // GA4 — view_item (parte solo se il consenso ai cookie è stato dato).
-    trackEvent('view_item', {
-      currency: 'EUR',
-      value: prodotto.prezzoCentesimi / 100,
-      items: [{ item_id: prodotto.slug, item_name: prodotto.nome }],
-    });
-
     // Le pastiglie stanno fuori dal form, quindi la ricerca è sul documento:
     // c'è comunque un solo selettore colore per pagina.
     function coloreSelezionato() {
       return document.querySelector('input[name="colore"]:checked');
     }
-    function stockColore(slug) {
-      const c = prodotto.colori.find((x) => x.slug === slug);
-      return c ? c.stock : 0;
+
+    // ── Pelle (D-030) ──────────────────────────────────────────────────
+    // La variante è colore + pelle. Per un colore, le pelli "disponibili"
+    // sono quelle con stock; il selettore compare solo se sono due o più.
+    // pelleCorrente è la pelle scelta per il colore corrente.
+    const radiosPelle = Array.from(document.querySelectorAll('input[name="pelle"]'));
+    const opzioniPelle = document.getElementById('pelle-opzioni');
+    const rigaPelle = document.getElementById('pelle-riga');
+    const nomePelle = document.getElementById('pelle-nome');
+    const descPelle = document.getElementById('pelle-desc');
+    let pelleCorrente = radiosPelle.find((r) => r.checked)?.value || null;
+
+    function variantiColore(coloreSlug) {
+      return prodotto.varianti.filter((v) => v.colore === coloreSlug);
     }
+    function pelliDisponibili(coloreSlug) {
+      const ids = [];
+      variantiColore(coloreSlug).forEach((v) => { if (v.stock > 0 && !ids.includes(v.pelle)) ids.push(v.pelle); });
+      return ids;
+    }
+    function stockVariante(coloreSlug, pelleId) {
+      return variantiColore(coloreSlug).find((v) => v.pelle === pelleId)?.stock || 0;
+    }
+    function stockColore(coloreSlug) {
+      return variantiColore(coloreSlug).reduce((t, v) => t + (v.stock || 0), 0);
+    }
+    function pelleSelezionata() {
+      return pelleCorrente;
+    }
+    // Nome leggibile della variante, per GA4 (item_variant = "{colore} / {pelle}").
+    function nomeVariante(coloreSlug) {
+      const colore = prodotto.colori.find((x) => x.slug === coloreSlug)?.nome || coloreSlug;
+      const pelle = prodotto.pelli[pelleSelezionata()]?.nome || pelleSelezionata() || '';
+      return pelle ? `${colore} / ${pelle}` : colore;
+    }
+
+    // Al cambio colore: pelle iniziale di quel colore (la prima con stock,
+    // o la prima variante), selettore mostrato solo con due o più pelli.
+    function aggiornaSelettorePelle(coloreSlug) {
+      const disponibili = pelliDisponibili(coloreSlug);
+      if (!pelleCorrente || !disponibili.includes(pelleCorrente)) {
+        pelleCorrente = disponibili[0] || variantiColore(coloreSlug)[0]?.pelle || null;
+      }
+      radiosPelle.forEach((r) => {
+        const ok = disponibili.includes(r.value);
+        r.disabled = !ok;
+        r.checked = r.value === pelleCorrente;
+        const wrap = r.closest('.pelle-wrap');
+        if (wrap) wrap.hidden = !ok;
+      });
+      if (opzioniPelle) opzioniPelle.hidden = disponibili.length < 2;
+      const dati = prodotto.pelli[pelleCorrente] || {};
+      if (nomePelle) nomePelle.textContent = dati.nome || '';
+      if (rigaPelle) rigaPelle.hidden = !dati.nome;
+      if (descPelle) { descPelle.textContent = dati.descrizione || ''; descPelle.hidden = !dati.descrizione; }
+      // Riga "Pelle" della tabella dettagli e fisarmonica "Cura della pelle".
+      const rigaTabella = document.getElementById('riga-pelle');
+      const valoreTabella = document.getElementById('riga-pelle-valore');
+      if (rigaTabella && valoreTabella) {
+        valoreTabella.textContent = dati.rigaTabella || '';
+        rigaTabella.hidden = !dati.rigaTabella;
+      }
+      const curaCorpo = document.getElementById('cura-corpo');
+      const cura = document.getElementById('cura');
+      if (curaCorpo && cura) {
+        curaCorpo.textContent = '';
+        if (dati.cura) {
+          const intro = document.createElement('p'); intro.textContent = dati.cura.intro;
+          const ul = document.createElement('ul');
+          (dati.cura.punti || []).forEach((t) => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+          const chiusura = document.createElement('p'); chiusura.textContent = dati.cura.chiusura;
+          curaCorpo.append(intro, ul, chiusura);
+        }
+        cura.hidden = !dati.cura;
+      }
+    }
+    radiosPelle.forEach((r) => {
+      r.addEventListener('change', () => {
+        if (!r.checked) return;
+        pelleCorrente = r.value;
+        aggiornaSelettorePelle(coloreSelezionato()?.value);
+        aggiornaVista();
+        if (typeof aggiorna === 'function') aggiorna();
+      });
+    });
+
     // Pezzi ancora aggiungibili per il colore scelto (stock meno quelli già nel carrello).
     function residuo(slug) {
       return Math.max(0, stockColore(slug) - getQuantitaColore(prodotto.slug, slug));
     }
+
+    // GA4 — view_item (parte solo se il consenso ai cookie è stato dato).
+    // item_variant = "{colore} / {pelle}" (D-030 § 1.3.6).
+    aggiornaSelettorePelle(coloreSelezionato()?.value || prodotto.colori[0]?.slug);
+    trackEvent('view_item', {
+      currency: 'EUR',
+      value: prodotto.prezzoCentesimi / 100,
+      items: [{ item_id: prodotto.slug, item_name: prodotto.nome, item_variant: nomeVariante(coloreSelezionato()?.value || prodotto.colori[0]?.slug) }],
+    });
 
     // Prezzo mostrato sul pulsante (e sulla barra fissa mobile): base, più
     // le iniziali se la casella è spuntata.
@@ -388,6 +549,7 @@ const prodottoJsonLd = {
       document.dispatchEvent(new CustomEvent('pdp:prezzo', { detail: { centesimi: prezzoCorrente() } }));
     }
 
+    let aggiorna = null;
     const form = document.getElementById('form-acquisto');
     if (form) {
       const btn = document.getElementById('btn-aggiungi');
@@ -409,7 +571,7 @@ const prodottoJsonLd = {
         }, 2500);
       }
 
-      function aggiorna() {
+      aggiorna = function () {
         const scelto = coloreSelezionato();
         if (!scelto) {
           btn.disabled = true;
@@ -425,7 +587,7 @@ const prodottoJsonLd = {
         } else {
           disponibilita.hidden = true;
         }
-      }
+      };
 
       document.querySelectorAll('input[name="colore"]').forEach((el) => {
         el.addEventListener('change', aggiorna);
@@ -452,12 +614,12 @@ const prodottoJsonLd = {
           disponibilita.hidden = false;
         }
 
-        const iniziali = (inputIniziali.value || '').trim().toUpperCase();
-        addToCart({ slug: prodotto.slug, colore, iniziali, quantita });
+        const iniziali = (inputIniziali?.value || '').trim().toUpperCase();
+        addToCart({ slug: prodotto.slug, colore, pelle: pelleSelezionata(), iniziali, quantita });
 
         trackEvent('add_to_cart', {
           currency: 'EUR',
-          items: [{ item_id: prodotto.slug, quantity: quantita }],
+          items: [{ item_id: prodotto.slug, item_name: prodotto.nome, item_variant: nomeVariante(colore), quantity: quantita }],
         });
 
         const nomeColore = prodotto.colori.find((x) => x.slug === colore)?.nome || colore;
@@ -470,8 +632,10 @@ const prodottoJsonLd = {
 
       // Il campo iniziali compare solo se la casella è spuntata.
       checkboxIniziali?.addEventListener('change', () => {
-        inputIniziali.hidden = !checkboxIniziali.checked;
-        if (!checkboxIniziali.checked) inputIniziali.value = '';
+        if (inputIniziali) {
+          inputIniziali.hidden = !checkboxIniziali.checked;
+          if (!checkboxIniziali.checked) inputIniziali.value = '';
+        }
         aggiornaPrezzoBottone();
       });
       aggiornaPrezzoBottone();
@@ -487,9 +651,9 @@ const prodottoJsonLd = {
     const anteprimaTesto = document.getElementById('iniziali-anteprima-testo');
     const anteprimaNota = document.getElementById('iniziali-anteprima-nota');
 
-    // Galleria: un'unica striscia a scorrimento. Cambiare colore
+    // Galleria: un'unica striscia a scorrimento. Cambiare colore o pelle
     // ricostruisce striscia, miniature e puntini da zero: il numero di
-    // scatti può variare da un colore all'altro (vedi FOTO_SITO/LEGGIMI.md).
+    // scatti può variare da una variante all'altra (vedi FOTO_SITO/LEGGIMI.md).
     const track = document.getElementById('pdp-track');
     const miniature = document.getElementById('pdp-miniature');
     const puntini = document.getElementById('pdp-puntini');
@@ -572,7 +736,8 @@ const prodottoJsonLd = {
       }, 80);
     }, { passive: true });
 
-    // Soglia scorte basse (§ 4.3): 5 pezzi o meno, sui numeri veri.
+    // Soglia scorte basse (§ 4.3): 5 pezzi o meno, sui numeri veri della
+    // variante colore+pelle.
     const SOGLIA_SCORTE_BASSE = 5;
 
     function aggiornaVista() {
@@ -581,20 +746,25 @@ const prodottoJsonLd = {
       const c = prodotto.colori.find((x) => x.slug === scelto.value);
       if (!c) return;
       if (coloreNome) coloreNome.textContent = c.nome;
+      const pelle = pelleSelezionata();
       if (scorte) {
-        const bassa = c.stock > 0 && c.stock <= SOGLIA_SCORTE_BASSE;
+        const n = stockVariante(c.slug, pelle);
+        const bassa = n > 0 && n <= SOGLIA_SCORTE_BASSE;
         scorte.hidden = !bassa;
         // Accordo del verbo col numero (1 → "resta"), non un testo diverso.
-        if (bassa) scorte.textContent = `${c.stock === 1 ? 'Ne resta' : 'Ne restano'} ${c.stock} in ${c.nome}`;
+        if (bassa) scorte.textContent = `${n === 1 ? 'Ne resta' : 'Ne restano'} ${n} in ${c.nome}`;
       }
       if (didascalia) {
         didascalia.textContent = `Foto — ${prodotto.nome}, ${c.nome.toLowerCase()}`;
       }
-      costruisciGalleria(prodotto.galleria?.[c.slug] || []);
+      costruisciGalleria(prodotto.galleria?.[`${c.slug}|${pelle}`] || prodotto.galleria?.[`${c.slug}|${variantiColore(c.slug)[0]?.pelle}`] || []);
       if (anteprima) anteprima.setAttribute('data-c', c.slug);
     }
     document.querySelectorAll('input[name="colore"]').forEach((el) => {
-      el.addEventListener('change', aggiornaVista);
+      el.addEventListener('change', () => {
+        aggiornaSelettorePelle(el.value);
+        aggiornaVista();
+      });
     });
     aggiornaVista();
 
@@ -756,6 +926,25 @@ const prodottoJsonLd = {
   .sw-wrap input:disabled + .sw { opacity: .32; }
   .sw-wrap input:focus-visible + .sw { outline: 2px solid var(--brass); outline-offset: 4px; }
 
+  /* Pelle (D-030): riga "Pelle: …" come la riga colore; selettore a
+     etichette di testo, stesso pattern radio+span delle pastiglie
+     (input invisibile sopra l'etichetta, bordo ottone sulla scelta),
+     altezza minima 44px come ogni bersaglio tocco. */
+  .pelle { border: 0; padding: 0; margin: 18px 0 0; }
+  .pdp-pelle { margin-bottom: 8px; }
+  .pdp-pelle[hidden], .pelle-opzioni[hidden], .pelle-wrap[hidden], .pdp-pelle-desc[hidden] { display: none; }
+  .pelle-opzioni { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+  .pelle-wrap { position: relative; display: inline-block; }
+  .pelle-wrap input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+  .pelle-chip {
+    display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px;
+    border: 1px solid var(--line2); background: transparent; color: var(--ink2);
+    font-family: var(--f-label); font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .pelle-wrap input:checked + .pelle-chip { border-color: var(--brass); box-shadow: inset 0 0 0 1px var(--brass); color: var(--ink); }
+  .pelle-wrap input:focus-visible + .pelle-chip { outline: 2px solid var(--brass); outline-offset: 3px; }
+  .pdp-pelle-desc { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink2); }
+
   .opt { margin-top: 22px; padding: 17px; border: 1px solid var(--line); background: var(--raise); }
   .opt__label { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
   .opt__label--statico { cursor: default; }
@@ -847,6 +1036,7 @@ const prodottoJsonLd = {
      alto almeno 44px (bersaglio tocco). */
   .fisarmonica { border-top: 1px solid var(--line); }
   .fisarmonica:last-of-type { border-bottom: 1px solid var(--line); }
+  .fisarmonica[hidden] { display: none; }
   .fisarmonica summary {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
     min-height: 52px; padding: 12px 0; cursor: pointer; list-style: none;
@@ -867,6 +1057,7 @@ const prodottoJsonLd = {
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 11px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
   tr:last-child th, tr:last-child td { border-bottom: 0; }
+  tr[hidden] { display: none; }
   th {
     font-family: var(--f-label); font-size: 9.5px; font-weight: 600; letter-spacing: .15em;
     text-transform: uppercase; color: var(--ink3); width: 11rem; padding-right: 18px;
@@ -878,6 +1069,7 @@ const prodottoJsonLd = {
   }
 
   .pdp-rimando { margin: 30px 0 0; font-size: 17px; }
+  .pdp-rimando + .pdp-rimando { margin-top: 10px; }
   .pdp-rimando a { color: var(--brass-testo); text-decoration: none; display: inline-block; padding: 8px 0; }
   .pdp-rimando a:hover { text-decoration: underline; }
 </style>

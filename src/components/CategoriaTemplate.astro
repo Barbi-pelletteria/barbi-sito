@@ -3,9 +3,12 @@
 // (PACCHETTO_RIFINITURA + richiesta diretta del Founder). Filtrano solo su
 // dati reali già nel catalogo — nessun attributo inventato (niente taglie,
 // niente genere: quei dati non esistono in nessun documento del progetto).
+// D-030 § 1.3.2: terzo filtro "Pelle", valori dai dati (solo pelli
+// confermate con almeno un pezzo disponibile), parametro URL ?pelle={id}.
 import Layout from '../layouts/Layout.astro';
 import ProductCard from './ProductCard.astro';
-import { categorie, getProdottiByCategoria } from '../data/prodotti.js';
+import { categorie, getProdottiByCategoria, getVarianti, stockVariante } from '../data/prodotti.js';
+import { getPelle } from '../data/pelli.js';
 import { copertinaProdotto } from '../data/immagini.js';
 
 const { categoriaSlug } = Astro.props;
@@ -14,6 +17,16 @@ const prodottiCategoria = getProdottiByCategoria(categoriaSlug);
 
 const modelli = [...new Set(prodottiCategoria.map((p) => p.nome))];
 const coloriDisponibili = [...new Set(prodottiCategoria.flatMap((p) => p.colori.map((c) => c.nome)))];
+
+// Pelli con stock per ogni prodotto (bersaglio del filtro) e valori del
+// filtro: pelli confermate con almeno un pezzo in tutta la categoria. Un
+// prodotto in bozza non arriva fin qui (getProdottiByCategoria).
+const pelliConStock = (p) => [...new Set(
+  getVarianti(p).filter((v) => stockVariante(p, v.colore, v.pelle) > 0).map((v) => v.pelle)
+)];
+const pelliFiltro = [...new Set(prodottiCategoria.flatMap(pelliConStock))]
+  .map((id) => getPelle(id))
+  .filter((p) => p && p.confermata && p.nome);
 
 // La pagina dei portafogli è "La collezione" (D-029 § 4.2 e § 4.14, QG):
 // titolo, sottotitolo, description e nota in fondo sono i suoi. Le altre
@@ -38,6 +51,8 @@ const titoloPagina = eCollezione ? 'Collezione' : categoria.nome;
 // per l'hero in home. Categorie ancora vuote (3 su 4) restano sul default.
 const primoProdotto = prodottiCategoria[0];
 const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.colori[0]) : null;
+
+const mostraFiltri = modelli.length > 1 || coloriDisponibili.length > 1 || pelliFiltro.length > 0;
 ---
 <Layout title={titoloPagina} description={descrizioneCategoria} ogImage={fotoOg?.jpg}>
   <div class="contenitore">
@@ -58,7 +73,7 @@ const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.co
         </div>
       ) : (
         <>
-          {(modelli.length > 1 || coloriDisponibili.length > 1) && (
+          {mostraFiltri && (
             <div class="filtri-barra">
               <div class="filtri__cerca">
                 <label for="cerca-prodotto" class="sr-only">Cerca per nome</label>
@@ -83,6 +98,15 @@ const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.co
                       {coloriDisponibili.map((c) => <button type="button" class="filtro-chip" data-filtro-colore={c.toLowerCase()}>{c}</button>)}
                     </div>
                   )}
+                  {/* Pelle (D-030): presente anche con un solo valore, è l'informazione
+                      che dice al cliente in quale pelle sono i pezzi disponibili. */}
+                  {pelliFiltro.length > 0 && (
+                    <div class="filtri__gruppo" role="group" aria-label="Filtra per pelle">
+                      <span class="filtri__etichetta-gruppo">Pelle</span>
+                      <button type="button" class="filtro-chip is-attivo" data-filtro-pelle="">Tutte</button>
+                      {pelliFiltro.map((p) => <button type="button" class="filtro-chip" data-filtro-pelle={p.id}>{p.nome}</button>)}
+                    </div>
+                  )}
                 </div>
               </details>
             </div>
@@ -92,7 +116,12 @@ const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.co
 
           <div class="grid2" id="griglia-prodotti">
             {prodottiCategoria.map((p) => (
-              <div class="scheda-wrap" data-nome={p.nome.toLowerCase()} data-colori={p.colori.map((c) => c.nome.toLowerCase()).join(',')}>
+              <div
+                class="scheda-wrap"
+                data-nome={p.nome.toLowerCase()}
+                data-colori={p.colori.map((c) => c.nome.toLowerCase()).join(',')}
+                data-pelli={pelliConStock(p).join(',')}
+              >
                 <ProductCard prodotto={p} />
               </div>
             ))}
@@ -186,11 +215,13 @@ const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.co
   const griglia = document.getElementById('griglia-prodotti');
   const esito = document.getElementById('filtri-esito');
   const etichettaFiltri = document.getElementById('filtri-etichetta');
+  const pannello = document.getElementById('filtri-toggle');
 
   if (griglia && esito) {
     const schede = Array.from(griglia.querySelectorAll('.scheda-wrap'));
     let filtroModello = '';
     let filtroColore = '';
+    let filtroPelle = '';
 
     // PACCHETTO_INTERFACCIA punto 4 + correzione successiva: "Filtri (2)"
     // quando ci sono filtri attivi dentro il pannello a comparsa —
@@ -200,8 +231,18 @@ const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.co
     // solo, contarlo anche nell'etichetta sarebbe ridondante.
     function aggiornaEtichettaFiltri() {
       if (!etichettaFiltri) return;
-      const attivi = [!!filtroModello, !!filtroColore].filter(Boolean).length;
+      const attivi = [!!filtroModello, !!filtroColore, !!filtroPelle].filter(Boolean).length;
       etichettaFiltri.textContent = attivi > 0 ? `Filtri (${attivi})` : 'Filtri';
+    }
+
+    // Il filtro Pelle vive anche nell'URL (?pelle={id}, D-030): si può
+    // condividere il link e si legge all'apertura. Gli altri filtri
+    // restano come prima, solo nella pagina.
+    function scriviUrlPelle() {
+      const url = new URL(window.location.href);
+      if (filtroPelle) url.searchParams.set('pelle', filtroPelle);
+      else url.searchParams.delete('pelle');
+      history.replaceState(null, '', url.pathname + (url.search || '') + url.hash);
     }
 
     function applica() {
@@ -210,10 +251,12 @@ const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.co
       schede.forEach((el) => {
         const nome = el.getAttribute('data-nome') || '';
         const colori = (el.getAttribute('data-colori') || '').split(',');
+        const pelli = (el.getAttribute('data-pelli') || '').split(',');
         const passaTesto = !testo || nome.includes(testo);
         const passaModello = !filtroModello || nome === filtroModello;
         const passaColore = !filtroColore || colori.includes(filtroColore);
-        const mostra = passaTesto && passaModello && passaColore;
+        const passaPelle = !filtroPelle || pelli.includes(filtroPelle);
+        const mostra = passaTesto && passaModello && passaColore && passaPelle;
         el.classList.toggle('is-nascosta', !mostra);
         if (mostra) visibili++;
 
@@ -246,5 +289,27 @@ const fotoOg = primoProdotto ? copertinaProdotto(primoProdotto, primoProdotto.co
         applica();
       });
     });
+    function attivaPelle(btn) {
+      filtroPelle = btn.getAttribute('data-filtro-pelle') || '';
+      contenitore.querySelectorAll('[data-filtro-pelle]').forEach((b) => b.classList.toggle('is-attivo', b === btn));
+      applica();
+    }
+    contenitore?.querySelectorAll('[data-filtro-pelle]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        attivaPelle(btn);
+        scriviUrlPelle();
+      });
+    });
+
+    // ?pelle={id} all'apertura: chip attivo e pannello aperto, così si
+    // vede quale filtro sta agendo. Un id sconosciuto viene ignorato.
+    const pelleDaUrl = new URLSearchParams(window.location.search).get('pelle');
+    if (pelleDaUrl && contenitore) {
+      const btn = contenitore.querySelector(`[data-filtro-pelle="${CSS.escape(pelleDaUrl)}"]`);
+      if (btn) {
+        attivaPelle(btn);
+        if (pannello) pannello.open = true;
+      }
+    }
   }
 </script>

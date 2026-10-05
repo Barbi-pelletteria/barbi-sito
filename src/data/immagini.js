@@ -16,8 +16,15 @@
 // scripts/ottimizza-foto-prodotto.mjs — non scritti a mano. Rilanciare
 // quello script (mai modificare il manifest direttamente) è l'unico modo
 // corretto di aggiungere una foto, incluso il futuro 06-con-carta.
+//
+// D-030: le foto si cercano per variante. Una variante {colore, pelle,
+// foto?} con `foto` punta a una cartella propria (chiave del manifest al
+// posto del colore); senza, si usano le foto del colore. La macro della
+// pelle in coda alla galleria è della capra conciata al vegetale: si
+// aggiunge solo quando la pelle scelta è quella.
 import manifest from './foto-manifest.json';
 import macroPelle from './macro-pelle-manifest.json';
+import { getVariante, pelleIniziale } from './prodotti.js';
 
 // Didascalie vere per tipo di scatto — mai "portafoglio" da solo, sempre
 // cosa si vede + modello + colore (per screen reader e Google Immagini).
@@ -36,26 +43,40 @@ const DIDASCALIE = {
     `Dettaglio del bordo tinto a mano del portafoglio ${nome} in pelle ${colore}`,
 };
 
-// Galleria completa, in ordine, per un prodotto+colore: gli scatti numerati
-// (01-05, presto anche 06-con-carta) più, in coda, la macro della pelle di
-// quel colore come immagine di dettaglio del materiale (richiesta diretta
-// del Founder, PACCHETTO_MACRO_PELLE) — condivisa fra Sottile e Completo
-// dello stesso colore, non duplicata per prodotto come i file numerati:
-// non è una foto DI un prodotto specifico, è la pelle in sé.
-export function galleriaProdotto(prodotto, colore) {
-  const file = manifest[prodotto.slug]?.[colore.slug] || [];
-  const base = `/prodotti/${prodotto.slug}-${colore.slug}`;
-  const didascalia = DIDASCALIE[file[0]?.id];
+// Didascalie specifiche per prodotto, quando gli scatti mostrano altro
+// rispetto allo schema comune (testi alt scritti dal QG per quel modello).
+const DIDASCALIE_PRODOTTO = {};
+
+function didascalia(prodotto, colore, id) {
+  const propria = DIDASCALIE_PRODOTTO[prodotto.slug]?.[id];
+  if (propria) return propria;
+  const generica = DIDASCALIE[id] || DIDASCALIE['01-chiuso'];
+  return generica(prodotto.nome, colore.nome.toLowerCase());
+}
+
+// Galleria completa, in ordine, per un prodotto+colore(+pelle): gli scatti
+// numerati (01-05, presto anche 06-con-carta) più, in coda, la macro della
+// pelle di quel colore come immagine di dettaglio del materiale (richiesta
+// diretta del Founder, PACCHETTO_MACRO_PELLE) — condivisa fra Sottile e
+// Completo dello stesso colore, non duplicata per prodotto come i file
+// numerati: non è una foto DI un prodotto specifico, è la pelle in sé.
+// Senza pelleId si prende la pelle iniziale del colore (prodotti.js).
+export function galleriaProdotto(prodotto, colore, pelleId) {
+  const pelle = pelleId || pelleIniziale(prodotto, colore.slug);
+  const variante = getVariante(prodotto, colore.slug, pelle);
+  const chiave = variante?.foto || colore.slug;
+  const file = manifest[prodotto.slug]?.[chiave] || [];
+  const base = `/prodotti/${prodotto.slug}-${chiave}`;
   const scatti = file.map((f) => ({
     id: f.id,
     webp: `${base}/${f.id}.webp`,
     jpg: `${base}/${f.id}.jpg`,
     width: f.width,
     height: f.height,
-    alt: (DIDASCALIE[f.id] || didascalia)(prodotto.nome, colore.nome.toLowerCase()),
+    alt: didascalia(prodotto, colore, f.id),
   }));
   const macro = macroPelle[colore.slug];
-  if (macro) {
+  if (macro && pelle === 'capra-vegetale') {
     scatti.push({
       id: 'macro-pelle',
       webp: macro.macroWebp,
@@ -81,12 +102,12 @@ export function macroProdotto(coloreSlug) {
 // manifest): anteprima del selettore colore su ProductCard.astro. Non un
 // campo separato — la stessa fonte della galleria, un solo posto dove le
 // foto di un colore possono disallinearsi.
-export function copertinaProdotto(prodotto, colore) {
-  return galleriaProdotto(prodotto, colore)[0] || null;
+export function copertinaProdotto(prodotto, colore, pelleId) {
+  return galleriaProdotto(prodotto, colore, pelleId)[0] || null;
 }
 
 // Colore mostrato per primo su ogni scheda. È una scelta di vetrina, non di
-// magazzino: serve solo perché le due schede affiancate non partano dallo
+// magazzino: serve solo perché le schede affiancate non partano dallo
 // stesso colore (come nell'anteprima approvata). Se il colore indicato è
 // esaurito, il componente ripiega sul primo disponibile.
 export const coloreVetrina = {

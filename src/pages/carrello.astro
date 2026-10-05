@@ -53,7 +53,7 @@ import { VENDITA_ATTIVA } from '../data/prodotti.js';
 
 <script>
   import { getCart, updateQuantita, removeFromCart, lineKey } from '../scripts/cart.js';
-  import { getProdottoBySlug, getColore, formatEuro, INIZIALI_CENTESIMI } from '../data/prodotti.js';
+  import { getProdottoBySlug, getColore, formatEuro, INIZIALI_CENTESIMI, stockColore } from '../data/prodotti.js';
   import { copertinaProdotto } from '../data/immagini.js';
 
   function prezzoRiga(prodotto, riga) {
@@ -64,7 +64,7 @@ import { VENDITA_ATTIVA } from '../data/prodotti.js';
   // righe con lo stesso modello+colore (es. stesso colore con e senza iniziali).
   function maxRiga(cart, prodotto, riga) {
     const colore = getColore(prodotto, riga.colore);
-    const stock = colore ? colore.stock : 0;
+    const stock = colore ? stockColore(prodotto, riga.colore) : 0;
     const altri = cart
       .filter((r) => r.slug === riga.slug && r.colore === riga.colore && r !== riga)
       .reduce((t, r) => t + r.quantita, 0);

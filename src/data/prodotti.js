@@ -10,6 +10,8 @@
 // ─────────────────────────────────────────────────────────────────────────
 export const VENDITA_ATTIVA = false;
 
+import { pelli, getPelle } from './pelli.js';
+
 // Email di contatto pubblica del laboratorio.
 export const EMAIL_CONTATTO = 'info.barbipelletteria@gmail.com';
 
@@ -25,6 +27,9 @@ export const INIZIALI_CENTESIMI = 1000;
 // prodotto e "Come nasce un portafoglio", sta in macro-pelle-manifest.json
 // (vedi immagini.js). Generate da scripts/ottimizza-macro-pelle.mjs, non
 // scritte a mano: rilanciare quello script per aggiornarle.
+// Sono macro della CAPRA conciata al vegetale: per un colore che su quel
+// prodotto è in un'altra pelle lo swatch torna alla tinta piatta
+// (swatchColore, sotto) — non si mostra la grana di una pelle diversa.
 export const MACRO_PELLE = {
   blu: '/pelle/blu-swatch.webp',
   bordeaux: '/pelle/bordeaux-swatch.webp',
@@ -46,19 +51,9 @@ export const categorie = [
   { slug: 'borse', nome: 'Borse', genere: 'f' },
 ];
 
-// Blocco "Come si cura", identico su entrambe le schede (testo verbatim).
-export const curaProdotto = {
-  titolo: 'Come si cura',
-  intro:
-    'La pelle è conciata e tinta naturalmente, senza protezioni chimiche. È un materiale vivo: si segna, cambia tono e con l’uso diventa suo. Per farlo invecchiare bene:',
-  punti: [
-    'tienilo lontano dall’acqua — pioggia, schizzi, umidità',
-    'evita creme, oli, unguenti e il contatto con il cibo',
-    'non lasciarlo al sole né vicino a fonti di calore',
-    'attenzione al contatto prolungato con indumenti di colore molto diverso: il colore può trasferirsi in entrambe le direzioni',
-  ],
-  chiusura: 'Conservalo in un luogo asciutto, al riparo dalla luce diretta.',
-};
+// Il blocco "Come si cura" (testo verbatim, invariato) oggi vive nel
+// catalogo pelli: ogni pelle ha il suo (pelli.js, campo `cura`), la scheda
+// prodotto mostra quello della pelle scelta.
 
 // Riquadro iniziali sulla scheda prodotto (D-029 § 4.3, testo del QG).
 export const avvisoIniziali =
@@ -69,16 +64,39 @@ export const avvisoIniziali =
 export const CONSENSO_NEWSLETTER =
   'Accetto di ricevere email da Barbi Pelletteria su novità e nuovi modelli. Posso annullare l’iscrizione in qualsiasi momento.';
 
-// I DUE prodotti reali. Stock per singolo colore (punto 4A).
+// ─────────────────────────────────────────────────────────────────────────
+// Anteprima delle bozze (D-030 Parte 4). Un prodotto con `pubblicato:
+// false` non esiste per il sito pubblico (niente pagina → 404, niente
+// collezione, home, sitemap, filtri, dati strutturati). In locale si
+// controlla con:   MOSTRA_BOZZE=true npm run build
+// Letta da process.env (build e test in Node) o da import.meta.env (Astro);
+// nel browser nessuna delle due esiste → sempre false.
+// ─────────────────────────────────────────────────────────────────────────
+const ambiente = (typeof process !== 'undefined' && process.env) || {};
+export const MOSTRA_BOZZE =
+  ambiente.MOSTRA_BOZZE === 'true' || import.meta.env?.MOSTRA_BOZZE === 'true';
+
+// I prodotti reali. Da D-030 ogni pezzo vendibile è identificato da
+// modello + colore + PELLE: `colori` elenca i colori (slug + nome), le
+// `varianti` {colore, pelle, stock, foto?} dicono quali pelli esistono
+// per ogni colore e quanti pezzi ci sono. Lo stock vive SOLO sulla
+// variante (anti-sovravendita per colore+pelle, non più per solo colore).
+// `foto` è facoltativa: se manca si usano le foto del colore.
+//
+// I campi di scheda (fodera, misure, spessore, peso, capienza,
+// lavorazione) sono separati: la tabella "Dettagli e misure" si costruisce
+// da qui (specificheProdotto) e salta le righe vuote — mai "n.d." o
+// trattini. Vuoto = dato non ancora arrivato da Stefano, non inventato.
 export const prodotti = [
   // Tutti i testi qui sotto (occhielli, sommario, fraseBreve, puntiForza,
-  // descrizione, rimando, metaDescription) sono quelli definitivi del QG,
+  // descrizione, rimandi, metaDescription) sono quelli definitivi del QG,
   // D-029 § 4.1/4.3/4.4/4.14 — non riscritti. Apostrofi tipografici come
   // nel resto del sito (uniformati il 26/08).
   {
     slug: 'sottile',
     categoria: 'portafogli',
     nome: 'Sottile',
+    pubblicato: true,
     // Eyebrow della scheda prodotto (§ 4.3) e della card in vetrina (§ 4.1).
     occhiello: 'Portafoglio slim · 8 carte',
     occhielloCard: '8 carte · 0,55 cm',
@@ -90,6 +108,7 @@ export const prodotti = [
     prezzoCentesimi: 4900,
     tascheCarte: 8,
     portamonete: false,
+    inizialiDisponibili: true,
     // Punti di forza (§ 4.3): icona + titolo + riga. L'icona è solo un
     // segno lineare scelto per tema, vedi ICONE in prodotto/[slug].astro.
     puntiForza: [
@@ -101,28 +120,32 @@ export const prodotti = [
     descrizione: [
       '«Un portafoglio ridimensionato per lo stile di vita odierno»: così lo descrive Stefano. Meno contante, più carte, nessun ingombro. Chiuso misura 10,9 × 8,5 cm e pesa 50 grammi.',
     ],
-    rimando: { slug: 'completo', testo: 'Ti serve anche il portamonete? Scopri il Completo →' },
+    rimandi: [{ slug: 'completo', testo: 'Ti serve anche il portamonete? Scopri il Completo →' }],
     metaDescription: 'Sottile: portafoglio slim da 8 carte, 0,55 cm, in pelle di capra conciata al vegetale con bordi tinti a mano. 49 €, spedizione inclusa.',
-    specifiche: [
-      ['Pelle', 'capra conciata al vegetale, spessore 1,2-1,3 mm'],
-      ['Fodera', 'poliestere'],
-      ['Chiuso', '10,9 × 8,5 cm'],
-      ['Aperto', '21 × 8,5 cm'],
-      ['Spessore', '0,55 cm'],
-      ['Peso', '50 g'],
-      ['Capienza', '8 tasche carte, scomparto banconote, tasca documenti (nessun portamonete)'],
-      ['Lavorazione', 'cuciture a macchina, bordi tinti a mano'],
-    ],
+    fodera: 'poliestere',
+    misure: { chiuso: '10,9 × 8,5 cm', aperto: '21 × 8,5 cm' },
+    spessore: '0,55 cm',
+    peso: '50 g',
+    capienza: '8 tasche carte, scomparto banconote, tasca documenti (nessun portamonete)',
+    lavorazione: 'cuciture a macchina, bordi tinti a mano',
     colori: [
-      { slug: 'blu', nome: 'Blu', stock: 4 },
-      { slug: 'bordeaux', nome: 'Bordeaux', stock: 5 },
-      { slug: 'marrone', nome: 'Marrone', stock: 4 },
+      { slug: 'blu', nome: 'Blu' },
+      { slug: 'bordeaux', nome: 'Bordeaux' },
+      { slug: 'marrone', nome: 'Marrone' },
+    ],
+    // Stock invariato rispetto a prima di D-030, solo spostato sulla
+    // variante (tutte in capra conciata al vegetale).
+    varianti: [
+      { colore: 'blu', pelle: 'capra-vegetale', stock: 4 },
+      { colore: 'bordeaux', pelle: 'capra-vegetale', stock: 5 },
+      { colore: 'marrone', pelle: 'capra-vegetale', stock: 4 },
     ],
   },
   {
     slug: 'completo',
     categoria: 'portafogli',
     nome: 'Completo',
+    pubblicato: true,
     occhiello: 'Portafoglio classico · con portamonete',
     occhielloCard: '5 carte · portamonete',
     scopri: 'Scopri il Completo',
@@ -131,6 +154,7 @@ export const prodotti = [
     prezzoCentesimi: 5500,
     tascheCarte: 5,
     portamonete: true,
+    inizialiDisponibili: true,
     puntiForza: [
       { icona: 'portamonete', titolo: 'Portamonete con patta', testo: 'Chiuso da un bottone: le monete restano al loro posto.' },
       { icona: 'spessore', titolo: '0,65 cm di spessore', testo: 'Solo un millimetro in più del Sottile, e non lascia fuori niente.' },
@@ -140,32 +164,75 @@ export const prodotti = [
     descrizione: [
       'Stefano lo chiama «il classico per l’uso di tutti i giorni». Cinque tasche per le carte, scomparto banconote, tasca documenti e portamonete. Chiuso misura 10,9 × 8,5 cm e pesa 55 grammi.',
     ],
-    rimando: { slug: 'sottile', testo: 'Preferisci qualcosa di ancora più sottile? Scopri il Sottile →' },
+    rimandi: [{ slug: 'sottile', testo: 'Preferisci qualcosa di ancora più sottile? Scopri il Sottile →' }],
     metaDescription: 'Completo: portafoglio con portamonete e 5 carte, 0,65 cm, in pelle di capra conciata al vegetale con bordi tinti a mano. 55 €, spedizione inclusa.',
-    specifiche: [
-      ['Pelle', 'capra conciata al vegetale, spessore 1,2-1,3 mm'],
-      ['Fodera', 'poliestere'],
-      ['Chiuso', '10,9 × 8,5 cm'],
-      ['Aperto', '21 × 8,5 cm'],
-      ['Spessore', '0,65 cm'],
-      ['Peso', '55 g'],
-      ['Capienza', '5 tasche carte, scomparto banconote, tasca documenti, portamonete'],
-      ['Lavorazione', 'cuciture a macchina, bordi tinti a mano'],
-    ],
+    fodera: 'poliestere',
+    misure: { chiuso: '10,9 × 8,5 cm', aperto: '21 × 8,5 cm' },
+    spessore: '0,65 cm',
+    peso: '55 g',
+    capienza: '5 tasche carte, scomparto banconote, tasca documenti, portamonete',
+    lavorazione: 'cuciture a macchina, bordi tinti a mano',
     colori: [
-      { slug: 'blu', nome: 'Blu', stock: 4 },
-      { slug: 'bordeaux', nome: 'Bordeaux', stock: 3 },
-      { slug: 'marrone', nome: 'Marrone', stock: 4 },
+      { slug: 'blu', nome: 'Blu' },
+      { slug: 'bordeaux', nome: 'Bordeaux' },
+      { slug: 'marrone', nome: 'Marrone' },
+    ],
+    varianti: [
+      { colore: 'blu', pelle: 'capra-vegetale', stock: 4 },
+      { colore: 'bordeaux', pelle: 'capra-vegetale', stock: 3 },
+      { colore: 'marrone', pelle: 'capra-vegetale', stock: 4 },
     ],
   },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────
+// Blocco di pubblicazione (D-030 Parte 4). Gira a ogni build (questo
+// modulo è importato da tutte le pagine): se un prodotto con
+// `pubblicato: true` usa una pelle non confermata, o ha vuoti misure,
+// peso o stock, la build si ferma qui con il messaggio sotto. Nel browser
+// (window definito) non gira: il controllo è già passato in build.
+// ─────────────────────────────────────────────────────────────────────────
+export function validaCatalogo(lista = prodotti, catalogoPelli = pelli) {
+  const errori = [];
+  for (const p of lista) {
+    if (p.pubblicato !== true) continue;
+    const varianti = p.varianti || [];
+    if (varianti.length === 0) errori.push(`${p.nome}: nessuna variante (colore + pelle + stock)`);
+    for (const v of varianti) {
+      const pelle = catalogoPelli.find((x) => x.id === v.pelle);
+      if (!pelle) errori.push(`${p.nome} (${v.colore}): la pelle "${v.pelle}" non esiste nel catalogo pelli`);
+      else if (!pelle.confermata) errori.push(`${p.nome} (${v.colore}): usa la pelle "${v.pelle}" non confermata`);
+    }
+    const mancanti = [];
+    if (!p.misure?.chiuso || !p.misure?.aperto) mancanti.push('misure');
+    if (!p.peso) mancanti.push('peso');
+    if (varianti.some((v) => !Number.isInteger(v.stock) || v.stock < 0)) mancanti.push('stock');
+    if (mancanti.length) errori.push(`${p.nome}: campi vuoti: ${mancanti.join(', ')}`);
+  }
+  if (errori.length) {
+    throw new Error(
+      'BLOCCO DI PUBBLICAZIONE (D-030 Parte 4): un prodotto con `pubblicato: true` non ha i dati per andare online.\n' +
+        errori.map((e) => `  - ${e}`).join('\n') +
+        '\nRimetti `pubblicato: false` oppure completa i dati (arrivano da Stefano, via QG) in src/data/prodotti.js e src/data/pelli.js.'
+    );
+  }
+  return true;
+}
+if (typeof window === 'undefined') validaCatalogo(prodotti, pelli);
+
+// Pubblicati = online. Visibili = pubblicati + bozze solo in anteprima
+// locale (MOSTRA_BOZZE). getProdottoBySlug resta su tutti: serve al
+// carrello (righe salvate nel browser) e all'anteprima.
+export const prodottiPubblicati = prodotti.filter((p) => p.pubblicato === true);
+export const bozze = prodotti.filter((p) => p.pubblicato !== true);
+export const prodottiVisibili = prodotti.filter((p) => p.pubblicato === true || MOSTRA_BOZZE);
 
 export function getProdottoBySlug(slug) {
   return prodotti.find((p) => p.slug === slug);
 }
 
 export function getProdottiByCategoria(categoriaSlug) {
-  return prodotti.filter((p) => p.categoria === categoriaSlug);
+  return prodottiVisibili.filter((p) => p.categoria === categoriaSlug);
 }
 
 export function getColore(prodotto, coloreSlug) {
@@ -173,9 +240,100 @@ export function getColore(prodotto, coloreSlug) {
   return prodotto.colori.find((c) => c.slug === coloreSlug);
 }
 
+// ── Varianti (colore + pelle) ────────────────────────────────────────────
+export function getVarianti(prodotto, coloreSlug) {
+  const tutte = prodotto?.varianti || [];
+  return coloreSlug ? tutte.filter((v) => v.colore === coloreSlug) : tutte;
+}
+
+export function getVariante(prodotto, coloreSlug, pelleId) {
+  return getVarianti(prodotto, coloreSlug).find((v) => v.pelle === pelleId);
+}
+
+// Stock di una variante: 0 se la variante non esiste o lo stock non è
+// ancora un numero (bozza).
+export function stockVariante(prodotto, coloreSlug, pelleId) {
+  const v = getVariante(prodotto, coloreSlug, pelleId);
+  return v && Number.isInteger(v.stock) && v.stock > 0 ? v.stock : 0;
+}
+
+export function stockColore(prodotto, coloreSlug) {
+  return getVarianti(prodotto, coloreSlug).reduce((t, v) => t + stockVariante(prodotto, v.colore, v.pelle), 0);
+}
+
+export function stockTotale(prodotto) {
+  return getVarianti(prodotto).reduce((t, v) => t + stockVariante(prodotto, v.colore, v.pelle), 0);
+}
+
+// Pelli con almeno un pezzo per un colore, nell'ordine delle varianti.
+export function pelliColore(prodotto, coloreSlug) {
+  return [...new Set(
+    getVarianti(prodotto, coloreSlug)
+      .filter((v) => stockVariante(prodotto, v.colore, v.pelle) > 0)
+      .map((v) => v.pelle)
+  )];
+}
+
+// Pelle mostrata per prima per un colore: la prima con stock, altrimenti
+// la prima variante di quel colore (es. bozza senza stock).
+export function pelleIniziale(prodotto, coloreSlug) {
+  return pelliColore(prodotto, coloreSlug)[0] || getVarianti(prodotto, coloreSlug)[0]?.pelle || null;
+}
+
+// Tutte le pelli usate da un prodotto (anche senza stock), senza doppioni.
+export function pelliProdotto(prodotto) {
+  return [...new Set(getVarianti(prodotto).map((v) => v.pelle))];
+}
+
+// Pelle della variante principale (la prima): dati strutturati `material`
+// e riga pelle della card.
+export function pelleVariantePrincipale(prodotto) {
+  return getPelle(getVarianti(prodotto)[0]?.pelle) || null;
+}
+
+// Pezzi ancora aggiungibili per una variante: stock meno quelli già nel
+// carrello (la funzione di conteggio viene da cart.js, passata qui per non
+// legare i dati al browser).
+export function residuoVariante(prodotto, coloreSlug, pelleId, quantitaNelCarrello) {
+  return Math.max(0, stockVariante(prodotto, coloreSlug, pelleId) - quantitaNelCarrello(prodotto.slug, coloreSlug, pelleId));
+}
+
+// Swatch di un colore: la macro della capra se su quel prodotto il colore
+// è in capra conciata al vegetale, altrimenti nessuna immagine (resta la
+// tinta piatta del CSS). Mai la grana di una pelle diversa.
+export function swatchColore(prodotto, coloreSlug) {
+  return pelleIniziale(prodotto, coloreSlug) === 'capra-vegetale' ? MACRO_PELLE[coloreSlug] : undefined;
+}
+
+// Riga "Pelle" della tabella dettagli: nome della pelle (iniziale
+// minuscola) più lo spessore se noto — es. "capra conciata al vegetale,
+// spessore 1,2-1,3 mm", lo stesso testo di prima di D-030. Vuota se la
+// pelle non ha ancora un nome (bozza).
+export function rigaPelle(pelle) {
+  if (!pelle?.nome) return '';
+  return pelle.nome.charAt(0).toLowerCase() + pelle.nome.slice(1) + (pelle.spessore ? `, spessore ${pelle.spessore}` : '');
+}
+
+// Tabella "Dettagli e misure": righe nell'ordine del pacchetto, saltando
+// quelle senza dato. La riga Pelle viene dal catalogo pelli, per la pelle
+// scelta.
+export function specificheProdotto(prodotto, pelleId) {
+  const pelle = getPelle(pelleId || pelleIniziale(prodotto, prodotto.colori[0]?.slug));
+  return [
+    ['Pelle', rigaPelle(pelle)],
+    ['Fodera', prodotto.fodera],
+    ['Chiuso', prodotto.misure?.chiuso],
+    ['Aperto', prodotto.misure?.aperto],
+    ['Spessore', prodotto.spessore],
+    ['Peso', prodotto.peso],
+    ['Capienza', prodotto.capienza],
+    ['Lavorazione', prodotto.lavorazione],
+  ].filter(([, valore]) => valore && String(valore).trim() !== '');
+}
+
 // Formatta un importo in centesimi come prezzo italiano, es. 4900 → "49,00 €".
 export function formatEuro(centesimi) {
-  return (centesimi / 100).toFixed(2).replace('.', ',') + ' €';
+  return (centesimi / 100).toFixed(2).replace('.', ',') + ' €';
 }
 
 // Prezzo "da vetrina" (D-029 § 2.7): "49 €" senza decimali quando
