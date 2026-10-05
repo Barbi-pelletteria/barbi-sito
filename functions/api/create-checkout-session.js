@@ -137,6 +137,18 @@ export async function onRequestPost({ request, env }) {
         pelle: perArticolo((it) => it.pelle || ''),
         iniziali: perArticolo((it) => it.iniziali || ''),
       },
+      // Gli stessi quattro campi anche sul pagamento (PaymentIntent): nella
+      // Dashboard di Stripe la pagina del pagamento mostra i metadata del
+      // PaymentIntent, non quelli della sessione — è lì che Stefano legge
+      // cosa spedire. Provato in sandbox (D-030 Parte 5.3).
+      payment_intent_data: {
+        metadata: {
+          modello: perArticolo((it) => it.nome || it.slug),
+          colore: perArticolo((it) => it.colore || ''),
+          pelle: perArticolo((it) => it.pelle || ''),
+          iniziali: perArticolo((it) => it.iniziali || ''),
+        },
+      },
       success_url: `${origin}/conferma-ordine?session_id={CHECKOUT_SESSION_ID}&value=${(totaleCentesimi / 100).toFixed(2)}&currency=EUR`,
       cancel_url: `${origin}/carrello`,
     });
