@@ -7,7 +7,7 @@
 // confermate con almeno un pezzo disponibile), parametro URL ?pelle={id}.
 import Layout from '../layouts/Layout.astro';
 import ProductCard from './ProductCard.astro';
-import { categorie, getProdottiByCategoria, getVarianti, stockVariante } from '../data/prodotti.js';
+import { categorie, getProdottiByCategoria, getVarianti, stockVariante, TRE_MODELLI } from '../data/prodotti.js';
 import { getPelle } from '../data/pelli.js';
 import { copertinaProdotto } from '../data/immagini.js';
 
@@ -38,8 +38,17 @@ const eCollezione = categoriaSlug === 'portafogli';
 // per lo stesso motivo del testo "pronti/pronte" qui sotto (C-16 in
 // CORREZIONI.md — la stessa famiglia di bug, stavolta evitata da subito).
 const fattoA = categoria.genere === 'f' ? 'fatte' : 'fatti';
+// Sottotitolo e description della collezione: versione a tre modelli
+// (D-030 Parte 3, QG) solo quando il terzo prodotto è pubblicato
+// (TRE_MODELLI, dal numero di prodotti pubblicati), altrimenti D-029.
+const sottotitoloCollezione = TRE_MODELLI
+  ? 'Tre portafogli in pelle, in blu, bordeaux e marrone. Scegli il modello, il colore e la pelle: ogni pezzo esce dal laboratorio di Stefano Barbi.'
+  : 'Due portafogli in pelle di capra conciata al vegetale, in blu, bordeaux e marrone. Ogni pezzo esce dal laboratorio di Stefano Barbi, rifinito a mano.';
+const descrizioneCollezione = TRE_MODELLI
+  ? 'Sottile, Completo ed Essenziale: portafogli in pelle in blu, bordeaux e marrone. Scegli modello, colore e pelle. Spedizione gratuita in Italia.'
+  : 'Sottile e Completo: portafogli in pelle conciata al vegetale in blu, bordeaux e marrone. Iniziali impresse su richiesta. Spedizione gratuita.';
 const descrizioneCategoria = eCollezione
-  ? 'Sottile e Completo: portafogli in pelle conciata al vegetale in blu, bordeaux e marrone. Iniziali impresse su richiesta. Spedizione gratuita.'
+  ? descrizioneCollezione
   : prodottiCategoria.length > 0
     ? `I ${categoria.nome.toLowerCase()} Barbi Pelletteria: pelle conciata al vegetale, ${fattoA} a mano a Casoria.`
     : `${categoria.nome} Barbi Pelletteria, in arrivo: pelle conciata al vegetale, ${fattoA} a mano a Casoria.`;
@@ -60,7 +69,7 @@ const mostraFiltri = modelli.length > 1 || coloriDisponibili.length > 1 || pelli
       <div class="sec-top">
         <h1>{eCollezione ? 'La collezione' : categoria.nome}</h1>
         {eCollezione ? (
-          <p>Due portafogli in pelle di capra conciata al vegetale, in blu, bordeaux e marrone. Ogni pezzo esce dal laboratorio di Stefano Barbi, rifinito a mano.</p>
+          <p>{sottotitoloCollezione}</p>
         ) : (
           <p>Quello che c’è davvero in laboratorio oggi. Non un catalogo: un banco di lavoro.</p>
         )}

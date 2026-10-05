@@ -278,6 +278,20 @@ export const prodottiPubblicati = prodotti.filter((p) => p.pubblicato === true);
 export const bozze = prodotti.filter((p) => p.pubblicato !== true);
 export const prodottiVisibili = prodotti.filter((p) => p.pubblicato === true || MOSTRA_BOZZE);
 
+// D-030 Parte 3/4: i testi che parlano di tre modelli (home, collezione,
+// FAQ, "Come nasce", fascia numeri, un punto di forza del Sottile) si
+// attivano da soli quando il terzo prodotto è pubblicato. Letto dal numero
+// di prodotti pubblicati, non da un interruttore a mano: finché
+// l'Essenziale è in bozza restano i testi D-029 a due modelli.
+export const TRE_MODELLI = prodottiPubblicati.length >= 3;
+
+// Punto di forza "8 tasche per le carte" del Sottile: seconda riga nella
+// versione a tre modelli (D-030 Parte 3, QG); fino ad allora quella D-029.
+{
+  const tasche = prodotti.find((p) => p.slug === 'sottile')?.puntiForza.find((f) => f.titolo === '8 tasche per le carte');
+  if (tasche && TRE_MODELLI) tasche.testo = 'Più scomparto banconote e tasca documenti. Tutto quello che serve, niente di superfluo.';
+}
+
 export function getProdottoBySlug(slug) {
   return prodotti.find((p) => p.slug === slug);
 }

@@ -3,6 +3,7 @@
 // Le risposte stanno in un solo elenco, usato sia per la pagina sia per il
 // FAQPage JSON-LD: se una cambia, cambiano insieme.
 import Layout from '../layouts/Layout.astro';
+import { TRE_MODELLI } from '../data/prodotti.js';
 
 const faq = [
   {
@@ -11,7 +12,11 @@ const faq = [
   },
   {
     d: 'Che pelle usate?',
-    r: 'Pelle di capra conciata al vegetale, spessore 1,2-1,3 mm. Stefano la descrive così: «conciata e tinta naturalmente, senza protezioni chimiche: materiale vivo e delicato». Vivo, perché con l’uso cambia tono e diventa unico. Delicato, perché teme acqua, oli e sole più di una pelle trattata industrialmente: per questo vale la pena saperla curare.',
+    // Versione a tre modelli e pelle per pezzo (D-030 Parte 3, QG) solo
+    // quando il terzo prodotto è pubblicato; altrimenti il testo D-029.
+    r: TRE_MODELLI
+      ? 'Dipende dal modello e dal pezzo: la pelle esatta è indicata nella scheda di ogni portafoglio e puoi sceglierla con il filtro Pelle. Sottile e Completo sono in capra conciata al vegetale, spessore 1,2-1,3 mm: «conciata e tinta naturalmente, senza protezioni chimiche: materiale vivo e delicato», come la descrive Stefano. Per questo teme acqua, oli e sole più di una pelle trattata industrialmente, e vale la pena saperla curare.'
+      : 'Pelle di capra conciata al vegetale, spessore 1,2-1,3 mm. Stefano la descrive così: «conciata e tinta naturalmente, senza protezioni chimiche: materiale vivo e delicato». Vivo, perché con l’uso cambia tono e diventa unico. Delicato, perché teme acqua, oli e sole più di una pelle trattata industrialmente: per questo vale la pena saperla curare.',
   },
   {
     d: 'Come si cura?',

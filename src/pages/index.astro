@@ -3,8 +3,28 @@ import Layout from '../layouts/Layout.astro';
 import VetrinaProdotti from '../components/VetrinaProdotti.astro';
 import StoriaHome from '../components/StoriaHome.astro';
 import ComeNasce from '../components/ComeNasce.astro';
-import { prodottiVisibili, getProdottoBySlug, VENDITA_ATTIVA } from '../data/prodotti.js';
+import { prodottiVisibili, getProdottoBySlug, VENDITA_ATTIVA, TRE_MODELLI } from '../data/prodotti.js';
 import { copertinaProdotto } from '../data/immagini.js';
+
+// D-030 Parte 3/4: con il terzo modello pubblicato cambiano SOLO queste
+// righe (testi del QG, D-030 Parte 3); finché l'Essenziale è in bozza
+// restano quelle di D-029 § 4.1/4.14. TRE_MODELLI viene dal numero di
+// prodotti pubblicati (prodotti.js), non da un interruttore a mano.
+const testi = TRE_MODELLI
+  ? {
+      description: 'Alta pelletteria Barbi: portafogli in pelle montati e rifiniti a mano da Stefano Barbi in Campania. Scegli modello, colore e pelle. Spedizione gratuita.',
+      supporto: 'Portafogli in pelle, montati e rifiniti a mano da Stefano Barbi nel suo laboratorio in Campania.',
+      collezioneTitolo: 'Tre portafogli. Nessun compromesso.',
+      collezioneSotto: 'Stessa cura, tre modi di portare con sé quello che serve.',
+      spessorePelle: 'lo spessore della capra conciata al vegetale',
+    }
+  : {
+      description: 'Alta pelletteria Barbi: portafogli in pelle di capra conciata al vegetale, rifiniti a mano da Stefano Barbi in Campania. Spedizione gratuita in Italia.',
+      supporto: 'Portafogli in pelle di capra conciata al vegetale, montati e rifiniti a mano da Stefano Barbi nel suo laboratorio in Campania.',
+      collezioneTitolo: 'Due portafogli. Nessun compromesso.',
+      collezioneSotto: 'Stessa pelle, stesse mani, due modi di portare con sé l’essenziale.',
+      spessorePelle: 'lo spessore della pelle scelta',
+    };
 
 // Redesign 15/09/2026 (riferimento "Stitch & Hide"): foto grande nell'hero.
 // Marrone — colore di riferimento del sito (cuciture, pulsanti, macro) —
@@ -39,7 +59,7 @@ const organizzazioneJsonLd = {
   },
 };
 ---
-<Layout title="Home" description="Alta pelletteria Barbi: portafogli in pelle di capra conciata al vegetale, rifiniti a mano da Stefano Barbi in Campania. Spedizione gratuita in Italia.">
+<Layout title="Home" description={testi.description}>
   <Fragment slot="structured-data">
     <script type="application/ld+json" set:html={JSON.stringify(organizzazioneJsonLd)} />
   </Fragment>
@@ -79,7 +99,7 @@ const organizzazioneJsonLd = {
       <p class="eyebrow">Laboratorio di pelletteria · dal 1992</p>
       <h1>Alta pelletteria Barbi:</h1>
       <p class="sottotitolo">L'arte di plasmare il futuro grazie ad una nobile tradizione artigianale.</p>
-      <p class="hero-nuovo__supporto">Portafogli in pelle di capra conciata al vegetale, montati e rifiniti a mano da Stefano Barbi nel suo laboratorio in Campania.</p>
+      <p class="hero-nuovo__supporto">{testi.supporto}</p>
       <div class="hero-nuovo__azioni">
         <a class="pulsante pulsante--grande" href="/portafogli/">Scegli il tuo portafoglio</a>
         <a class="link-freccia" href="/chi-siamo/">Entra nel laboratorio →</a>
@@ -108,8 +128,8 @@ const organizzazioneJsonLd = {
         {/* D-029 § 4.1 "Sezione collezione" (QG). "I più venduti" tolto:
             non dimostrabile online (Parte 3). */}
         <p class="eyebrow">La collezione</p>
-        <h2>Due portafogli. Nessun compromesso.</h2>
-        <p>Stessa pelle, stesse mani, due modi di portare con sé l’essenziale.</p>
+        <h2>{testi.collezioneTitolo}</h2>
+        <p>{testi.collezioneSotto}</p>
       </div>
 
       {/* Solo i prodotti visibili: pubblicati, più le bozze in anteprima
@@ -126,7 +146,7 @@ const organizzazioneJsonLd = {
       <div><b>1992</b><span>l’anno in cui Stefano inizia a lavorare la pelle</span></div>
       <div><b>2-3 ore</b><span>di lavoro su ogni portafoglio</span></div>
       <div><b>circa 50</b><span>fiere l’anno in tutta Italia</span></div>
-      <div><b>1,2 mm</b><span>lo spessore della pelle scelta</span></div>
+      <div><b>1,2 mm</b><span>{testi.spessorePelle}</span></div>
     </div>
   </section>
 

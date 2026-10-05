@@ -7,10 +7,18 @@
 // Il terzo passo dice che la cucitura è a macchina: non è una svista,
 // nasconderlo è ciò che fa sembrare un sito insincero (divieto 15: mai
 // "cucito a mano").
+//
+// "01 · La pelle" ha due versioni (D-030 Parte 3, QG): quella a tre
+// modelli parte da sola quando il terzo prodotto è pubblicato
+// (TRE_MODELLI, dal numero di prodotti pubblicati in prodotti.js).
+import { TRE_MODELLI } from '../data/prodotti.js';
+
 const passi = [
   {
     titolo: 'La pelle',
-    testo: 'Capra conciata al vegetale, spessore 1,2-1,3 mm. Una concia lenta, senza protezioni chimiche: la pelle resta viva e con l’uso prende un tono che è solo tuo.',
+    testo: TRE_MODELLI
+      ? 'Ogni modello ha la sua pelle, indicata nella scheda. Sottile e Completo nascono in capra conciata al vegetale, spessore 1,2-1,3 mm: senza protezioni chimiche, con l’uso prende un tono che è solo tuo.'
+      : 'Capra conciata al vegetale, spessore 1,2-1,3 mm. Una concia lenta, senza protezioni chimiche: la pelle resta viva e con l’uso prende un tono che è solo tuo.',
   },
   {
     titolo: 'Il taglio',
