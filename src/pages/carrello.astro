@@ -53,20 +53,21 @@ import { VENDITA_ATTIVA } from '../data/prodotti.js';
 
 <script>
   import { getCart, updateQuantita, removeFromCart, lineKey } from '../scripts/cart.js';
-  import { getProdottoBySlug, getColore, formatEuro, INIZIALI_CENTESIMI, stockColore } from '../data/prodotti.js';
+  import { getProdottoBySlug, getColore, formatEuro, INIZIALI_CENTESIMI, stockVariante } from '../data/prodotti.js';
+  import { getPelle } from '../data/pelli.js';
   import { copertinaProdotto } from '../data/immagini.js';
 
   function prezzoRiga(prodotto, riga) {
     return prodotto.prezzoCentesimi + (riga.iniziali ? INIZIALI_CENTESIMI : 0);
   }
 
-  // Massimo aggiungibile per una riga: stock del colore meno i pezzi di altre
-  // righe con lo stesso modello+colore (es. stesso colore con e senza iniziali).
+  // Massimo aggiungibile per una riga: stock della variante colore+pelle
+  // (D-030 § 1.3.5) meno i pezzi di altre righe con la stessa variante
+  // (es. stessa variante con e senza iniziali).
   function maxRiga(cart, prodotto, riga) {
-    const colore = getColore(prodotto, riga.colore);
-    const stock = colore ? stockColore(prodotto, riga.colore) : 0;
+    const stock = stockVariante(prodotto, riga.colore, riga.pelle);
     const altri = cart
-      .filter((r) => r.slug === riga.slug && r.colore === riga.colore && r !== riga)
+      .filter((r) => r.slug === riga.slug && r.colore === riga.colore && (r.pelle || '') === (riga.pelle || '') && r !== riga)
       .reduce((t, r) => t + r.quantita, 0);
     return Math.max(0, stock - altri);
   }
@@ -99,20 +100,21 @@ import { VENDITA_ATTIVA } from '../data/prodotti.js';
       const prodotto = getProdottoBySlug(riga.slug);
       if (!prodotto) return;
       const colore = getColore(prodotto, riga.colore);
+      const pelle = getPelle(riga.pelle);
       const unit = prezzoRiga(prodotto, riga);
       const sub = unit * riga.quantita;
       totale += sub;
-      const key = lineKey(riga.slug, riga.colore, riga.iniziali);
+      const key = lineKey(riga.slug, riga.colore, riga.pelle, riga.iniziali);
       const maxQ = maxRiga(cart, prodotto, riga);
 
-      const dettaglio = [
-        colore ? colore.nome : riga.colore,
-        riga.iniziali ? `iniziali: ${riga.iniziali}` : null,
-      ].filter(Boolean).join(' · ');
+      // Nome della riga "{Modello} — {Colore} — {Pelle}" (D-030 § 1.3.3);
+      // le iniziali, se ci sono, nella riga piccola sotto.
+      const nomeRiga = [prodotto.nome, colore ? colore.nome : riga.colore, pelle?.nome].filter(Boolean).join(' — ');
+      const dettaglio = riga.iniziali ? `iniziali: ${riga.iniziali}` : '';
 
       // Stessa copertina (01-chiuso) usata in vetrina/scheda prodotto per
-      // questo modello+colore (immagini.js).
-      const copertina = colore ? copertinaProdotto(prodotto, colore) : null;
+      // questa variante modello+colore+pelle (immagini.js).
+      const copertina = colore ? copertinaProdotto(prodotto, colore, riga.pelle) : null;
       const fotoHtml = copertina
         ? `<picture class="riga-foto">
              <source srcset="${copertina.webp}" type="image/webp" />
@@ -126,8 +128,7 @@ import { VENDITA_ATTIVA } from '../data/prodotti.js';
           <div class="riga-prodotto">
             ${fotoHtml}
             <div>
-              <span class="riga-nome">${prodotto.nome}</span><br>
-              <span class="riga-dettaglio">${dettaglio}</span>
+              <span class="riga-nome">${nomeRiga}</span>${dettaglio ? `<br><span class="riga-dettaglio">${dettaglio}</span>` : ''}
             </div>
           </div>
         </td>

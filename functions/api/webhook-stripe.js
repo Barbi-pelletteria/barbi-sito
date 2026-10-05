@@ -31,9 +31,11 @@ function formattaRiepilogo(righe) {
   return righe
     .map((r) => {
       const colore = r.c ? ` — ${r.c}` : '';
+      // Pelle (D-030): stessa forma del nome riga Stripe, "{Modello} — {Colore} — {Pelle}".
+      const pelle = r.l ? ` — ${r.l}` : '';
       const iniziali = r.i ? ` (iniziali: ${r.i})` : '';
       const quantita = r.q > 1 ? ` × ${r.q}` : '';
-      return `${r.n}${colore}${iniziali}${quantita}: ${formatEuro(r.p * r.q)}`;
+      return `${r.n}${colore}${pelle}${iniziali}${quantita}: ${formatEuro(r.p * r.q)}`;
     })
     .join('\n');
 }

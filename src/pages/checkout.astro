@@ -31,6 +31,7 @@ import Layout from '../layouts/Layout.astro';
 <script>
   import { getCart } from '../scripts/cart.js';
   import { getProdottoBySlug, getColore, formatEuro, INIZIALI_CENTESIMI } from '../data/prodotti.js';
+  import { getPelle } from '../data/pelli.js';
   import { trackEvent } from '../scripts/analytics.js';
 
   const cart = getCart();
@@ -54,23 +55,34 @@ import Layout from '../layouts/Layout.astro';
       const prodotto = getProdottoBySlug(riga.slug);
       if (!prodotto) return;
       const colore = getColore(prodotto, riga.colore);
+      const pelle = getPelle(riga.pelle);
       const unit = unitCentesimi(prodotto, riga);
       totale += unit * riga.quantita;
-      const dettaglio = [
-        colore ? colore.nome : riga.colore,
-        riga.iniziali ? `iniziali: ${riga.iniziali}` : null,
-      ].filter(Boolean).join(' · ');
+      // Stesso nome riga del carrello: "{Modello} — {Colore} — {Pelle}" (D-030).
+      const nomeRiga = [prodotto.nome, colore ? colore.nome : riga.colore, pelle?.nome].filter(Boolean).join(' — ');
+      const iniziali = riga.iniziali ? ` (iniziali: ${riga.iniziali})` : '';
       const li = document.createElement('li');
-      li.textContent = `${prodotto.nome} (${dettaglio}) × ${riga.quantita} — ${formatEuro(unit * riga.quantita)}`;
+      li.textContent = `${nomeRiga}${iniziali} × ${riga.quantita} — ${formatEuro(unit * riga.quantita)}`;
       lista.appendChild(li);
     });
     totaleEl.textContent = formatEuro(totale);
 
     // GA4 — begin_checkout: parte solo se il consenso ai cookie è stato dato.
+    // item_variant = "{colore} / {pelle}" (D-030 § 1.3.6).
     trackEvent('begin_checkout', {
       currency: 'EUR',
       value: totale / 100,
-      items: cart.map((r) => ({ item_id: r.slug, quantity: r.quantita })),
+      items: cart.map((r) => {
+        const prodotto = getProdottoBySlug(r.slug);
+        const colore = prodotto ? getColore(prodotto, r.colore) : null;
+        const pelle = getPelle(r.pelle);
+        return {
+          item_id: r.slug,
+          item_name: prodotto?.nome || r.slug,
+          item_variant: [colore?.nome || r.colore, pelle?.nome].filter(Boolean).join(' / '),
+          quantity: r.quantita,
+        };
+      }),
     });
   }
 
@@ -85,10 +97,14 @@ import Layout from '../layouts/Layout.astro';
           const prodotto = getProdottoBySlug(r.slug);
           if (!prodotto) return null;
           const colore = getColore(prodotto, r.colore);
+          const pelle = getPelle(r.pelle);
           return {
             slug: r.slug,
             nome: prodotto.nome,
             colore: colore ? colore.nome : r.colore,
+            // Nome pubblico della pelle (nel nome riga Stripe) e id (metadata).
+            pelle: pelle ? pelle.nome : '',
+            pelleId: r.pelle || '',
             iniziali: r.iniziali || '',
             quantita: r.quantita,
             prezzoCentesimi: prodotto.prezzoCentesimi,

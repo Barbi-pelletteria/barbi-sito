@@ -424,7 +424,7 @@ const prodottoJsonLd = {
 <script type="application/json" id="prodotto-dati" is:inline set:html={JSON.stringify(datiClient)}></script>
 
 <script>
-  import { addToCart, getQuantitaColore } from '../../scripts/cart.js';
+  import { addToCart, getQuantitaVariante } from '../../scripts/cart.js';
   import { trackEvent } from '../../scripts/analytics.js';
   import { formatEuroBreve } from '../../data/prodotti.js';
 
@@ -523,9 +523,15 @@ const prodottoJsonLd = {
       });
     });
 
-    // Pezzi ancora aggiungibili per il colore scelto (stock meno quelli già nel carrello).
-    function residuo(slug) {
-      return Math.max(0, stockColore(slug) - getQuantitaColore(prodotto.slug, slug));
+    // Pezzi ancora aggiungibili per la variante scelta, colore + pelle
+    // (stock della variante meno quelli già nel carrello, D-030 § 1.3.5).
+    function residuo(coloreSlug, pelleId = pelleSelezionata()) {
+      return Math.max(0, stockVariante(coloreSlug, pelleId) - getQuantitaVariante(prodotto.slug, coloreSlug, pelleId));
+    }
+    // Messaggio quando non si può aggiungere: colore esaurito del tutto,
+    // oppure solo la pelle scelta (o già tutta nel carrello).
+    function messaggioEsaurito(coloreSlug) {
+      return stockColore(coloreSlug) === 0 ? 'Questo colore è esaurito.' : 'Questa pelle è esaurita in questo colore.';
     }
 
     // GA4 — view_item (parte solo se il consenso ai cookie è stato dato).
@@ -582,7 +588,7 @@ const prodottoJsonLd = {
         if (parseInt(inputQ.value, 10) > rimasti) inputQ.value = String(Math.max(1, rimasti));
         btn.disabled = rimasti === 0;
         if (rimasti === 0) {
-          disponibilita.textContent = 'Questo colore è esaurito.';
+          disponibilita.textContent = messaggioEsaurito(scelto.value);
           disponibilita.hidden = false;
         } else {
           disponibilita.hidden = true;
@@ -603,14 +609,14 @@ const prodottoJsonLd = {
         let quantita = Math.max(1, parseInt(inputQ.value, 10) || 1);
 
         if (rimasti === 0) {
-          disponibilita.textContent = 'Questo colore è esaurito.';
+          disponibilita.textContent = messaggioEsaurito(colore);
           disponibilita.hidden = false;
           return;
         }
         if (quantita > rimasti) {
           quantita = rimasti;
           inputQ.value = String(rimasti);
-          disponibilita.textContent = `Puoi aggiungerne al massimo ${rimasti} in questo colore.`;
+          disponibilita.textContent = `Puoi aggiungerne al massimo ${rimasti} in questa pelle e colore.`;
           disponibilita.hidden = false;
         }
 

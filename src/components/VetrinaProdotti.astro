@@ -8,7 +8,8 @@
 // Componente a sé, non una modifica di ProductCard: quel componente è
 // condiviso con la pagina collezione. Stessa fonte dati (prodotti.js,
 // immagini.js), zero duplicazione della logica di lettura.
-import { formatEuroBreve, VENDITA_ATTIVA, stockColore, pelleIniziale } from '../data/prodotti.js';
+import { formatEuroBreve, VENDITA_ATTIVA, stockColore, stockVariante, pelleIniziale } from '../data/prodotti.js';
+import { getPelle } from '../data/pelli.js';
 import { copertinaProdotto, coloreVetrina } from '../data/immagini.js';
 
 const { prodotti } = Astro.props;
@@ -46,7 +47,8 @@ const { prodotti } = Astro.props;
               data-colore={coloreAttivo.slug}
               data-colore-nome={coloreAttivo.nome}
               data-pelle={pelleIniziale(p, coloreAttivo.slug)}
-              data-stock={stockColore(p, coloreAttivo.slug)}
+              data-pelle-nome={getPelle(pelleIniziale(p, coloreAttivo.slug))?.nome || ''}
+              data-stock={stockVariante(p, coloreAttivo.slug, pelleIniziale(p, coloreAttivo.slug))}
             >Aggiungi al carrello</button>
           )}
         </div>

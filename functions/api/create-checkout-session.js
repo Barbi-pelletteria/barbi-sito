@@ -61,12 +61,13 @@ export async function onRequestPost({ request, env }) {
     const unitAmount = (it) =>
       (it.prezzoCentesimi || 0) + (it.iniziali ? it.inizialiCentesimi || 0 : 0);
 
-    // Nome leggibile nel dashboard/app Stripe di Stefano: il colore separato
-    // da un trattino lungo, le iniziali fra parentesi se presenti. Da questo
-    // testo, e da questo soltanto, Stefano capisce cosa preparare.
+    // Nome leggibile nel dashboard/app Stripe di Stefano:
+    // "{Modello} — {Colore} — {Pelle}" (D-030 § 1.3.4), le iniziali fra
+    // parentesi se presenti. Da questo testo, e dai metadata sotto, Stefano
+    // capisce quale pezzo preparare — pelle compresa.
     const line_items = items.map((it) => {
       const nome = it.nome || it.slug;
-      const conColore = it.colore ? `${nome} — ${it.colore}` : nome;
+      const conColore = [nome, it.colore, it.pelle].filter(Boolean).join(' — ');
       const nomeCompleto = it.iniziali ? `${conColore} (iniziali: ${it.iniziali})` : conColore;
       return {
         price_data: {
@@ -93,10 +94,17 @@ export async function onRequestPost({ request, env }) {
     const riepilogoOrdine = items.map((it) => ({
       n: it.nome || it.slug,
       c: it.colore || '',
+      l: it.pelle || '',
       i: it.iniziali || '',
       p: unitAmount(it),
       q: it.quantita,
     }));
+
+    // D-030 § 1.3.4: modello, colore, pelle e iniziali anche come metadata
+    // leggibili nella Dashboard. Con più articoli i valori sono separati da
+    // " | ", nello stesso ordine delle righe (limite Stripe: 500 caratteri
+    // per valore).
+    const perArticolo = (f) => items.map(f).join(' | ').slice(0, 500);
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -124,6 +132,10 @@ export async function onRequestPost({ request, env }) {
       metadata: {
         consenso_marketing: consensoMarketing ? 'si' : 'no',
         riepilogo_ordine: JSON.stringify(riepilogoOrdine),
+        modello: perArticolo((it) => it.nome || it.slug),
+        colore: perArticolo((it) => it.colore || ''),
+        pelle: perArticolo((it) => it.pelle || ''),
+        iniziali: perArticolo((it) => it.iniziali || ''),
       },
       success_url: `${origin}/conferma-ordine?session_id={CHECKOUT_SESSION_ID}&value=${(totaleCentesimi / 100).toFixed(2)}&currency=EUR`,
       cancel_url: `${origin}/carrello`,

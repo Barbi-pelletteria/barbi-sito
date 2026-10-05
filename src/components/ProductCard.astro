@@ -27,6 +27,11 @@ import FotoSegnaposto from './FotoSegnaposto.astro';
 const { prodotto } = Astro.props;
 const url = `/prodotto/${prodotto.slug}/`;
 const stockDi = (c) => stockColore(prodotto, c.slug);
+// Variante del pulsante rapido per un colore: la pelle iniziale (prima
+// con stock) e il suo stock — è quella che "Aggiungi al carrello" aggiunge.
+const pelleDi = (c) => pelleIniziale(prodotto, c.slug);
+const nomePelleDi = (c) => getPelle(pelleDi(c))?.nome || '';
+const stockRapido = (c) => stockVariante(prodotto, c.slug, pelleDi(c));
 
 // Colore di vetrina se è ancora disponibile, altrimenti il primo che c'è.
 const preferito = prodotto.colori.find(
@@ -88,8 +93,9 @@ const etichettaScorta = (c) =>
         class:list={['sw', { on: c.slug === coloreAttivo.slug }]}
         data-c={c.slug}
         data-nome={c.nome}
-        data-stock={stockDi(c)}
-        data-pelle={pelleIniziale(prodotto, c.slug)}
+        data-stock={stockRapido(c)}
+        data-pelle={pelleDi(c)}
+        data-pelle-nome={nomePelleDi(c)}
         title={c.nome}
         disabled={stockDi(c) === 0}
         aria-label={c.nome + (stockDi(c) === 0 ? ' (esaurito)' : '')}
@@ -110,8 +116,9 @@ const etichettaScorta = (c) =>
         data-nome={prodotto.nome}
         data-colore={coloreAttivo.slug}
         data-colore-nome={coloreAttivo.nome}
-        data-pelle={pelleIniziale(prodotto, coloreAttivo.slug)}
-        data-stock={stockDi(coloreAttivo)}
+        data-pelle={pelleDi(coloreAttivo)}
+        data-pelle-nome={nomePelleDi(coloreAttivo)}
+        data-stock={stockRapido(coloreAttivo)}
       >Aggiungi al carrello</button>
     )}
   </div>
