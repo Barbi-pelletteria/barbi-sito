@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "test": "node --test \"test/**/*.test.mjs\""
+    "test": "node --test \"test/**/*.test.mjs\"",
+    "verifica-prelancio": "node scripts/verifica-prelancio.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
@@ -15,6 +16,7 @@
     "stripe": "^17.0.0"
   },
   "devDependencies": {
+    "playwright-core": "^1.63.0",
     "sharp": "^0.35.4"
   }
 }
