@@ -93,14 +93,10 @@ const { prodotti } = Astro.props;
     transition: transform 300ms ease;
   }
   .v-scheda:hover .v-scheda__foto img { transform: scale(1.03); }
-  /* Le due foto di copertina non sono state scattate alla stessa distanza
-     dal soggetto (misurato, non a occhio: il portafoglio blu riempie il
-     71,1%×47,2% del proprio scatto, il marrone il 77,4%×50,6% — circa
-     l'8% più piccolo). Zoom correttivo solo sulla scheda più piccola —
-     se arrivano scatti nuovi con la stessa inquadratura, questa regola
-     va tolta. */
-  .v-scheda__foto--sottile img { transform: scale(1.08); }
-  .v-scheda:hover .v-scheda__foto--sottile img { transform: scale(1.112); }
+  /* Lo zoom correttivo sul solo Sottile (scale 1.08, 03/09/2026) è stato
+     tolto il 06/10/2026 (D-031): le copertine nuove hanno la stessa
+     inquadratura su tutti i colori (il portafoglio riempie il 91,7-93,2%
+     della larghezza, misurato), come prevedeva il commento di allora. */
 
   .v-scheda__nome { font-size: 27px; font-weight: 500; margin: 12px 0 0; line-height: 1.1; }
   .v-scheda__nome a { text-decoration: none; color: inherit; }

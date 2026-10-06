@@ -136,13 +136,12 @@ const etichettaScorta = (c) =>
   }
   .scheda__foto > * { display: block; width: 100%; height: 100%; }
   .scheda__foto img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  /* Stessa correzione già applicata in VetrinaProdotti.astro (home,
-     03/09/2026): le foto di copertina non sono state scattate alla stessa
-     distanza dal soggetto — misurato sui pixel reali di QUESTA pagina, non
-     a occhio: il portafoglio Sottile (blu) riempie il 70,3%×46,6% del
-     riquadro, il Completo (marrone) il 76,9%×50,0%. Stesso zoom
-     correttivo, solo sulla scheda più piccola. */
-  .scheda__foto--sottile img { transform: scale(1.08); }
+  /* Fino al 06/10/2026 qui c'era uno zoom correttivo (scale 1.08) sul
+     solo Sottile, perché le vecchie copertine non avevano la stessa
+     inquadratura. Le copertine nuove (D-031) sono inquadrate allo stesso
+     modo — misurato: il portafoglio riempie il 91,7% (blu), 93,2%
+     (marrone) e 92,6% (bordeaux) della larghezza — quindi lo zoom è
+     stato tolto, come prevedeva il commento di allora. */
   @media (max-width: 680px) {
     /* Limite in vh, non solo aspect-ratio: su schermi molto stretti e alti
        4/5 da solo può comunque superare metà schermo. */
