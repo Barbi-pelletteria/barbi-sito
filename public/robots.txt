@@ -1,0 +1,13 @@
+# barbipelletteria.it — D-031 punto 3.
+# L'indicizzazione è oggi bloccata dal meta robots "noindex" su ogni pagina
+# (si toglie solo al via libera fiscale): questo file non la sblocca, dice
+# solo ai motori cosa non vale la pena leggere e dove sta la sitemap.
+User-agent: *
+Allow: /
+Disallow: /carrello/
+Disallow: /checkout/
+Disallow: /conferma-ordine/
+Disallow: /grazie/
+Disallow: /newsletter-confermata/
+
+Sitemap: https://barbipelletteria.it/sitemap-index.xml
