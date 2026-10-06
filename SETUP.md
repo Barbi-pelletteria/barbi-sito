@@ -175,6 +175,13 @@ messaggio "BLOCCO DI PUBBLICAZIONE (D-030 Parte 4)" che elenca i campi
 vuoti: è voluto, non è un guasto. `npm test` esegue i test del blocco e
 dell'anti-sovravendita per variante colore+pelle.
 
+**Pubblicare l'Essenziale con un comando (D-031):**
+1. Compilare `src/data/dati-essenziale.json` con i dati di Stefano, tutti: pelle (nome, specie, concia, finitura, spessore, descrizione, cura con intro/punti/chiusura), misure chiuso e aperto, peso, stock, iniziali (true/false), bordi_tinti_a_mano (true/false), fodera, e `confermato_da_stefano` con la data della conferma scritta (AAAA-MM-GG). Niente valori inventati.
+2. Lanciare `node scripts/pubblica-essenziale.mjs` (prima, se si vuole, `--solo-controllo`): se manca anche un solo campo si ferma ed elenca cosa manca, senza toccare nessun file.
+3. Se è tutto completo scrive pelle e dati nel catalogo, mette `pubblicato: true`, fa la build e stampa il riepilogo; se la build fallisce rimette i file com'erano.
+4. Poi `git add src/data && git commit && git push`: il deploy è il push su `main`.
+5. Infine `npm run verifica-prelancio -- --live` per il controllo dal vivo.
+
 ---
 
 ## Verifica finale end-to-end (chiude B3 punto 5 + B4)

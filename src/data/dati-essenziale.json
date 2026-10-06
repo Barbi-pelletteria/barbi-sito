@@ -1,0 +1,26 @@
+{
+  "_istruzioni": "Dati dell'Essenziale che oggi mancano (D-030/D-031). Compilare OGNI campo con i dati di Stefano, mai inventati: le stringhe non possono restare vuote, stock è un numero intero, iniziali e bordi_tinti_a_mano sono true/false, confermato_da_stefano è la data della conferma scritta (AAAA-MM-GG). Poi: node scripts/pubblica-essenziale.mjs — lo script rifiuta se manca anche un solo campo.",
+  "confermato_da_stefano": null,
+  "pelle": {
+    "nome": "",
+    "specie": "",
+    "concia": "",
+    "finitura": "",
+    "spessore": "",
+    "descrizione": "",
+    "cura": {
+      "intro": "",
+      "punti": [],
+      "chiusura": ""
+    }
+  },
+  "misure": {
+    "chiuso": "",
+    "aperto": ""
+  },
+  "peso": "",
+  "stock": null,
+  "iniziali": null,
+  "bordi_tinti_a_mano": null,
+  "fodera": ""
+}
