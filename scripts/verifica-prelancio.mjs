@@ -253,11 +253,12 @@ const pagineLette = pagine.filter((p) => html[p].stato === 200);
     const prezzo = /class="[^"]*pdp-prezzo[^"]*"[^>]*>[^<]*€/.test(h);
     const aggiungi = /id="btn-aggiungi"/.test(h);
     const avvisami = /id="btn-avvisami"/.test(h);
-    if (!pelle) { ok = false; dettagli.push(`${p}: riga Pelle assente o vuota`); }
+    if (!pelle && prodotto.datiInArrivo) dettagli.push(`${p}: riga Pelle assente — pubblicato in anticipo, dati in arrivo da Stefano (non è un KO)`);
+    else if (!pelle) { ok = false; dettagli.push(`${p}: riga Pelle assente o vuota`); }
     if (!prezzo) { ok = false; dettagli.push(`${p}: prezzo non trovato`); }
     if (VENDITA_ATTIVA ? !aggiungi : !avvisami) { ok = false; dettagli.push(`${p}: tasto atteso ${VENDITA_ATTIVA ? '"Aggiungi al carrello"' : '"Avvisami quando è disponibile"'} non trovato`); }
     if (!VENDITA_ATTIVA && aggiungi) { ok = false; dettagli.push(`${p}: "Aggiungi al carrello" presente a vendita spenta`); }
-    if (ok) dettagli.push(`${p}: Pelle "${pelle}", prezzo, ${VENDITA_ATTIVA ? 'Aggiungi al carrello' : 'Avvisami (vendita spenta)'}`);
+    if (ok && pelle) dettagli.push(`${p}: Pelle "${pelle}", prezzo, ${VENDITA_ATTIVA ? 'Aggiungi al carrello' : 'Avvisami (vendita spenta)'}`);
   }
   if (!VENDITA_ATTIVA) {
     const conAcquisto = pagineLette.filter((p) => /class="[^"]*\bv-aggiungi\b|id="form-acquisto"/.test(html[p].testo));

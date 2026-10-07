@@ -97,8 +97,8 @@ const etichettaScorta = (c) =>
         data-pelle={pelleDi(c)}
         data-pelle-nome={nomePelleDi(c)}
         title={c.nome}
-        disabled={stockDi(c) === 0}
-        aria-label={c.nome + (stockDi(c) === 0 ? ' (esaurito)' : '')}
+        disabled={VENDITA_ATTIVA && stockDi(c) === 0}
+        aria-label={c.nome + (VENDITA_ATTIVA && stockDi(c) === 0 ? ' (esaurito)' : '')}
         aria-pressed={c.slug === coloreAttivo.slug ? 'true' : 'false'}
         style={swatchColore(prodotto, c.slug) ? `background-image:url(${swatchColore(prodotto, c.slug)})` : undefined}
       ></button>

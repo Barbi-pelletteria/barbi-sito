@@ -200,7 +200,10 @@ const prodottoJsonLd = {
         <!--
           Le pastiglie colore stanno fuori dal form di acquisto (che esiste solo
           quando VENDITA_ATTIVA è vero) così restano visibili anche a vendita
-          spenta. Nessun dato di magazzino viene ricalcolato qui.
+          spenta. Nessun dato di magazzino viene ricalcolato qui. A vendita
+          spenta un colore senza stock non viene disattivato: lo stock conta
+          solo quando si può comprare (es. Essenziale con stock ancora da
+          Stefano).
         -->
         <fieldset class="colori">
           <legend class="sr-only">Colore</legend>
@@ -213,7 +216,7 @@ const prodottoJsonLd = {
                   name="colore"
                   value={c.slug}
                   data-stock={stockColore(prodotto, c.slug)}
-                  disabled={stockColore(prodotto, c.slug) === 0}
+                  disabled={VENDITA_ATTIVA && stockColore(prodotto, c.slug) === 0}
                   checked={c.slug === coloreIniziale.slug}
                 />
                 <span

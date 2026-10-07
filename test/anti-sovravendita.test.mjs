@@ -100,6 +100,16 @@ test('una bozza non è fra i pubblicati ma resta raggiungibile per slug', () => 
   assert.ok(!lista.filter((p) => p.pubblicato === true).some((p) => p.slug === 'bozza'));
 });
 
+test('la deroga datiInArrivo lascia pubblicare con i campi vuoti, ma solo con una pelle che esiste nel catalogo', () => {
+  const vuoto = prodottoDiProva({ misure: { chiuso: '', aperto: '' }, peso: '', varianti: [{ colore: 'blu', pelle: 'grana-da-confermare', stock: null }] });
+  assert.throws(() => catalogo.validaCatalogo([vuoto], pelli));
+  assert.doesNotThrow(() => catalogo.validaCatalogo([{ ...vuoto, datiInArrivo: true }], pelli));
+  assert.throws(
+    () => catalogo.validaCatalogo([{ ...vuoto, datiInArrivo: true, varianti: [{ colore: 'blu', pelle: 'inventata', stock: null }] }], pelli),
+    /non esiste nel catalogo pelli/
+  );
+});
+
 test('la validazione blocca un prodotto pubblicato con pelle non confermata o dati mancanti', () => {
   // Pelle non confermata → blocco, con il nome della pelle.
   assert.throws(

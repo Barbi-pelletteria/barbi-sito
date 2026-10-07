@@ -184,19 +184,26 @@ export const prodotti = [
     ],
   },
   // ───────────────────────────────────────────────────────────────────────
-  // Essenziale (D-030 Parte 2): costruito tutto, NON pubblicato. Pelle
-  // ancora da confermare, misure/peso/stock/fodera vuoti: arrivano da
-  // Stefano via QG, con `pubblicato: true` nella stessa consegna. Finché
-  // resta false: nessuna pagina (404), fuori da collezione, home, sitemap,
-  // filtri e dati strutturati; visibile in locale con MOSTRA_BOZZE=true.
-  // Testi § 2.3/2.4 (QG), prezzo deciso dal QG (D-030), spessore
-  // dichiarato dal Founder, capienza contata sulle foto.
+  // Essenziale (D-030 Parte 2). Pelle ancora da confermare, misure/peso/
+  // stock/fodera vuoti: arrivano da Stefano via QG (dati-essenziale.json +
+  // scripts/pubblica-essenziale.mjs). Testi § 2.3/2.4 (QG), prezzo deciso
+  // dal QG (D-030), spessore dichiarato dal Founder, capienza contata
+  // sulle foto.
+  //
+  // PUBBLICATO IN ANTICIPO il 07/10/2026 su richiesta diretta di Domenico
+  // ("devi aggiungere anche il portafoglio nuovo e fai deploy"), in deroga
+  // a D-030 Parte 4 / D-031. Il flag datiInArrivo qui sotto dice al blocco
+  // di pubblicazione di lasciar passare QUESTO prodotto con i campi vuoti:
+  // le righe senza dato non si mostrano (niente riga pelle, misure, peso,
+  // cura, iniziali), nulla è inventato, e a vendita spenta non si compra.
+  // Lo script di pubblicazione toglie il flag quando scrive i dati veri.
   // ───────────────────────────────────────────────────────────────────────
   {
     slug: 'essenziale',
     categoria: 'portafogli',
     nome: 'Essenziale',
-    pubblicato: false,
+    pubblicato: true,
+    datiInArrivo: true,
     occhiello: 'Portafoglio con fermasoldi · 6 carte',
     occhielloCard: '6 carte · fermasoldi',
     scopri: 'Scopri l’Essenziale',
@@ -248,6 +255,15 @@ export function validaCatalogo(lista = prodotti, catalogoPelli = pelli) {
   for (const p of lista) {
     if (p.pubblicato !== true) continue;
     const varianti = p.varianti || [];
+    if (p.datiInArrivo === true) {
+      // Deroga esplicita, scritta sul prodotto (oggi: Essenziale, richiesta
+      // di Domenico del 07/10/2026): si pubblica con i campi vuoti. Resta
+      // obbligatorio che la pelle esista nel catalogo pelli.
+      for (const v of varianti) {
+        if (!catalogoPelli.find((x) => x.id === v.pelle)) errori.push(`${p.nome} (${v.colore}): la pelle "${v.pelle}" non esiste nel catalogo pelli`);
+      }
+      continue;
+    }
     if (varianti.length === 0) errori.push(`${p.nome}: nessuna variante (colore + pelle + stock)`);
     for (const v of varianti) {
       const pelle = catalogoPelli.find((x) => x.id === v.pelle);

@@ -138,7 +138,11 @@ const inizioEss = prodottiOriginale.indexOf("slug: 'essenziale',");
 if (inizioEss < 0) fermati("Non trovo il prodotto 'essenziale' in src/data/prodotti.js. Nessun file è stato modificato.");
 const fineEss = prodottiOriginale.indexOf('\n];', inizioEss);
 let blocco = prodottiOriginale.slice(inizioEss, fineEss);
-blocco = sostituisciUnaVolta(blocco, 'pubblicato: false,', 'pubblicato: true,', 'pubblicato');
+// pubblicato: false → true. Se è già true (pubblicazione anticipata del
+// 07/10/2026, richiesta di Domenico) resta così, e il flag `datiInArrivo`
+// che la rendeva possibile se ne va: da qui i dati sono quelli veri.
+if (blocco.includes('pubblicato: false,')) blocco = sostituisciUnaVolta(blocco, 'pubblicato: false,', 'pubblicato: true,', 'pubblicato');
+blocco = blocco.replace(/\r?\n[ \t]*datiInArrivo: true,/, '');
 blocco = sostituisciUnaVolta(blocco, 'inizialiDisponibili: false,', `inizialiDisponibili: ${dati.iniziali},`, 'inizialiDisponibili');
 blocco = sostituisciUnaVolta(blocco, "fodera: '',", `fodera: ${js(dati.fodera)},`, 'fodera');
 blocco = sostituisciUnaVolta(blocco, "misure: { chiuso: '', aperto: '' },", `misure: { chiuso: ${js(misure.chiuso)}, aperto: ${js(misure.aperto)} },`, 'misure');
